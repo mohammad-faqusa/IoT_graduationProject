@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./main.css">
+
+</head>
+<body>
+    <form action="/add" method="POST">
+        <button type="submit">flash</button>
+        <label for="files">choose a file:</label>
+        <select name="languages" id="lang">
+            <% if(locals.arduinoFiles) { %>
+            <% for (var i = 0 ; i < locals.arduinoFiles.length ; i++)  { %>
+            <option value=<%=locals.arduinoFiles[i]%>><%=locals.arduinoFiles[i]%></option>
+            <% } %>
+            <% } %> 
+        </select>
+    </form>
+</body>
+</html>

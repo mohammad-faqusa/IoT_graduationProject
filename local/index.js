@@ -1,61 +1,124 @@
-const express = require("express"); 
+import express from "express"; 
+import bodyParser from "body-parser";
+import flash , {readArduinoFiles} from "./flash.js"; 
+import path from "path"; 
+import {readPorts, readData} from "./monitor.js"; 
+import { compile } from "ejs";
+import {getTopics , readMessages , readDataDemo} from "./pubSub.js";
+
+const __dirname = path.resolve(); 
 
 const app = express(); 
 const port = 3000; 
+var comPorts = []  ; 
+
+var arduinoFiles = [] ;
+var monitorData = "" ;  
+var enableMonitor = false; 
+var mosquittoTopics =  [] ; 
+var telemetryMessages = "" ; 
+var enableMessage = false ; 
+var enableTopic = true ; 
 
 
-app.use(express.static('public')); 
+app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
 
-app.get("/", (req,res)=> {
-    res.render("index.html"); 
-})
+readArduinoFiles(getArduinoFiles); 
 
-app.post("/add", (req, res)=>{
-    console.log(req.body); 
-    flashEsp(); 
-    res.redirect("/"); 
-
-})
-app.listen(port, ()=>{
-    console.log("the server is running on localhost:" + port); 
-})  
-
-function flashEsp(){
-
-    var spawn = require('child_process').spawn;
-    var child = spawn("powershell.exe",  ["./arduino-cli_1.1.1_Windows_64bit/hello.ps1" , 'ex1', './arduino-cli_1.1.1_Windows_64bit/']);
-
-    // You can also use a variable to save the output 
-    // for when the script closes later
-    var scriptOutput = "";
-
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', function(data) {
-        //Here is where the output goes
-        data=data.toString();
-        scriptOutput+=data;
-        if (data == '\n' || data.length > 50 ) {
-            console.log(scriptOutput); 
-            scriptOutput = "" ; 
-        }
-    });
-
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', function(data) {
-        //Here is where the error output goes
-
-        console.log('stderr: ' + data);
-
-        data=data.toString();
-        scriptOutput+=data;
-    });
-
-    child.on('close', function(code) {
-        //Here you can get the exit code of the script
-
-        console.log('closing code: ' + code);
-
-        console.log('Full output of script: ',scriptOutput);
+app.get("/", (req, res)=>{
+    res.render("pages/home", {arduinoFiles:arduinoFiles}); 
 });
 
+app.get("/add", (req, res)=> {
+    res.render("pages/add", {arduinoFiles:arduinoFiles});
+})
+
+app.get("/add", (req, res)=>{
+    console.log(arduinoFiles); 
+    readArduinoFiles(getArduinoFiles); 
+    res.render("index", {arduinoFiles:arduinoFiles});
+});
+
+app.get("/monitor", async (req, res)=>{
+    // console.log("here are the ports " ,comPorts); 
+    const buttonState = enableMonitor ? "stop" : "read" ; 
+    readPorts(getPorts);
+    res.render("pages/monitor", {selections:comPorts, streamData:monitorData, buttonState:buttonState, action:"/monitor", selection:"file"});
+    console.log(comPorts); 
+}); 
+
+
+app.get("/pubSub",  (req, res)=> {
+    console.log(mosquittoTopics); 
+    getTopics(returnTopics,enableTopic, enableTopicFunc);
+    const buttonState = enableMessage ? "stop" : "read"; 
+    
+    console.log("for second time " , mosquittoTopics); 
+    res.render("pages/monitor", {selections:mosquittoTopics, streamData:telemetryMessages, buttonState:buttonState, action:"/pubSub", selection:"topic"});
+
+}); 
+
+app.post("/pubSub",  (req, res)=> {
+    
+    // readMessages(returnMessages, enableMessage, enableMessageFunc, req.body.selection); 
+    enableMessage = !enableMessage; 
+    readDataDemo(returnMessages, enableMessage, enableTopicFunc ); 
+    res.redirect("/pubSub"); 
+    
+}); 
+
+
+app.post("/add", (req, res)=>{
+    const fileName = req.body.arduinoFile;
+    flash(fileName);
+    res.redirect("/add"); 
+});
+
+app.post("/monitor", async (req, res)=> {
+    enableMonitor = !enableMonitor; 
+    if (enableMonitor) { 
+        readData(getData);
+    } 
+    res.redirect("/monitor"); 
+});
+
+app.listen(port, ()=>{
+    console.log("the server is running on localhost:" + port); 
+});
+
+function getArduinoFiles(arrFiles){
+    arduinoFiles = arrFiles; 
+};
+
+function getPorts(ports){
+    comPorts = [...ports]; 
+}
+
+function getData(data = "" ){
+    monitorData += data; 
+    console.log(enableMonitor); 
+    return enableMonitor; 
+}
+
+function returnTopics(topics) {
+    mosquittoTopics = topics; 
+    return enableTopic; 
+}
+
+function returnMessages(message) {
+    telemetryMessages= message; 
+    return enableMessage; 
+
+}
+
+function enableTopicFunc() {
+    enableTopic = !enableTopic; 
+    return enableTopic; 
+}
+
+function enableMessageFunc(){
+    enableMessage = !enableMessage; 
+    return enableMessage; 
 }

@@ -5,4 +5,4 @@ param(
 
 )
 
-& $arduinoCliPath monitor -p $p 
+& $arduinoCliPath monitor -p $p -c 115200

@@ -21,7 +21,7 @@ const int ledPin = 2;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   // default settings
 
   setup_wifi();
@@ -119,7 +119,7 @@ void loop()
   client.loop();
 
   long now = millis();
-  if (now - lastMsg > 5000)
+  if (now - lastMsg > 500)
   {
     lastMsg = now;
 

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./main.css">
+
+</head>
+<body>
+    <form action=<%=locals.action%> method="POST">
+        <button type="submit"><%=locals.buttonState%></button>
+        <label for="selections">choose a <%=selection %>:</label>
+        <select name="selection" id="selection">
+            <% if(locals.selections) { %>
+            <% for (var i = 0 ; i < locals.selections.length ; i++)  { %>
+            <option value=<%=locals.selections[i]%>><%=locals.selections[i]%></option>
+            <% } %>
+            <% } %> 
+        </select>
+    </form>
+    <label for="screen">monitoring data</label>
+
+    <textarea id="screen" name="screen" rows="200" cols="100">
+        <%=locals.streamData %>
+    </textarea>
+</body>
+</html>

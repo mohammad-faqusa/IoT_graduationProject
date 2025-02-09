@@ -7,7 +7,7 @@ const char *password = "13141516"; // Your Wi-Fi password
 void setup()
 {
   // Start the Serial communication
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
