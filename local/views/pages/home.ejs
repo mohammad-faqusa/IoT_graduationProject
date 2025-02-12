@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./main.css">
-
+    <title>Socket.IO Client</title>
+    <style>
+        a{
+            font-size: 32px;
+            display: block;
+            text-align: center;
+        }
+    </style>
 </head>
+
 <body>
-    <form action="/add" method="POST">
-        <button type="submit">flash</button>
-        <label for="files">choose a file:</label>
-        <select name="languages" id="lang">
-            <% if(locals.arduinoFiles) { %>
-            <% for (var i = 0 ; i < locals.arduinoFiles.length ; i++)  { %>
-            <option value=<%=locals.arduinoFiles[i]%>><%=locals.arduinoFiles[i]%></option>
-            <% } %>
-            <% } %> 
-        </select>
-    </form>
+    <a href="/monitor">monitor</a>
+    <a href="/add">add</a>
+    <a href="/pubSub">mqtt monitor</a>
 </body>
 </html>

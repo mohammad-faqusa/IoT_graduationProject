@@ -1,7 +1,6 @@
 import { spawn } from "child_process";
 
 
-
 function readArduinoFiles(getArduinoFiles){
     const psScriptPath = 'D:/IoT_graduationProject/local/arduino-cli_1.1.1_Windows_64bit/scriptsPS/getArduinoFiles.ps1';
 
