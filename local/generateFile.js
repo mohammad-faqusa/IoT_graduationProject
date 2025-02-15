@@ -152,6 +152,7 @@ function generateTemplate(name="esp-default", delay=500, ssid="clear", pass="131
     }
     }
     `
+  
     return template; 
 }
 

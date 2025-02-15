@@ -1,4 +1,4 @@
-import express from "express"; 
+import express, { query } from "express"; 
 import bodyParser from "body-parser";
 import flash , {readArduinoFiles} from "./flash.js"; 
 import path from "path"; 
@@ -7,7 +7,8 @@ import { readDataDemo, outputData} from "./pubSub.js";
 import generateFile from "./generateFile.js";
 import pg from "pg"; 
 import 'dotenv/config'; 
-import { Console } from "console";
+import passport from "passport";
+
 
 
 const db = new pg.Client({
@@ -18,11 +19,13 @@ const db = new pg.Client({
     database: process.env.DB_DATABASE 
 }); 
 
+await db.connect();
 
-db.connect();
+const resultDb = await db.query("SELECT * FROM customers"); 
+console.log(resultDb.rows); 
+  
 
-
-console.log(process.env); 
+// console.log(process.env); 
 
 const port = 3000; 
 var comPorts = []  ; 
@@ -40,20 +43,18 @@ var enableMessage = false ;
 var outputEnable = true ; 
  
 
+
+
 app.set('view engine', 'ejs');
 app.set("views", "views"); // Ensure it points to the correct directory
 
-// app.use('/static', express.static(path.join(__dirname, 'public')));
-app.use(express.static("public"));
-// app.use(bodyParser.json); 
+app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
-
-
+app.use(bodyParser.json());
 
 // Render EJS views
-app.set("view engine", "ejs");
 
-readArduinoFiles(getArduinoFiles); 
+// readArduinoFiles(getArduinoFiles); 
 
 readDataDemo(returnMessages, enableMessageFunc); 
 
@@ -61,6 +62,24 @@ app.get("/", (req, res)=>{
     res.render("pages/home"); 
 });
 
+
+app.get("/login", (req, res)=> {
+    res.render("pages/login", {title:"login"}); 
+})
+app.post("/login", (req, res)=>{
+    console.log(req.body); 
+    res.redirect("/login"); 
+})
+app.get("/register", (req, res)=> {
+    res.render("pages/login", {title:"register"}); 
+})
+app.post("/register", async (req, res)=>{
+    console.log(req.body); 
+    const username = req.body.username;
+    const password = req.body.password; 
+    const result = await db.query("INSERT INTO customers (email, pass) VALUES ($1 , $2);", [username, password])
+    res.redirect("/register"); 
+})
 app.get("/add", (req, res)=>{
     console.log(arduinoFiles); 
     readArduinoFiles(getArduinoFiles); 
@@ -129,6 +148,16 @@ app.post("/monitor", async (req, res)=> {
     } 
     res.redirect("/monitor"); 
 });
+
+const users = [{username:"mohammad",password:"314151"}]; 
+
+
+passport.serializeUser((user, done)=>{
+    done(null, user.id); 
+}); 
+passport.deserializeUser((user, done)=>{
+    done(null, user); 
+}); 
 
 
 app.listen(port, ()=>{

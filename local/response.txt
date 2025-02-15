@@ -1,0 +1,85 @@
+```cpp
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Stepper.h>
+#include <Servo.h>
+#include <ArduinoJson.h>
+#include <Adafruit_Sensor.h>
+#include <MQ135.h>
+
+// Initialize I2C LCD
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Initialize Stepper Motor
+Stepper stepper(100, 8, 9); // 100 steps, pin 8 and 9
+
+// Initialize Servo Motor
+Servo myServo;
+
+// Define pins
+const int switchPin = 2;
+const int gasSensorPin = A0;
+
+// Initialize gas sensor
+MQ135 gasSensor = MQ135(gasSensorPin);
+
+struct VariablesDict
+{
+    int gasLevel;
+    bool switchState;
+    int stepperPosition;
+    int servoAngle;
+} variables_dict;
+
+String get_variable_types()
+{
+    DynamicJsonDocument doc(1024);
+    doc["gasLevel"]["type"] = "int";
+    doc["gasLevel"]["range"] = "0-1023";
+    doc["switchState"]["type"] = "bool";
+    doc["switchState"]["range"] = "true/false";
+    doc["stepperPosition"]["type"] = "int";
+    doc["stepperPosition"]["range"] = "0-100"; // Example range
+    doc["servoAngle"]["type"] = "int";
+    doc["servoAngle"]["range"] = "0-180";
+
+    String output;
+    serializeJson(doc, output);
+    return output;
+}
+
+String get_peripheral_pins()
+{
+    DynamicJsonDocument doc(1024);
+    doc["LCD"]["pin"] = 0x27;
+    doc["stepper"]["pins"]["stepPin"] = 8;
+    doc["stepper"]["pins"]["dirPin"] = 9;
+    doc["servo"]["pin"] = 10; // Assume servo on pin 10
+    doc["switch"]["pin"] = switchPin;
+    doc["gasSensor"]["pin"] = gasSensorPin;
+
+    String output;
+    serializeJson(doc, output);
+    return output;
+}
+
+void update_variables_dict()
+{
+    variables_dict.gasLevel = gasSensor.getPPM();
+    variables_dict.switchState = digitalRead(switchPin);
+    variables_dict.stepperPosition = stepper.currentPosition(); // Assumed method
+    variables_dict.servoAngle = myServo.read(); // Assumed method
+}
+
+void set_peripherals_values(JsonDocument output_variables_dict)
+{
+    if (output_variables_dict.containsKey("stepperPosition")) {
+        int position = output_variables_dict["stepperPosition"];
+        stepper.step(position);
+    }
+    if (output_variables_dict.containsKey("servoAngle")) {
+        int angle = output_variables_dict["servoAngle"];
+        myServo.write(angle);
+    }
+}
+```
