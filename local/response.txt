@@ -1,85 +1,61 @@
-```cpp
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include <Stepper.h>
-#include <Servo.h>
-#include <ArduinoJson.h>
-#include <Adafruit_Sensor.h>
-#include <MQ135.h>
+```python
+from machine import Pin, ADC, PWM
+import dht
+import time
 
-// Initialize I2C LCD
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+# ** define pins
+DHT_PIN = 12
+GAS_SENSOR_PIN = 34
+SERVO_PIN = 13
+OUTPUT_SWITCH_1_PIN = 25
+OUTPUT_SWITCH_2_PIN = 26
 
-// Initialize Stepper Motor
-Stepper stepper(100, 8, 9); // 100 steps, pin 8 and 9
+# ** initialize objects from peripherals libraries
+dht_sensor = dht.DHT22(Pin(DHT_PIN))
+gas_sensor = ADC(Pin(GAS_SENSOR_PIN))
+servo = PWM(Pin(SERVO_PIN), freq=50)
+output_switch_1 = Pin(OUTPUT_SWITCH_1_PIN, Pin.OUT)
+output_switch_2 = Pin(OUTPUT_SWITCH_2_PIN, Pin.OUT)
 
-// Initialize Servo Motor
-Servo myServo;
+# ** type read functions for peripherals
+def read_dht():
+    dht_sensor.measure()
+    return (dht_sensor.temperature(), dht_sensor.humidity())
 
-// Define pins
-const int switchPin = 2;
-const int gasSensorPin = A0;
+def read_gas_sensor():
+    return gas_sensor.read()
 
-// Initialize gas sensor
-MQ135 gasSensor = MQ135(gasSensorPin);
+def read_servo_position():
+    # Example placeholder as servo typically does not have read functionality
+    return None
 
-struct VariablesDict
-{
-    int gasLevel;
-    bool switchState;
-    int stepperPosition;
-    int servoAngle;
-} variables_dict;
+def read_output_switch_1():
+    return output_switch_1.value()
 
-String get_variable_types()
-{
-    DynamicJsonDocument doc(1024);
-    doc["gasLevel"]["type"] = "int";
-    doc["gasLevel"]["range"] = "0-1023";
-    doc["switchState"]["type"] = "bool";
-    doc["switchState"]["range"] = "true/false";
-    doc["stepperPosition"]["type"] = "int";
-    doc["stepperPosition"]["range"] = "0-100"; // Example range
-    doc["servoAngle"]["type"] = "int";
-    doc["servoAngle"]["range"] = "0-180";
+def read_output_switch_2():
+    return output_switch_2.value()
 
-    String output;
-    serializeJson(doc, output);
-    return output;
-}
+# ** type write functions for peripherals
+def write_servo_position(angle):
+    pulse_width = (angle / 180) + 0.5  # Convert angle to pulse width
+    servo.duty(int(pulse_width * 1023))  # Assuming 10-bit resolution
 
-String get_peripheral_pins()
-{
-    DynamicJsonDocument doc(1024);
-    doc["LCD"]["pin"] = 0x27;
-    doc["stepper"]["pins"]["stepPin"] = 8;
-    doc["stepper"]["pins"]["dirPin"] = 9;
-    doc["servo"]["pin"] = 10; // Assume servo on pin 10
-    doc["switch"]["pin"] = switchPin;
-    doc["gasSensor"]["pin"] = gasSensorPin;
+def write_output_switch_1(state):
+    output_switch_1.value(state)
 
-    String output;
-    serializeJson(doc, output);
-    return output;
-}
+def write_output_switch_2(state):
+    output_switch_2.value(state)
 
-void update_variables_dict()
-{
-    variables_dict.gasLevel = gasSensor.getPPM();
-    variables_dict.switchState = digitalRead(switchPin);
-    variables_dict.stepperPosition = stepper.currentPosition(); // Assumed method
-    variables_dict.servoAngle = myServo.read(); // Assumed method
-}
+# ** write a dictionary to store read/write functions
+peripheral_functions = {
+    'read_dht': ([None, None], read_dht),
+    'read_gas_sensor': ([int, None], read_gas_sensor),
+    'read_servo_position': ([None, None], read_servo_position),
+    'read_output_switch_1': ([int, None], read_output_switch_1),
+    'read_output_switch_2': ([int, None], read_output_switch_2),
 
-void set_peripherals_values(JsonDocument output_variables_dict)
-{
-    if (output_variables_dict.containsKey("stepperPosition")) {
-        int position = output_variables_dict["stepperPosition"];
-        stepper.step(position);
-    }
-    if (output_variables_dict.containsKey("servoAngle")) {
-        int angle = output_variables_dict["servoAngle"];
-        myServo.write(angle);
-    }
+    'write_servo_position': ([None, int], write_servo_position),
+    'write_output_switch_1': ([None, int], write_output_switch_1),
+    'write_output_switch_2': ([None, int], write_output_switch_2),
 }
 ```

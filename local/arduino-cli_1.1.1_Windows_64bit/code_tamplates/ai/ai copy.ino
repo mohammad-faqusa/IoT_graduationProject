@@ -4,11 +4,11 @@
 #include <ArduinoJson.h>
 
 // Wi-Fi credentials
-const char* ssid = "clear";
-const char* password = "13141516";
+const char *ssid = "clear";
+const char *password = "13141516";
 
 // MQTT broker details
-const char* mqtt_server = "192.168.137.1";
+const char *mqtt_server = "192.168.137.1";
 const int mqtt_port = 1883;
 
 // Initialize Wi-Fi and MQTT client
@@ -16,9 +16,9 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 // Peripheral pins
-#define DHTPIN 4          // DHT22 data pin
-#define GAS_SENSOR_PIN 34 // Gas sensor analog pin
-#define LED_PIN 5         // Digital output for LED
+#define DHTPIN 4            // DHT22 data pin
+#define GAS_SENSOR_PIN 34   // Gas sensor analog pin
+#define LED_PIN 5           // Digital output for LED
 #define MOTOR_ENABLE_PIN 18 // Digital output for motor enable
 
 // DHT22 setup
@@ -33,7 +33,8 @@ bool led_status = false;
 bool motor_status = false;
 
 // Struct to store peripheral variables
-struct VariablesDict {
+struct VariablesDict
+{
     float temperature;
     float humidity;
     int gas_value;
@@ -42,7 +43,8 @@ struct VariablesDict {
 } variables_dict;
 
 // Function to return variable types and ranges
-String get_variable_types() {
+String get_variable_types()
+{
     DynamicJsonDocument doc(1024);
     doc["temperature"]["type"] = "float";
     doc["temperature"]["range"] = "-40 to 80";
@@ -61,7 +63,8 @@ String get_variable_types() {
 }
 
 // Function to return peripheral pins
-String get_peripheral_pins() {
+String get_peripheral_pins()
+{
     DynamicJsonDocument doc(1024);
     doc["temperature"] = DHTPIN;
     doc["humidity"] = DHTPIN;
@@ -75,7 +78,8 @@ String get_peripheral_pins() {
 }
 
 // Function to update variables_dict from peripherals
-void update_variables_dict() {
+void update_variables_dict()
+{
     variables_dict.temperature = dht.readTemperature();
     variables_dict.humidity = dht.readHumidity();
     variables_dict.gas_value = analogRead(GAS_SENSOR_PIN);
@@ -84,32 +88,40 @@ void update_variables_dict() {
 }
 
 // MQTT callback function
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(char *topic, byte *payload, unsigned int length)
+{
     String message;
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
         message += (char)payload[i];
     }
 
     // Check if the topic is "esp32/input"
-    if (String(topic) == "esp32/input") {
+    if (String(topic) == "esp32/input")
+    {
         // Parse JSON input
         DynamicJsonDocument doc(1024);
         deserializeJson(doc, message);
 
         // Update variables_dict if keys are present
-        if (doc.containsKey("temperature")) {
+        if (doc.containsKey("temperature"))
+        {
             variables_dict.temperature = doc["temperature"].as<float>();
         }
-        if (doc.containsKey("humidity")) {
+        if (doc.containsKey("humidity"))
+        {
             variables_dict.humidity = doc["humidity"].as<float>();
         }
-        if (doc.containsKey("gas_value")) {
+        if (doc.containsKey("gas_value"))
+        {
             variables_dict.gas_value = doc["gas_value"].as<int>();
         }
-        if (doc.containsKey("led_status")) {
+        if (doc.containsKey("led_status"))
+        {
             variables_dict.led_status = doc["led_status"].as<bool>();
         }
-        if (doc.containsKey("motor_status")) {
+        if (doc.containsKey("motor_status"))
+        {
             variables_dict.motor_status = doc["motor_status"].as<bool>();
         }
 
@@ -127,7 +139,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
 
     // Check if the topic is "esp32/peripherals"
-    else if (String(topic) == "esp32/peripherals") {
+    else if (String(topic) == "esp32/peripherals")
+    {
         // Publish peripheral pins and variable types
         String pins = get_peripheral_pins();
         String types = get_variable_types();
@@ -143,13 +156,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 // Setup function
-void setup() {
+void setup()
+{
     // Initialize serial communication
     Serial.begin(115200);
 
     // Initialize Wi-Fi
     WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
         delay(1000);
         Serial.println("Connecting to Wi-Fi...");
     }
@@ -158,11 +173,15 @@ void setup() {
     // Initialize MQTT
     client.setServer(mqtt_server, mqtt_port);
     client.setCallback(callback);
-    while (!client.connected()) {
+    while (!client.connected())
+    {
         Serial.println("Connecting to MQTT...");
-        if (client.connect("ESP32Client")) {
+        if (client.connect("ESP32Client"))
+        {
             Serial.println("Connected to MQTT");
-        } else {
+        }
+        else
+        {
             delay(1000);
         }
     }
@@ -177,7 +196,8 @@ void setup() {
 }
 
 // Loop function
-void loop() {
+void loop()
+{
     // Update variables_dict with current peripheral values
     update_variables_dict();
 
