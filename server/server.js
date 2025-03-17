@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv')
 const path = require('path')
 const socketio = require('socket.io')
+const socketMain = require('./socketMain')
 
 dotenv.config({path: path.join(__dirname, '.env')});
 
@@ -22,13 +23,7 @@ const expressServer = app.listen(port, ()=> {
 
 const io = socketio(expressServer)
 
-io.on('connection', socket => {
-    console.log(`a client is connected with socket:id ${socket.id}`)
-    socket.on('message', data => {
-        console.log(`client ${socket.id} : ${data}`)
-        socket.emit('message', 'hello from the server')
-    })
-})
+socketMain(io); 
 
 
 
