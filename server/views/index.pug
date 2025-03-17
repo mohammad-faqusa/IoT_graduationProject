@@ -1,0 +1,26 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Socket.io with Pug
+    script(src="/socket.io/socket.io.js")
+    script.
+      const socket = io();
+      socket.on('message', (data) => {
+        const messages = document.getElementById('messages');
+        const messageItem = document.createElement('li');
+        messageItem.textContent = data;
+        messages.appendChild(messageItem);
+      });
+      function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const message = input.value;
+        socket.emit('message', message);
+        input.value = '';
+      }
+  body
+    h1 Socket.io Chat
+    input#messageInput(type="text" placeholder="Type your message...")
+    button(onclick="sendMessage()") Send
+    ul#messages
