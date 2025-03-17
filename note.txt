@@ -1,0 +1,10 @@
+powershell commands : 
+    Start-Service mosquitto
+    Get-Service mosquitto
+    Restart-Service mosquitto
+
+mosquitto commands 
+    mosquitto -v
+    mosquitto_sub -h localhost -t test/topic
+    mosquitto_pub -h localhost -t test/topic -m "Hello from Mosquitto!"
+

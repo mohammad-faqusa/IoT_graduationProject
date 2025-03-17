@@ -2,6 +2,7 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "mqtt": "^5.10.4",
     "openai": "^4.84.1",
     "path": "^0.12.7",
     "pug": "^3.0.3",
