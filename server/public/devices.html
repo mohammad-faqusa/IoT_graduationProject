@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Device Dashboard</title>
+    <link rel="stylesheet" href="css/devices.css">
+    
+</head>
+<body>
+    <div class="container">
+        <h1>IoT Device Dashboard</h1>
+        
+        <div class="device-grid">
+            <!-- Device 1 -->
+            <div class="device-card" data-id="TH-2023-001" data-name="Smart Thermostat" data-status="online" data-image="https://images.unsplash.com/photo-1558089687-f282ffcbc126?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" data-type="Thermostat" data-location="Living Room" data-last-update="2023-10-15 14:32">
+                <img src="https://images.unsplash.com/photo-1558089687-f282ffcbc126?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Smart Thermostat" class="device-image">
+                <div class="device-info">
+                    <h2 class="device-name">Smart Thermostat</h2>
+                    <p class="device-id">ID: TH-2023-001</p>
+                    <div class="device-status">
+                        <span class="status-indicator status-online"></span>
+                        <span class="status-text status-online-text">Online</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Device 2 -->
+            <div class="device-card" data-id="SC-2023-042" data-name="Security Camera" data-status="offline" data-image="https://images.unsplash.com/photo-1557438159-51eec7a6c9e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" data-type="Camera" data-location="Front Door" data-last-update="2023-10-14 23:15">
+                <img src="https://images.unsplash.com/photo-1557438159-51eec7a6c9e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Security Camera" class="device-image">
+                <div class="device-info">
+                    <h2 class="device-name">Security Camera</h2>
+                    <p class="device-id">ID: SC-2023-042</p>
+                    <div class="device-status">
+                        <span class="status-indicator status-offline"></span>
+                        <span class="status-text status-offline-text">Offline</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Device 3 -->
+            <div class="device-card" data-id="SL-2023-107" data-name="Smart Light" data-status="online" data-image="https://images.unsplash.com/photo-1546054454-aa26e2b734c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" data-type="Light" data-location="Bedroom" data-last-update="2023-10-15 16:45">
+                <img src="https://images.unsplash.com/photo-1546054454-aa26e2b734c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Smart Light" class="device-image">
+                <div class="device-info">
+                    <h2 class="device-name">Smart Light</h2>
+                    <p class="device-id">ID: SL-2023-107</p>
+                    <div class="device-status">
+                        <span class="status-indicator status-online"></span>
+                        <span class="status-text status-online-text">Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal-overlay" id="deviceModal">
+        <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Device Details</h2>
+                <button class="modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img src="/placeholder.svg" alt="Device" class="modal-image" id="modalImage">
+                </div>
+                <div class="device-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Device ID</div>
+                        <div class="detail-value" id="modalId">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Type</div>
+                        <div class="detail-value" id="modalType">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value" id="modalLocation">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value" id="modalStatus">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Last Update</div>
+                        <div class="detail-value" id="modalLastUpdate">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button secondary-button" id="closeButton">Close</button>
+                <button class="modal-button primary-button" id="controlButton">Control Device</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/classes/Modal.js"></script>
+    <script src="js/classes/DeviceModal.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="js/device.js"></script>
+</body>
+</html>
