@@ -9,7 +9,8 @@ class Device {
         this.dictVariables = dictVariables;
         this.image = image
         this.status = 'offline' 
-        this.automatedFunctions = []; 
+        this.automatedFunctions = [];
+        this.info = this.getInfo()
     }
     setVariable(varDoc, value){
         this.dictVariables[varDoc] = value
@@ -18,6 +19,19 @@ class Device {
         return this.dictVariables[varDoc]
     }
 
+    getInfo(){
+        const info = {
+            id: this.id,
+            name: this.name,
+            location: this.location,
+            image: this.image,
+            status: this.status,
+        }
+        for (const [key, value] of Object.entries(this.dictVariables)) {
+            info[key] = JSON.stringify(value)
+        }
+        return info 
+    }
     
     
     addAutomate(inputDevice, outputDevice, logic){

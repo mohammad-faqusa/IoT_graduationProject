@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Device Dashboard</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 2rem;
+        }
+        
+        /* Container styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-bottom: 2rem;
+            color: #2d3748;
+            text-align: center;
+        }
+        
+        /* Device grid layout */
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        /* Device card styles */
+        .device-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .device-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #edf2f7;
+        }
+        
+        .device-info {
+            padding: 1.5rem;
+        }
+        
+        .device-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+        
+        .device-id {
+            font-size: 0.875rem;
+            color: #718096;
+            margin-bottom: 1rem;
+        }
+        
+        .device-status {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background-color: #48bb78;
+        }
+        
+        .status-offline {
+            background-color: #f56565;
+        }
+        
+        .status-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-online-text {
+            color: #48bb78;
+        }
+        
+        .status-offline-text {
+            color: #f56565;
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+            transition: color 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            color: #e53e3e;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-image-container {
+            width: 100%;
+            height: 250px;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .modal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .device-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-item {
+            padding: 0.75rem;
+            background-color: #f7fafc;
+            border-radius: 6px;
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #edf2f7;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .modal-button {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .primary-button {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+        }
+        
+        .primary-button:hover {
+            background-color: #3182ce;
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            color: #718096;
+            border: 1px solid #cbd5e0;
+            margin-right: 0.75rem;
+        }
+        
+        .secondary-button:hover {
+            background-color: #f7fafc;
+        }
+        
+        /* Field type specific styles */
+        .field-image {
+            width: 100%;
+            height: 250px;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .field-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .field-chart {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f7fafc;
+        }
+        
+        .field-status {
+            display: flex;
+            align-items: center;
+        }
+        
+        .field-status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .field-status-online {
+            background-color: #48bb78;
+        }
+        
+        .field-status-offline {
+            background-color: #f56565;
+        }
+        
+        .field-status-warning {
+            background-color: #ecc94b;
+        }
+        
+        .field-status-error {
+            background-color: #e53e3e;
+        }
+        
+        .field-progress {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .field-progress-bar {
+            height: 100%;
+            background-color: #4299e1;
+            border-radius: 4px;
+        }
+        
+        .field-toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .field-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .field-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .field-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        .field-toggle input:checked + .field-toggle-slider {
+            background-color: #48bb78;
+        }
+        
+        .field-toggle input:checked + .field-toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .device-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+            
+            .device-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IoT Device Dashboard</h1>
+        
+        <div class="device-grid">
+            <!-- Device 1: Thermostat -->
+            <div class="device-card" 
+                data-device-type="thermostat"
+                data-id="TH-2023-001" 
+                data-name="Smart Thermostat" 
+                data-status="online" 
+                data-image="https://images.unsplash.com/photo-1558089687-f282ffcbc126?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+                data-type="Thermostat" 
+                data-location="Living Room" 
+                data-last-update="2023-10-15 14:32"
+                data-temperature="72"
+                data-humidity="45"
+                data-mode="cooling"
+                data-target-temp="70">
+                <img src="https://images.unsplash.com/photo-1558089687-f282ffcbc126?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Smart Thermostat" class="device-image">
+                <div class="device-info">
+                    <h2 class="device-name">Smart Thermostat</h2>
+                    <p class="device-id">ID: TH-2023-001</p>
+                    <div class="device-status">
+                        <span class="status-indicator status-online"></span>
+                        <span class="status-text status-online-text">Online</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Device 2: Security Camera -->
+            <div class="device-card"
+                data-device-type="camera"
+                data-id="SC-2023-042" 
+                data-name="Security Camera" 
+                data-status="offline" 
+                data-image="https://images.unsplash.com/photo-1557438159-51eec7a6c9e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+                data-type="Camera" 
+                data-location="Front Door" 
+                data-last-update="2023-10-14 23:15"
+                data-resolution="1080p"
+                data-storage="75"
+                data-motion-detection="enabled"
+                data-night-vision="enabled">
+                <img src="https://images.unsplash.com/photo-1557438159-51eec7a6c9e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Security Camera" class="device-image">
+                <div class="device-info">
+                    <h2 class="device-name">Security Camera</h2>
+                    <p class="device-id">ID: SC-2023-042</p>
+                    <div class="device-status">
+                        <span class="status-indicator status-offline"></span>
+                        <span class="status-text status-offline-text">Offline</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Device 3: Smart Light -->
+            <div class="device-card"
+                data-device-type="light"
+                data-id="SL-2023-107" 
+                data-name="Smart Light" 
+                data-status="online" 
+                data-image="https://images.unsplash.com/photo-1546054454-aa26e2b734c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+                data-type="Light" 
+                data-location="Bedroom" 
+                data-last-update="2023-10-15 16:45"
+                data-brightness="80"
+                data-color="warm white"
+                data-power-usage="8.5"
+                data-is-on="true">
+                <img src="https://images.unsplash.com/photo-1546054454-aa26e2b734c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Smart Light" class="device-image">
+                <div class="device-info">
+                    <h2 class="device-name">Smart Light</h2>
+                    <p class="device-id">ID: SL-2023-107</p>
+                    <div class="device-status">
+                        <span class="status-indicator status-online"></span>
+                        <span class="status-text status-online-text">Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        /**
+         * Modal class for creating and managing modal windows
+         */
+        class Modal {
+            /**
+             * Create a new modal instance
+             * @param {Object} options - Configuration options for the modal
+             */
+            constructor(options = {}) {
+                this.id = options.id || 'modal-' + Math.random().toString(36).substr(2, 9);
+                this.title = options.title || 'Modal';
+                this.content = options.content || '';
+                this.buttons = options.buttons || [
+                    { text: 'Close', type: 'secondary', id: 'close', handler: () => this.close() }
+                ];
+                this.onOpen = options.onOpen || (() => {});
+                this.onClose = options.onClose || (() => {});
+                this.element = null;
+                this.overlay = null;
+                this.isCreated = false;
+                
+                // Create the modal if it doesn't exist
+                this.create();
+                
+                // Bind methods to this instance
+                this.open = this.open.bind(this);
+                this.close = this.close.bind(this);
+                this.handleKeyDown = this.handleKeyDown.bind(this);
+                this.handleOverlayClick = this.handleOverlayClick.bind(this);
+            }
+            
+            /**
+             * Create the modal DOM structure
+             */
+            create() {
+                // Check if modal already exists
+                if (this.isCreated) return;
+                
+                // Create overlay
+                this.overlay = document.createElement('div');
+                this.overlay.className = 'modal-overlay';
+                this.overlay.id = this.id + '-overlay';
+                
+                // Create modal container
+                this.element = document.createElement('div');
+                this.element.className = 'modal';
+                this.element.setAttribute('role', 'dialog');
+                this.element.setAttribute('aria-labelledby', this.id + '-title');
+                this.element.setAttribute('aria-modal', 'true');
+                
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'modal-header';
+                
+                const title = document.createElement('h2');
+                title.className = 'modal-title';
+                title.id = this.id + '-title';
+                title.textContent = this.title;
+                
+                const closeButton = document.createElement('button');
+                closeButton.className = 'modal-close';
+                closeButton.setAttribute('aria-label', 'Close modal');
+                closeButton.innerHTML = '&times;';
+                closeButton.addEventListener('click', this.close);
+                
+                header.appendChild(title);
+                header.appendChild(closeButton);
+                
+                // Create body
+                const body = document.createElement('div');
+                body.className = 'modal-body';
+                
+                if (typeof this.content === 'string') {
+                    body.innerHTML = this.content;
+                } else if (this.content instanceof HTMLElement) {
+                    body.appendChild(this.content);
+                }
+                
+                // Create footer
+                const footer = document.createElement('div');
+                footer.className = 'modal-footer';
+                
+                // Add buttons to footer
+                this.buttons.forEach(button => {
+                    const buttonElement = document.createElement('button');
+                    buttonElement.className = `modal-button ${button.type}-button`;
+                    buttonElement.id = button.id || button.text.toLowerCase().replace(/\s+/g, '-');
+                    buttonElement.textContent = button.text;
+                    
+                    if (button.handler) {
+                        buttonElement.addEventListener('click', button.handler);
+                    }
+                    
+                    footer.appendChild(buttonElement);
+                });
+                
+                // Assemble modal
+                this.element.appendChild(header);
+                this.element.appendChild(body);
+                this.element.appendChild(footer);
+                this.overlay.appendChild(this.element);
+                
+                // Add event listeners
+                this.overlay.addEventListener('click', this.handleOverlayClick);
+                
+                // Append to body
+                document.body.appendChild(this.overlay);
+                
+                this.isCreated = true;
+            }
+            
+            /**
+             * Open the modal
+             */
+            open() {
+                if (!this.isCreated) {
+                    this.create();
+                }
+                
+                this.overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                document.addEventListener('keydown', this.handleKeyDown);
+                
+                // Focus on close button for accessibility
+                setTimeout(() => {
+                    const closeButton = this.element.querySelector('.modal-close');
+                    if (closeButton) {
+                        closeButton.focus();
+                    }
+                }, 100);
+                
+                // Call onOpen callback
+                if (typeof this.onOpen === 'function') {
+                    this.onOpen();
+                }
+            }
+            
+            /**
+             * Close the modal
+             */
+            close() {
+                this.overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                document.removeEventListener('keydown', this.handleKeyDown);
+                
+                // Call onClose callback
+                if (typeof this.onClose === 'function') {
+                    this.onClose();
+                }
+            }
+            
+            /**
+             * Handle keydown events (close on Escape)
+             * @param {KeyboardEvent} event - The keyboard event
+             */
+            handleKeyDown(event) {
+                if (event.key === 'Escape') {
+                    this.close();
+                }
+            }
+            
+            /**
+             * Handle overlay click (close when clicking outside modal)
+             * @param {MouseEvent} event - The mouse event
+             */
+            handleOverlayClick(event) {
+                if (event.target === this.overlay) {
+                    this.close();
+                }
+            }
+            
+            /**
+             * Update the modal content
+             * @param {Object} options - Options to update
+             */
+            update(options = {}) {
+                // Update properties
+                if (options.title) {
+                    this.title = options.title;
+                    const titleElement = this.element.querySelector('.modal-title');
+                    if (titleElement) {
+                        titleElement.textContent = this.title;
+                    }
+                }
+                
+                if (options.content) {
+                    this.content = options.content;
+                    const bodyElement = this.element.querySelector('.modal-body');
+                    if (bodyElement) {
+                        bodyElement.innerHTML = '';
+                        if (typeof this.content === 'string') {
+                            bodyElement.innerHTML = this.content;
+                        } else if (this.content instanceof HTMLElement) {
+                            bodyElement.appendChild(this.content);
+                        }
+                    }
+                }
+                
+                if (options.buttons) {
+                    this.buttons = options.buttons;
+                    const footerElement = this.element.querySelector('.modal-footer');
+                    if (footerElement) {
+                        footerElement.innerHTML = '';
+                        this.buttons.forEach(button => {
+                            const buttonElement = document.createElement('button');
+                            buttonElement.className = `modal-button ${button.type}-button`;
+                            buttonElement.id = button.id || button.text.toLowerCase().replace(/\s+/g, '-');
+                            buttonElement.textContent = button.text;
+                            
+                            if (button.handler) {
+                                buttonElement.addEventListener('click', button.handler);
+                            }
+                            
+                            footerElement.appendChild(buttonElement);
+                        });
+                    }
+                }
+                
+                if (options.onOpen) {
+                    this.onOpen = options.onOpen;
+                }
+                
+                if (options.onClose) {
+                    this.onClose = options.onClose;
+                }
+            }
+            
+            /**
+             * Set the content of the modal body
+             * @param {string|HTMLElement} content - The content to set
+             */
+            setContent(content) {
+                this.content = content;
+                const bodyElement = this.element.querySelector('.modal-body');
+                if (bodyElement) {
+                    bodyElement.innerHTML = '';
+                    if (typeof content === 'string') {
+                        bodyElement.innerHTML = content;
+                    } else if (content instanceof HTMLElement) {
+                        bodyElement.appendChild(content);
+                    }
+                }
+            }
+            
+            /**
+             * Destroy the modal and remove it from the DOM
+             */
+            destroy() {
+                if (this.overlay) {
+                    this.overlay.removeEventListener('click', this.handleOverlayClick);
+                    document.removeEventListener('keydown', this.handleKeyDown);
+                    document.body.removeChild(this.overlay);
+                    this.isCreated = false;
+                }
+            }
+        }
+        
+        /**
+         * Dynamic Device Modal class
+         * Handles different device types with dynamic content
+         */
+        class DynamicDeviceModal extends Modal {
+            /**
+             * Create a new dynamic device modal
+             * @param {Object} options - Configuration options
+             */
+            constructor(options = {}) {
+                // Default buttons for device modal
+                const buttons = [
+                    { 
+                        text: 'Close', 
+                        type: 'secondary', 
+                        id: 'device-modal-close', 
+                        handler: () => this.close() 
+                    },
+                    { 
+                        text: 'Control Device', 
+                        type: 'primary', 
+                        id: 'device-modal-control', 
+                        handler: () => this.controlDevice() 
+                    }
+                ];
+                
+                // Call parent constructor
+                super({
+                    id: 'dynamic-device-modal',
+                    title: options.title || 'Device Details',
+                    content: '<div id="dynamic-device-content"></div>',
+                    buttons: buttons,
+                    onOpen: options.onOpen,
+                    onClose: options.onClose
+                });
+                
+                // Device-specific properties
+                this.device = null;
+                this.schemas = {};
+                
+                // Register default schemas
+                this.registerDefaultSchemas();
+            }
+            
+            /**
+             * Register default schemas for common device types
+             */
+            registerDefaultSchemas() {
+                // Common fields for all devices
+                const commonFields = [
+                    { name: 'image', type: 'image', label: 'Image' },
+                    { name: 'id', type: 'text', label: 'Device ID' },
+                    { name: 'type', type: 'text', label: 'Type' },
+                    { name: 'location', type: 'text', label: 'Location' },
+                    { name: 'status', type: 'status', label: 'Status' },
+                    { name: 'lastUpdate', type: 'text', label: 'Last Update' }
+                ];
+                
+                // Thermostat schema
+                this.registerSchema('thermostat', [
+                    ...commonFields,
+                    { name: 'temperature', type: 'text', label: 'Current Temperature', suffix: '°F' },
+                    { name: 'targetTemp', type: 'text', label: 'Target Temperature', suffix: '°F' },
+                    { name: 'humidity', type: 'text', label: 'Humidity', suffix: '%' },
+                    { name: 'mode', type: 'text', label: 'Mode' }
+                ]);
+                
+                // Camera schema
+                this.registerSchema('camera', [
+                    ...commonFields,
+                    { name: 'resolution', type: 'text', label: 'Resolution' },
+                    { name: 'storage', type: 'progress', label: 'Storage Used', suffix: '%' },
+                    { name: 'motionDetection', type: 'text', label: 'Motion Detection' },
+                    { name: 'nightVision', type: 'text', label: 'Night Vision' }
+                ]);
+                
+                // Light schema
+                this.registerSchema('light', [
+                    ...commonFields,
+                    { name: 'isOn', type: 'toggle', label: 'Power' },
+                    { name: 'brightness', type: 'progress', label: 'Brightness', suffix: '%' },
+                    { name: 'color', type: 'text', label: 'Color' },
+                    { name: 'powerUsage', type: 'text', label: 'Power Usage', suffix: 'W' }
+                ]);
+                
+                // Default schema (fallback)
+                this.registerSchema('default', commonFields);
+            }
+            
+            /**
+             * Register a schema for a device type
+             * @param {string} deviceType - The type of device
+             * @param {Array} fields - Array of field definitions
+             */
+            registerSchema(deviceType, fields) {
+                this.schemas[deviceType] = fields;
+            }
+            
+            /**
+             * Show device details in the modal
+             * @param {Object} device - The device data to display
+             */
+            showDevice(device) {
+                this.device = device;
+                
+                // Update modal title
+                this.update({ title: device.name });
+                
+                // Get the schema for this device type
+                const schema = this.schemas[device.deviceType] || this.schemas.default;
+                
+                // Create content container
+                const contentContainer = document.createElement('div');
+                
+                // Render fields based on schema
+                schema.forEach(field => {
+                    const fieldElement = this.renderField(field, device);
+                    if (fieldElement) {
+                        contentContainer.appendChild(fieldElement);
+                    }
+                });
+                
+                // Update modal content
+                this.setContent(contentContainer);
+                
+                // Update control button text based on status
+                const controlButton = document.getElementById('device-modal-control');
+                if (controlButton) {
+                    controlButton.textContent = device.status === 'online' ? 'Control Device' : 'Restart Device';
+                }
+                
+                // Open the modal
+                this.open();
+            }
+            
+            /**
+             * Render a field based on its type
+             * @param {Object} field - Field definition
+             * @param {Object} device - Device data
+             * @returns {HTMLElement} - The rendered field element
+             */
+            renderField(field, device) {
+                // Get the value from the device data
+                const value = device[field.name];
+                
+                // Skip if value is undefined
+                if (value === undefined) return null;
+                
+                // Create field container
+                let fieldElement;
+                
+                // Render based on field type
+                switch (field.type) {
+                    case 'image':
+                        fieldElement = this.renderImageField(field, value, device);
+                        break;
+                    case 'status':
+                        fieldElement = this.renderStatusField(field, value, device);
+                        break;
+                    case 'progress':
+                        fieldElement = this.renderProgressField(field, value, device);
+                        break;
+                    case 'toggle':
+                        fieldElement = this.renderToggleField(field, value, device);
+                        break;
+                    case 'text':
+                    default:
+                        fieldElement = this.renderTextField(field, value, device);
+                        break;
+                }
+                
+                return fieldElement;
+            }
+            
+            /**
+             * Render an image field
+             * @param {Object} field - Field definition
+             * @param {string} value - Image URL
+             * @param {Object} device - Device data
+             * @returns {HTMLElement} - The rendered image field
+             */
+            renderImageField(field, value, device) {
+                const container = document.createElement('div');
+                container.className = 'field-image';
+                
+                const img = document.createElement('img');
+                img.src = value;
+                img.alt = device.name || 'Device image';
+                
+                container.appendChild(img);
+                return container;
+            }
+            
+            /**
+             * Render a text field
+             * @param {Object} field - Field definition
+             * @param {string} value - Field value
+             * @param {Object} device - Device data
+             * @returns {HTMLElement} - The rendered text field
+             */
+            renderTextField(field, value, device) {
+                const container = document.createElement('div');
+                container.className = 'detail-item';
+                
+                const label = document.createElement('div');
+                label.className = 'detail-label';
+                label.textContent = field.label;
+                
+                const valueElement = document.createElement('div');
+                valueElement.className = 'detail-value';
+                valueElement.textContent = value + (field.suffix ? field.suffix : '');
+                
+                container.appendChild(label);
+                container.appendChild(valueElement);
+                
+                return container;
+            }
+            
+            /**
+             * Render a status field
+             * @param {Object} field - Field definition
+             * @param {string} value - Status value (online, offline, etc.)
+             * @param {Object} device - Device data
+             * @returns {HTMLElement} - The rendered status field
+             */
+            renderStatusField(field, value, device) {
+                const container = document.createElement('div');
+                container.className = 'detail-item';
+                
+                const label = document.createElement('div');
+                label.className = 'detail-label';
+                label.textContent = field.label;
+                
+                const valueContainer = document.createElement('div');
+                valueContainer.className = 'field-status';
+                
+                const indicator = document.createElement('span');
+                indicator.className = `field-status-indicator field-status-${value}`;
+                
+                const valueText = document.createElement('span');
+                valueText.className = 'detail-value';
+                valueText.textContent = value.charAt(0).toUpperCase() + value.slice(1);
+                valueText.style.color = value === 'online' ? '#48bb78' : '#f56565';
+                
+                valueContainer.appendChild(indicator);
+                valueContainer.appendChild(valueText);
+                
+                container.appendChild(label);
+                container.appendChild(valueContainer);
+                
+                return container;
+            }
+            
+            /**
+             * Render a progress field
+             * @param {Object} field - Field definition
+             * @param {string|number} value - Progress value (0-100)
+             * @param {Object} device - Device data
+             * @returns {HTMLElement} - The rendered progress field
+             */
+            renderProgressField(field, value, device) {
+                const container = document.createElement('div');
+                container.className = 'detail-item';
+                
+                const label = document.createElement('div');
+                label.className = 'detail-label';
+                label.textContent = field.label;
+                
+                const valueElement = document.createElement('div');
+                valueElement.className = 'detail-value';
+                valueElement.textContent = value + (field.suffix ? field.suffix : '');
+                
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'field-progress';
+                
+                const progressBar = document.createElement('div');
+                progressBar.className = 'field-progress-bar';
+                progressBar.style.width = `${value}%`;
+                
+                progressContainer.appendChild(progressBar);
+                
+                container.appendChild(label);
+                container.appendChild(valueElement);
+                container.appendChild(progressContainer);
+                
+                return container;
+            }
+            
+            /**
+             * Render a toggle field
+             * @param {Object} field - Field definition
+             * @param {string|boolean} value - Toggle value
+             * @param {Object} device - Device data
+             * @returns {HTMLElement} - The rendered toggle field
+             */
+            renderToggleField(field, value, device) {
+                const container = document.createElement('div');
+                container.className = 'detail-item';
+                
+                const label = document.createElement('div');
+                label.className = 'detail-label';
+                label.textContent = field.label;
+                
+                const toggleContainer = document.createElement('label');
+                toggleContainer.className = 'field-toggle';
+                
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = value === true || value === 'true';
+                
+                // Add event listener for toggle change
+                input.addEventListener('change', () => {
+                    // Here you would typically make an API call to update the device
+                    alert(`Toggling ${field.label} to ${input.checked ? 'ON' : 'OFF'}`);
+                });
+                
+                const slider = document.createElement('span');
+                slider.className = 'field-toggle-slider';
+                
+                toggleContainer.appendChild(input);
+                toggleContainer.appendChild(slider);
+                
+                container.appendChild(label);
+                container.appendChild(toggleContainer);
+                
+                return container;
+            }
+            
+            /**
+             * Handle device control action
+             */
+            controlDevice() {
+                if (!this.device) return;
+                
+                if (this.device.status === 'online') {
+                    alert(`Opening control panel for ${this.device.name}`);
+                } else {
+                    alert(`Attempting to restart ${this.device.name}...`);
+                    // Here you would typically make an API call to restart the device
+                }
+            }
+        }
+        
+        // Create a single instance of DynamicDeviceModal
+        const deviceModal = new DynamicDeviceModal();
+        
+        // Add click event to each device card
+        const deviceCards = document.querySelectorAll('.device-card');
+        deviceCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Extract all data attributes from the card
+                const deviceData = {};
+                
+                // Convert kebab-case to camelCase for data attributes
+                Array.from(card.attributes)
+                    .filter(attr => attr.name.startsWith('data-'))
+                    .forEach(attr => {
+                        const key = attr.name.replace('data-', '').replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+                        deviceData[key] = attr.value;
+                    });
+                
+                // Show device in modal
+                deviceModal.showDevice(deviceData);
+            });
+        });
+    </script>
+</body>
+</html>
