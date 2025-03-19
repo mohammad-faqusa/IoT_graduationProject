@@ -1,7 +1,12 @@
 
-const devices = require('./data/devices')
+const {getDevices} = require('./data/devices')
 
-const socketMain = (io) => {
+
+
+const socketMain = async (io) => {
+    const devices = await getDevices(); 
+    console.log(devices); 
+    
     io.on('connection', socket => {
         console.log(`a client is connected with socket:id ${socket.id}`)
         socket.on('message', data => {
