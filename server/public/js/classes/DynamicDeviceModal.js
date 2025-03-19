@@ -44,7 +44,7 @@ class DynamicDeviceModal extends Modal {
     async showDevice(socket, index) {
         this.device = await socket.emitWithAck('deviceClick', index)
         this.update({ title: this.device.name || 'Device Details' });
-        
+        console.log(this.device.info); 
         const contentContainer = document.createElement('div');
 
         contentContainer.innerHTML = ''; 
@@ -57,6 +57,8 @@ class DynamicDeviceModal extends Modal {
         }
         console.log(this.fieldsValues)
         
+        
+        
 
         this.setContent(contentContainer);
         
@@ -66,14 +68,25 @@ class DynamicDeviceModal extends Modal {
         }
         
         this.open();
+
+        this.displayInterval = setInterval(async () => {
+            this.device = await socket.emitWithAck('deviceClick', index)
+            for (const [key, value] of Object.entries(this.fieldsValues)) {
+                const fieldValue = document.getElementById(value); 
+                fieldValue.textContent = this.device[key]
+            }
+        }, 1000);
+        
+        
     }
     
+
+
     renderField(key, value) {
-        this.fieldsValues[key] = key+'-field-value'
+        
 
         const fieldElement = document.createElement('div');
         fieldElement.className = 'field-item';
-
 
         const label = document.createElement('div');
         label.className = 'field-label';
@@ -81,10 +94,11 @@ class DynamicDeviceModal extends Modal {
         
         const valueElement = document.createElement('div');
         valueElement.className = 'field-value';
-        valueElement.id = this.fieldsValues[key]
+        
         
         if (key === 'image' && typeof value === 'string') {
             const img = document.createElement('img');
+            
             img.src = value;
             img.alt = 'Device image';
             img.className = 'field-image';
@@ -94,6 +108,10 @@ class DynamicDeviceModal extends Modal {
             statusIndicator.className = `status-indicator status-${value.toLowerCase()}`;
             
             const statusText = document.createElement('span');
+
+            this.fieldsValues[key] = key+'-field-value'
+            statusText.id = this.fieldsValues[key]
+
             statusText.textContent = value;
             statusText.className = `status-text status-${value.toLowerCase()}-text`;
             
@@ -101,8 +119,9 @@ class DynamicDeviceModal extends Modal {
             valueElement.appendChild(statusText);
         } else {
             valueElement.textContent = value;
+            this.fieldsValues[key] = key+'-field-value'
+            valueElement.id = this.fieldsValues[key]
         }
-        
         if (key !== 'image') {
             fieldElement.appendChild(label);
             fieldElement.appendChild(valueElement);
