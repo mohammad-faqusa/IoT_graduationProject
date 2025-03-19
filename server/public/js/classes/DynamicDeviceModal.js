@@ -1,5 +1,7 @@
 
 class DynamicDeviceModal extends Modal {
+    
+
     constructor(options = {}) {
         const buttons = [
             // modal-close
@@ -31,46 +33,55 @@ class DynamicDeviceModal extends Modal {
             content: '<div id="dynamic-device-content"></div>',
             buttons: buttons,
             onOpen: options.onOpen,
-            onClose: options.onClose
+            onClose: ()=> clearInterval(this.displayInterval),
+            onUpdate: ()=> console.log('updated')
         });
         
         this.device = null;
+        this.fieldsValues = {}; 
     }
     
-    showDevice(deviceData) {
-        this.device = deviceData;
-        
-        this.update({ title: deviceData.name || 'Device Details' });
+    async showDevice(socket, index) {
+        this.device = await socket.emitWithAck('deviceClick', index)
+        this.update({ title: this.device.name || 'Device Details' });
         
         const contentContainer = document.createElement('div');
-        
-        for (const [key, value] of Object.entries(deviceData)) {
+
+        contentContainer.innerHTML = ''; 
+            
+        for (const [key, value] of Object.entries(this.device)) {
             const fieldElement = this.renderField(key, value);
             if (fieldElement) {
                 contentContainer.appendChild(fieldElement);
             }
         }
+        console.log(this.fieldsValues)
         
+
         this.setContent(contentContainer);
         
         const controlButton = document.getElementById('device-modal-control');
         if (controlButton) {
-            controlButton.textContent = deviceData.status === 'online' ? 'Control Device' : 'Restart Device';
+            controlButton.textContent = this.device.status === 'online' ? 'Control Device' : 'Restart Device';
         }
         
         this.open();
     }
     
     renderField(key, value) {
+        this.fieldsValues[key] = key+'-field-value'
+
         const fieldElement = document.createElement('div');
         fieldElement.className = 'field-item';
-        
+
+
         const label = document.createElement('div');
         label.className = 'field-label';
         label.textContent = this.formatLabel(key);
         
         const valueElement = document.createElement('div');
         valueElement.className = 'field-value';
+        valueElement.id = this.fieldsValues[key]
         
         if (key === 'image' && typeof value === 'string') {
             const img = document.createElement('img');

@@ -10,7 +10,7 @@ socket.on('connect', async ()=> {
     // Create device cards
     renderCards(devices)
     
-    openOnClick(devices, socket); 
+    openOnClick(socket); 
 
     addDeviceFunc(); 
 })
@@ -38,17 +38,15 @@ function renderCards(devices){
     });
 }
 
-function openOnClick(devices, socket) {
+function openOnClick(socket) {
     // Create a single instance of DynamicDeviceModal
     const deviceModal = new DynamicDeviceModal();
     
     // Add click event to each device card
     const deviceCards = document.querySelectorAll('.device-card');
     deviceCards.forEach((card, index) => {
-        card.addEventListener('click', async () => {
-            const deviceData = await socket.emitWithAck('deviceClick', index)
-            console.log(deviceData); 
-            deviceModal.showDevice(deviceData);
+        card.addEventListener('click', async () => { 
+            deviceModal.showDevice(socket, index);
         });
     });
 }
