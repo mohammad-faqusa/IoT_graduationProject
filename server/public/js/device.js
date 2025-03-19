@@ -3,50 +3,23 @@ const socket = io();
 
 socket.on('connect', async ()=> {
     console.log('connected to the server')
-    const devices2 = await socket.emitWithAck('fetchDevices', 'all')
+
+    const devices = (await socket.emitWithAck('fetchDevices', 'all')).map(device => device.info)
     // const devices3 = devices2.map()
     
-    // Sample device data
-    const devices = [
-        {
-            name: "Smart Thermostat",
-            id: "TH-2023-001",
-            type: "Thermostat",
-            status: "online",
-            image: "https://images.unsplash.com/photo-1558089687-f282ffcbc126?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-            location: "Living Room",
-            temperature: "72°F",
-            humidity: "45%",
-            mode: "Cooling",
-            targetTemperature: "70°F"
-        },
-        {
-            name: "Security Camera",
-            id: "SC-2023-042",
-            type: "Camera",
-            status: "offline",
-            image: "https://images.unsplash.com/photo-1557438159-51eec7a6c9e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-            location: "Front Door",
-            resolution: "1080p",
-            nightVision: "Enabled",
-            motionDetection: "Active"
-        },
-        {
-            name: "Smart Light",
-            id: "SL-2023-107",
-            type: "Light",
-            status: "online",
-            image: "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-            location: "Bedroom",
-            brightness: "80%",
-            color: "Warm White",
-            powerUsage: "8.5W"
-        },
-        ...devices2.map(dev => dev.info)
-    ];
-    
     // Create device cards
+    renderCards(devices)
+    
+    openOnClick(devices, socket); 
+
+    addDeviceFunc(); 
+})
+
+
+
+function renderCards(devices){
     const deviceGrid = document.querySelector('.device-grid');
+    deviceGrid.innerHTML = ''; 
     devices.forEach(device => {
         const card = document.createElement('div');
         card.className = 'device-card';
@@ -63,17 +36,40 @@ socket.on('connect', async ()=> {
         `;
         deviceGrid.appendChild(card);
     });
-    
+}
+
+function openOnClick(devices, socket) {
     // Create a single instance of DynamicDeviceModal
     const deviceModal = new DynamicDeviceModal();
     
     // Add click event to each device card
     const deviceCards = document.querySelectorAll('.device-card');
     deviceCards.forEach((card, index) => {
-        card.addEventListener('click', () => {
-            deviceModal.showDevice(devices[index]);
+        card.addEventListener('click', async () => {
+            const deviceData = await socket.emitWithAck('deviceClick', index)
+            console.log(deviceData); 
+            deviceModal.showDevice(deviceData);
         });
     });
-})
+}
 
-
+function addDeviceFunc() {
+    // Create an instance of AddDeviceModal
+    const addDeviceModal = new AddDeviceModal({
+        onDeviceAdded: (newDevice) => {
+            // Add the new device to the devices array
+            devices.push(newDevice);
+            
+            // Re-render the device cards
+            renderDeviceCards();
+            
+            // Show a success message
+            alert(`Device "${newDevice.name}" has been added successfully!`);
+        }
+    });
+    
+    // Add click event to the Add Device button
+    document.getElementById('add-device-button').addEventListener('click', () => {
+        addDeviceModal.open();
+    });
+}
