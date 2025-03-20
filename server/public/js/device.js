@@ -12,7 +12,6 @@ socket.on('connect', async ()=> {
     
     openOnClick(socket); 
 
-    addDeviceFunc(); 
 })
 
 
@@ -51,23 +50,7 @@ function openOnClick(socket) {
     });
 }
 
-function addDeviceFunc() {
-    // Create an instance of AddDeviceModal
-    const addDeviceModal = new AddDeviceModal({
-        onDeviceAdded: (newDevice) => {
-            // Add the new device to the devices array
-            devices.push(newDevice);
-            
-            // Re-render the device cards
-            renderDeviceCards();
-            
-            // Show a success message
-            alert(`Device "${newDevice.name}" has been added successfully!`);
-        }
-    });
-    
-    // Add click event to the Add Device button
-    document.getElementById('add-device-button').addEventListener('click', () => {
-        addDeviceModal.open();
-    });
-}
+
+document.getElementById('add-device-button').addEventListener('click', function() {
+    window.location.href = 'addDevice.html';
+});

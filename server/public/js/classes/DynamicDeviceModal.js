@@ -42,9 +42,11 @@ class DynamicDeviceModal extends Modal {
     }
     
     async showDevice(socket, index) {
+        this.fieldsValues = {}; 
+
         this.device = await socket.emitWithAck('deviceClick', index)
         this.update({ title: this.device.name || 'Device Details' });
-        console.log(this.device.info); 
+        
         const contentContainer = document.createElement('div');
 
         contentContainer.innerHTML = ''; 
@@ -55,9 +57,6 @@ class DynamicDeviceModal extends Modal {
                 contentContainer.appendChild(fieldElement);
             }
         }
-        console.log(this.fieldsValues)
-        
-        
         
 
         this.setContent(contentContainer);

@@ -29,7 +29,6 @@ const socketMain = async (io) => {
         })
 
         socket.on('deviceClick', (data, ackCallBack) => {
-            console.log('this is the index of device ',data);
             ackCallBack(devices[data].info)
         })
     })
