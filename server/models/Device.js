@@ -6,7 +6,6 @@ const Schema = mongoose.Schema;
 const deviceSchema = new Schema({
   id: {
     type: Number, // Assuming 'id' is a string, modify this if it's another type (e.g., Number, ObjectId)
-    required: true,
   },
   name: {
     type: String,
@@ -33,13 +32,23 @@ const deviceSchema = new Schema({
   automatedFunctions: {
     type: [Schema.Types.Mixed], // Array of any type, can store functions or any objects
     default: [],
-  },
-  info: {
-    type: Map, // Assuming `info` is a string. You can modify this if it's more complex
   }
 }, { timestamps: true }); // Adds createdAt and updatedAt fields
+
+deviceSchema.pre('save',async function (next) {
+
+  const docs = await mongoose.model('Device').find({}).sort('-id');
+  
+  if (!docs[0]) {
+    this.id = 1; 
+  } else {
+    this.id = docs[0].id + 1 ; 
+  }
+  return next()
+});
 
 // Create the model based on the schema
 const Device = mongoose.model('Device', deviceSchema);
 
 module.exports = Device;
+

@@ -46,15 +46,26 @@ class DynamicDeviceModal extends Modal {
 
         this.device = await socket.emitWithAck('deviceClick', index)
         this.update({ title: this.device.name || 'Device Details' });
-        
+    
         const contentContainer = document.createElement('div');
 
         contentContainer.innerHTML = ''; 
             
         for (const [key, value] of Object.entries(this.device)) {
-            const fieldElement = this.renderField(key, value);
-            if (fieldElement) {
-                contentContainer.appendChild(fieldElement);
+            if(!['__v', 'automatedFunctions', '_id'].includes(key)){
+                if(key === 'dictVariables') {
+                    for (const [key2, value2] of Object.entries(this.device.dictVariables)) {
+                        const fieldElement = this.renderField(key2, value2);
+                        if (fieldElement) {
+                            contentContainer.appendChild(fieldElement);
+                        }
+                    }
+                } else {
+                    const fieldElement = this.renderField(key, value);
+                    if (fieldElement) {
+                        contentContainer.appendChild(fieldElement);
+                    }
+                }
             }
         }
         
@@ -70,11 +81,17 @@ class DynamicDeviceModal extends Modal {
 
         this.displayInterval = setInterval(async () => {
             this.device = await socket.emitWithAck('deviceClick', index)
+            console.log(this.device); 
             for (const [key, value] of Object.entries(this.fieldsValues)) {
                 const fieldValue = document.getElementById(value); 
-                fieldValue.textContent = this.device[key]
+                if (this.device[key])
+                    fieldValue.textContent = this.device[key].toString()
+                else if(this.device.dictVariables[key])
+                    fieldValue.textContent = this.device.dictVariables[key].toString()
+                else 
+                    console.log(key); 
             }
-        }, 1000);
+        }, 4000);
         
         
     }
@@ -117,7 +134,7 @@ class DynamicDeviceModal extends Modal {
             valueElement.appendChild(statusIndicator);
             valueElement.appendChild(statusText);
         } else {
-            valueElement.textContent = value;
+            valueElement.textContent = value.toString();
             this.fieldsValues[key] = key+'-field-value'
             valueElement.id = this.fieldsValues[key]
         }

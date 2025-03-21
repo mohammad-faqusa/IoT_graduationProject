@@ -8,3 +8,24 @@ mosquitto commands
     mosquitto_sub -h localhost -t test/topic
     mosquitto_pub -h localhost -t test/topic -m "Hello from Mosquitto!"
 
+
+1- install micropython on esp32 done 
+2- write main.py done 
+3- mqtt connection 
+4- ndoe js mqtt connection 
+
+
+// after insuring the conneciton 
+
+5- node js command to send function 
+6- esp32 write function on python 
+7- esp32 import this function later 
+8- execute the function, and include it in pub mqtt 
+
+
+
+//list the connected devices
+    mod 
+    
+micro python remote commands 
+    

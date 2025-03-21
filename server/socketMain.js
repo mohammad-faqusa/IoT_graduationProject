@@ -1,13 +1,27 @@
 
 const {getDevices} = require('./data/devices')
 
-
+const mqtt = require('mqtt');
 
 const socketMain = async (io) => {
-    const devices = await getDevices(); 
-    console.log(devices); 
     
-    io.on('connection', socket => {
+    
+    io.on('connection', async socket => {
+          
+        let currentDeviceIndex; 
+        const devices = await getDevices(); 
+        
+        devices.forEach(device => device.dictList = Object.entries(device.dictVariables).map(([key, val]) => key))
+        
+        const client = mqtt.connect('mqtt:localhost');
+
+        client.on('connect', ()=> console.log('connected to the broker'))
+        client.subscribe('dictVariables');
+        client.on('message', (topic, message) => {
+            devices[currentDeviceIndex].dictVariables = JSON.parse(message)
+        }) 
+
+        
         console.log(`a client is connected with socket:id ${socket.id}`)
         socket.on('message', data => {
             console.log(`client ${socket.id} : ${data}`)
@@ -29,7 +43,9 @@ const socketMain = async (io) => {
         })
 
         socket.on('deviceClick', (data, ackCallBack) => {
-            ackCallBack(devices[data].info)
+            client.publish('writeFunctions', JSON.stringify(devices[data].dictList))
+            currentDeviceIndex = data * 1 ; 
+            ackCallBack(devices[data])
         })
     })
 }

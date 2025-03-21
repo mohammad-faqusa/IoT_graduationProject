@@ -4,8 +4,8 @@ const socket = io();
 socket.on('connect', async ()=> {
     console.log('connected to the server')
 
-    const devices = (await socket.emitWithAck('fetchDevices', 'all')).map(device => device.info)
-    // const devices3 = devices2.map()
+    const devices = await socket.emitWithAck('fetchDevices', 'all')
+    // const devices3 = devices2.map(
     
     // Create device cards
     renderCards(devices)
@@ -20,6 +20,7 @@ function renderCards(devices){
     const deviceGrid = document.querySelector('.device-grid');
     deviceGrid.innerHTML = ''; 
     devices.forEach(device => {
+        console.log(device); 
         const card = document.createElement('div');
         card.className = 'device-card';
         card.innerHTML = `

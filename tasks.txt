@@ -1,0 +1,7 @@
+aim : write code on esp32 (main, boot) from esptool 
+
+
+steps 
+    esptool commands 
+    connect to esp32 via shell 
+    

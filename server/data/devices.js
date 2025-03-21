@@ -4,6 +4,7 @@ const DeviceModel = require('./../models/Device');
 async function getDevices() {
     try {
         const devices = await DeviceModel.find({}).lean();
+        console.log(devices[devices.length - 1])
         return devices; // Return the data
     } catch (error) {
         console.error('Error fetching devices:', error);

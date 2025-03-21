@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(axios); 
-    
 
     const form = document.getElementById('peripheralForm');
     const peripheralSelect = document.getElementById('peripheral');
@@ -65,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         peripheralList.innerHTML = '';
         selectedPeripherals = [];
         selectedPeripheralsInput.value = '';
+
     });
     
     // Form submission
@@ -78,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         axios.post('/devices', formData).then(res => console.log(res)).catch(err => console.log(err))
-        
+
         console.log('Form submitted:', formData);
         // Here you would typically send the data to a server
         
@@ -89,6 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
         peripheralList.innerHTML = '';
         selectedPeripherals = [];
         selectedPeripheralsInput.value = '';
+        window.location.href = "/devices";
+
     });
 });
 
