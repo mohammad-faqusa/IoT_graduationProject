@@ -1,3 +1,4 @@
+
 const { exec } = require('child_process');
 const generateFiles = require('./generateFiles')
 
@@ -5,7 +6,7 @@ const generateFiles = require('./generateFiles')
 
 function espSetup(id, plist) {
   generateFiles(id, plist); 
-  exec('mpremote connect COM3 fs cp main.py :main.py', (error, stdout, stderr) => {
+  exec('mpremote connect COM3 fs cp ./espFiles/main.py :main.py', (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error.message}`);
       return;
@@ -16,7 +17,7 @@ function espSetup(id, plist) {
     }
     console.log(`Stdout: ${stdout}`);
 
-    exec('mpremote connect COM3 fs cp boot.py :boot.py', (error, stdout, stderr) => {
+    exec('mpremote connect COM3 fs cp ./espFiles/boot.py :boot.py', (error, stdout, stderr) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
@@ -32,4 +33,4 @@ function espSetup(id, plist) {
 
 }
 
-espSetup(10, ['servo', 'temperature', 'lightSensor']); 
+module.exports = espSetup

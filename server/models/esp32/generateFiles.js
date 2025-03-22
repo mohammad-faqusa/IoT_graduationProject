@@ -1,5 +1,8 @@
 const fs = require('fs')
-const {mainTemplate, bootTemplate} = require('./templates')
+const path = require('path')
+
+const {mainTemplate, bootTemplate} = require(path.join(__dirname, 'templates'))
+
 const generateFiles = (id, pList) => {
      
     let p = {}; 
@@ -52,8 +55,8 @@ ${functions}
 `
 
 
-    fs.writeFileSync('./espFiles/main.py', mainTemplate(body, libraries))
-    fs.writeFileSync('./espFiles/boot.py', bootTemplate())
+    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(body, libraries))
+    fs.writeFileSync(`${__dirname}/espFiles/boot.py`, bootTemplate())
 
 
     

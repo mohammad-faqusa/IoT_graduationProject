@@ -21,6 +21,8 @@ exports.addDevice = async (req, res) => {
 
     await device.save(); 
 
+    
+
     res.status(201).send('the davice is saved')
 }
 

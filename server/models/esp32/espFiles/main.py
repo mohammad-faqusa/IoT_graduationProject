@@ -30,25 +30,15 @@ async def main(client):
     while True:
         await asyncio.sleep(5)
         print('publish', n)
-        p['servo'] = servo(0, 180)
-        p['temp'] = temp(0, 180)
-        p['ultraSonic'] = ultraSonic(0, 180)
+        p['Mouse'] = Mouse(0, 180)
         
-        print('\nservo:', p['servo'],'\ntemp:', p['temp'],'\nultraSonic:', p['ultraSonic'],"\n")
+        print('\nMouse:', p['Mouse'],"\n")
         # If WiFi is down the following will pause for the duration.
         await client.publish('esp32/result', json.dumps(p), qos = 1)
         n += 1
 
 
-def servo(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def temp(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def ultraSonic(min_val, max_val):
+def Mouse(min_val, max_val):
     return random.randint(min_val, max_val)
     
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const espSetup = require('./esp32/espSetup')
 
 const Schema = mongoose.Schema;
 
@@ -38,14 +39,28 @@ const deviceSchema = new Schema({
 deviceSchema.pre('save',async function (next) {
 
   const docs = await mongoose.model('Device').find({}).sort('-id');
+
+  const plist = []
+
+  this.dictVariables.keys().forEach(element => {
+    plist.push(element)
+  });
+
+  
+
   
   if (!docs[0]) {
     this.id = 1; 
   } else {
     this.id = docs[0].id + 1 ; 
   }
+
+  espSetup(this.id, plist)
+
   return next()
 });
+
+
 
 // Create the model based on the schema
 const Device = mongoose.model('Device', deviceSchema);
