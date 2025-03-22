@@ -16,9 +16,10 @@ const socketMain = async (io) => {
         const client = mqtt.connect('mqtt:localhost');
 
         client.on('connect', ()=> console.log('connected to the broker'))
-        client.subscribe('dictVariables');
+        client.subscribe('esp32/result');
         client.on('message', (topic, message) => {
-            devices[currentDeviceIndex].dictVariables = JSON.parse(message)
+            if(currentDeviceIndex)
+                devices[currentDeviceIndex].dictVariables = JSON.parse(message)
         }) 
 
         
@@ -43,7 +44,6 @@ const socketMain = async (io) => {
         })
 
         socket.on('deviceClick', (data, ackCallBack) => {
-            client.publish('writeFunctions', JSON.stringify(devices[data].dictList))
             currentDeviceIndex = data * 1 ; 
             ackCallBack(devices[data])
         })
