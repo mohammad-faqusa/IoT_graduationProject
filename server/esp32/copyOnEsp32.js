@@ -1,10 +1,10 @@
 const { exec } = require('child_process');
-const writeFiles = require('./templates')
+const generateFiles = require('./generateFiles')
 
 
 
-function espSetup(id) {
-  writeFiles(id); 
+function espSetup(id, plist) {
+  generateFiles(id, plist); 
   exec('mpremote connect COM3 fs cp main.py :main.py', (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error.message}`);
@@ -32,4 +32,4 @@ function espSetup(id) {
 
 }
 
-espSetup(10); 
+espSetup(10, ['servo', 'temperature', 'lightSensor']); 

@@ -1,6 +1,6 @@
 const fs = require('fs')
-const {mainTemplate} = require('./templates')
-const pDict = (id, pList) => {
+const {mainTemplate, bootTemplate} = require('./templates')
+const generateFiles = (id, pList) => {
      
     let p = {}; 
 
@@ -52,7 +52,8 @@ ${functions}
 `
 
 
-    fs.writeFileSync('functions.py', mainTemplate(body, libraries))
+    fs.writeFileSync('main.py', mainTemplate(body, libraries))
+    fs.writeFileSync('boot.py', bootTemplate())
 
 
     
@@ -70,5 +71,5 @@ function callRandomIntFunc(pName, min, max) {
     return `${pName}(${min}, ${max})`
 }
 
-pDict(5, ['servo', 'temp', 'ultraSonic'])
+module.exports = generateFiles; 
 

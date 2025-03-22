@@ -36,3 +36,18 @@ finally:
 
 `
 }
+
+exports.bootTemplate = (config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
+    return `
+import network
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+wlan.connect("${config.ssid}", "${config.pass}")
+
+while not wlan.isconnected():
+    pass
+
+print("Connected to Wi-Fi:", wlan.ifconfig())
+`
+}
