@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-exports.mainTemplate = (body, libraries, config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
+exports.mainTemplate = (id, body, libraries, config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
     return `
     
 from time import sleep
@@ -10,15 +10,21 @@ import json
 ${libraries} 
 
 # Local configuration
-config['ssid'] = 'clear'  # Optional on ESP8266
-config['wifi_pw'] = '13141516'
-config['server'] = '192.168.137.1'  # Change to suit e.g. 'iot.eclipse.org'
+config['ssid'] = '${config.ssid}'  # Optional on ESP8266
+config['wifi_pw'] = '${config.pass}'
+config['server'] = '${config.server}'  # Change to suit e.g. 'iot.eclipse.org'
+
+readP = False
+p = {}
 
 def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
+    global readP
+    readP = True
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
-    await client.subscribe('esp32/writeFunctions', 1)
+    await client.subscribe('esp32/${id}/getDict', 1)
+    
 
 
 config['subs_cb'] = callback

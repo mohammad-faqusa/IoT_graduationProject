@@ -39,23 +39,26 @@ const generateFiles = (id, pList) => {
 
     let body = `
 async def main(client):
-    p = {}
+    global p
+    global readP
+
     await client.connect()
     n = 0
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
         print('publish', n)
         ${pDictPython}
         ${callfunctions}
-        # If WiFi is down the following will pause for the duration.
-        await client.publish('esp32/result', json.dumps(p), qos = 1)
+        if readP:
+            await client.publish('esp32/result', json.dumps(p), qos = 1)
+            readP = False
         n += 1
 
 ${functions}
 `
 
 
-    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(body, libraries))
+    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(id, body, libraries))
     fs.writeFileSync(`${__dirname}/espFiles/boot.py`, bootTemplate())
 
 
