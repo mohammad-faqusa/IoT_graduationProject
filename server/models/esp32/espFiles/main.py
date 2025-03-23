@@ -21,7 +21,7 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
-    await client.subscribe('esp32/9/getDict', 1)
+    await client.subscribe('esp32/4/getDict', 1)
     
 
 
@@ -41,12 +41,12 @@ async def main(client):
         p['Mouse'] = Mouse(0, 180)
         p['Keyboard'] = Keyboard(0, 180)
         
-        p['id'] = 9
+        p['id'] = 4
         print('\nMouse:', p['Mouse'],'\nKeyboard:', p['Keyboard'],"\n")
         if readP:
             await client.publish('esp32/result', json.dumps(p), qos = 1)
             readP = False
-        await client.publish('esp32/status', '9', qos = 1)
+        await client.publish('esp32/status', '4', qos = 1)
         n += 1
 
 
