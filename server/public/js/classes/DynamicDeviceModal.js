@@ -41,10 +41,9 @@ class DynamicDeviceModal extends Modal {
         this.fieldsValues = {}; 
     }
     
-    async showDevice(socket, index) {
+    async showDevice(socket, deviceId) {
         this.fieldsValues = {}; 
-
-        this.device = await socket.emitWithAck('deviceClick', index)
+        this.device = await socket.emitWithAck('deviceClick', deviceId)
         this.update({ title: this.device.name || 'Device Details' });
     
         const contentContainer = document.createElement('div');
@@ -80,8 +79,8 @@ class DynamicDeviceModal extends Modal {
         this.open();
 
         this.displayInterval = setInterval(async () => {
-            this.device = await socket.emitWithAck('deviceClick', index)
-            console.log(this.device); 
+            this.device = await socket.emitWithAck('deviceClick', deviceId)
+            console.log(this.device.status); 
             for (const [key, value] of Object.entries(this.fieldsValues)) {
                 const fieldValue = document.getElementById(value); 
                 if (this.device[key])

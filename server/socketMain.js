@@ -7,7 +7,11 @@ const socketMain = async (io) => {
     
     io.on('connection', async socket => {
         
-        let currentDeviceIndex; 
+        let selectedDeviceId; 
+        let onlineStatusInterval = {};
+        let onlineDevices = []
+        let statusLog = []; 
+
         const devices = await getDevices(); 
          
         devices.forEach(device => device.dictList = Object.entries(device.dictVariables).map(([key, val]) => key))
@@ -16,8 +20,18 @@ const socketMain = async (io) => {
 
         client.on('connect', ()=> console.log('connected to the broker'))
         client.subscribe('esp32/result');
+        client.subscribe('esp32/status');
+
+
+
         client.on('message', (topic, message) => {
-            devices[currentDeviceIndex].dictVariables = JSON.parse(message)        
+            if (topic === 'esp32/result'){
+                const device = devices.find(device => device.id === selectedDeviceId )
+                device.dictVariables = JSON.parse(message)
+
+            }
+            if (topic === 'esp32/status')
+                statusLog.push(message.toString()*1)       
         }) 
 
         console.log(`a client is connected with socket:id ${socket.id}`)
@@ -35,17 +49,29 @@ const socketMain = async (io) => {
         })
 
         socket.on('fetchDevices', (data, ackCallBack) => {
+            
+            ackCallBack(devices)
             if(data === 'all') {
-                ackCallBack(devices)
+                onlineStatusInterval = setInterval(() => {
+                    onlineDevices = [...new Set(statusLog)]
+                    statusLog = [];
+                    devices.forEach(device => device.status = onlineDevices.includes(device.id) ? 'online' : 'offline')
+                    socket.emit('onlineDevices', onlineDevices)
+                }, 12000);
             }
         })
 
         socket.on('deviceClick', (data, ackCallBack) => {
-            currentDeviceIndex = data * 1  ;
-            console.log(currentDeviceIndex)
-            client.publish(`esp32/${devices[currentDeviceIndex].id}/getDict`, '')
-            ackCallBack(devices[currentDeviceIndex])
+            selectedDeviceId = data * 1  ;
+            const device = devices.find(device => device.id === data * 1)
+            client.publish(`esp32/${device.id}/getDict`, '')
+            ackCallBack(device)
+            console.log(device.status); 
 
+        })
+
+        socket.on('disconnect', ()=> {
+            clearInterval(onlineStatusInterval)
         })
     })
 }
