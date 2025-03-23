@@ -12,7 +12,7 @@ const socketMain = async (io) => {
         let onlineDevices = []
         let statusLog = []; 
 
-        const devices = await getDevices(); 
+        let devices = await getDevices(); 
          
         devices.forEach(device => device.dictList = Object.entries(device.dictVariables).map(([key, val]) => key))
         
@@ -22,13 +22,17 @@ const socketMain = async (io) => {
         client.subscribe('esp32/result');
         client.subscribe('esp32/status');
 
-
-
         client.on('message', (topic, message) => {
             if (topic === 'esp32/result'){
-                const device = devices.find(device => device.id === selectedDeviceId )
-                device.dictVariables = JSON.parse(message)
-
+                const deviceId = JSON.parse(message).id;
+                try{
+                    console.log('this is device id', deviceId)
+                    const device = devices.find(device => device.id === deviceId )
+                    device.dictVariables = JSON.parse(message)
+                } catch(err) {
+                    console.log('dict varaibles of device with id: ', deviceId, ' is not defined')
+                }
+                
             }
             if (topic === 'esp32/status')
                 statusLog.push(message.toString()*1)       
@@ -61,9 +65,11 @@ const socketMain = async (io) => {
             }
         })
 
-        socket.on('deviceClick', (data, ackCallBack) => {
+        socket.on('deviceClick', async (data, ackCallBack) => {
             selectedDeviceId = data * 1  ;
-            const device = devices.find(device => device.id === data * 1)
+            const  device = devices.find(device => device.id === data * 1)
+            console.log('this is device from click', device); 
+            
             client.publish(`esp32/${device.id}/getDict`, '')
             ackCallBack(device)
             console.log(device.status); 

@@ -45,14 +45,17 @@ async def main(client):
         ${pDictPython}
         ${callfunctions}
         # If WiFi is down the following will pause for the duration.
-        await client.publish('esp32/result', json.dumps(p), qos = 1)
+        if readP:
+            await client.publish('esp32/result', json.dumps(p), qos = 1)
+            readP = False
+        await client.publish('esp32/status', '${id}', qos = 1)
         n += 1
 
 ${functions}
 `
 
 
-    fs.writeFileSync('./espFiles/main.py', mainTemplate(body, libraries))
+    fs.writeFileSync('./espFiles/main.py', mainTemplate(id, body, libraries))
     fs.writeFileSync('./espFiles/boot.py', bootTemplate())
 
 

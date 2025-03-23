@@ -48,10 +48,12 @@ async def main(client):
         await asyncio.sleep(2)
         print('publish', n)
         ${pDictPython}
+        p['id'] = ${id}
         ${callfunctions}
         if readP:
             await client.publish('esp32/result', json.dumps(p), qos = 1)
             readP = False
+        await client.publish('esp32/status', '${id}', qos = 1)
         n += 1
 
 ${functions}

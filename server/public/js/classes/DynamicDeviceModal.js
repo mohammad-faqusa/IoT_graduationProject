@@ -80,6 +80,7 @@ class DynamicDeviceModal extends Modal {
 
         this.displayInterval = setInterval(async () => {
             this.device = await socket.emitWithAck('deviceClick', deviceId)
+            console.log(this.device); 
             console.log(this.device.status); 
             for (const [key, value] of Object.entries(this.fieldsValues)) {
                 const fieldValue = document.getElementById(value); 
