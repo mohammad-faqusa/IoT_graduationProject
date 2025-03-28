@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // selectedPeripherals = [];
         // selectedPeripheralsInput.value = '';
         // window.location.href = "/devices";
-        socket.emit('addDevice', 'the devices is added')
+        socket.emit('addDevice', formData)
         
     });
 });

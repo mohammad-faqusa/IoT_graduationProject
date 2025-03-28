@@ -2,6 +2,7 @@ const path = require('path')
 
 const Device = require('./../models/Device')
 
+
 exports.getAllDevices = (req,res) => {
     res.sendFile(path.join(__dirname, './../public/devices.html'))
 }
@@ -25,3 +26,9 @@ exports.addDevice = async (req, res) => {
 
     res.status(201).send('the davice is saved')
 }
+
+exports.getAddDevicePage = async (req, res) => {
+
+    res.render('')
+}
+

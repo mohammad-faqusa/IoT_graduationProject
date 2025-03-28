@@ -1,5 +1,6 @@
 
 const {getDevices} = require('./data/devices')
+const espSetup = require('./models/esp32/espSetup')
 
 const mqtt = require('mqtt');
 
@@ -63,6 +64,12 @@ const socketMain = async (io) => {
                     socket.emit('onlineDevices', onlineDevices)
                 }, 12000);
             }
+        })
+
+        socket.on('addDevice', data => {
+            console.log(data); 
+            espSetup(10, ['servo', 'dht'], socket)
+            
         })
 
         socket.on('deviceClick', async (data, ackCallBack) => {

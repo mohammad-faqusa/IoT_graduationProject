@@ -12,11 +12,17 @@ config['ssid'] = 'clear'  # Optional on ESP8266
 config['wifi_pw'] = '13141516'
 config['server'] = '192.168.137.1'  # Change to suit e.g. 'iot.eclipse.org'
 
+readP = False
+p = {}
+
 def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
+    global readP
+    readP = True
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
-    await client.subscribe('esp32/writeFunctions', 1)
+    await client.subscribe('esp32/10/getDict', 1)
+    
 
 
 config['subs_cb'] = callback
@@ -31,12 +37,14 @@ async def main(client):
         await asyncio.sleep(5)
         print('publish', n)
         p['servo'] = servo(0, 180)
-        p['temperature'] = temperature(0, 180)
-        p['lightSensor'] = lightSensor(0, 180)
+        p['dht'] = dht(0, 180)
         
-        print('\nservo:', p['servo'],'\ntemperature:', p['temperature'],'\nlightSensor:', p['lightSensor'],"\n")
+        print('\nservo:', p['servo'],'\ndht:', p['dht'],"\n")
         # If WiFi is down the following will pause for the duration.
-        await client.publish('esp32/result', json.dumps(p), qos = 1)
+        if readP:
+            await client.publish('esp32/result', json.dumps(p), qos = 1)
+            readP = False
+        await client.publish('esp32/status', '10', qos = 1)
         n += 1
 
 
@@ -44,11 +52,7 @@ def servo(min_val, max_val):
     return random.randint(min_val, max_val)
     
 
-def temperature(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def lightSensor(min_val, max_val):
+def dht(min_val, max_val):
     return random.randint(min_val, max_val)
     
 
