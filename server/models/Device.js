@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const espSetup = require('./esp32/espSetup')
 
 const Schema = mongoose.Schema;
 
@@ -47,15 +46,12 @@ deviceSchema.pre('save',async function (next) {
   });
 
   
-
-  
   if (!docs[0]) {
     this.id = 1; 
   } else {
     this.id = docs[0].id + 1 ; 
   }
 
-  espSetup(this.id, plist, this.socket)
 
   return next()
 });

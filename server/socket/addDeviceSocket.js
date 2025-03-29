@@ -27,7 +27,7 @@ const addDeviceSocket =  (socket) => {
             espSetup(device.id, data.peripherals, socket)
 
         } catch(err) {
-            socket.emit('error', err.message)
+            socket.emit('errorSetup', err.message)
             console.log(err); 
         }
     })

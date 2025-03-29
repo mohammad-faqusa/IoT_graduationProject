@@ -65,7 +65,7 @@ function openOnClick(socket) {
 
 
 document.getElementById('add-device-button').addEventListener('click', function() {
-    window.location.href = 'addDevice.html';
+    window.location.href = 'addDevice';
 });
 
 function renderDevicesStatus(devices, onlineDevices) {

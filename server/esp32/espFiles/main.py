@@ -21,7 +21,7 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
-    await client.subscribe('esp32/10/getDict', 1)
+    await client.subscribe('esp32/9/getDict', 1)
     
 
 
@@ -30,29 +30,26 @@ config['connect_coro'] = conn_han
 
 
 async def main(client):
-    p = {}
+    global p
+    global readP
+
     await client.connect()
     n = 0
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
         print('publish', n)
-        p['servo'] = servo(0, 180)
-        p['dht'] = dht(0, 180)
+        p['Mouse'] = Mouse(0, 180)
         
-        print('\nservo:', p['servo'],'\ndht:', p['dht'],"\n")
-        # If WiFi is down the following will pause for the duration.
+        p['id'] = 9
+        print('\nMouse:', p['Mouse'],"\n")
         if readP:
             await client.publish('esp32/result', json.dumps(p), qos = 1)
             readP = False
-        await client.publish('esp32/status', '10', qos = 1)
+        await client.publish('esp32/status', '9', qos = 1)
         n += 1
 
 
-def servo(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def dht(min_val, max_val):
+def Mouse(min_val, max_val):
     return random.randint(min_val, max_val)
     
 

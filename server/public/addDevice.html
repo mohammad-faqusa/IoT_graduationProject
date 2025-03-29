@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peripheral Request Form</title>
+    <!-- Socket.IO Client Library -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <link rel="stylesheet" href="./css/addDevice.css">
 </head>
 <body>
@@ -32,9 +34,6 @@
                             <option value="Headset">Headset</option>
                             <option value="Webcam">Webcam</option>
                             <option value="Docking Station">Docking Station</option>
-                            <option value="servo">servo</option>
-                            <option value="greeting">greeting</option>
-                            <option value="dht">dht</option>
                         </select>
                         <button type="button" id="addPeripheral" class="btn-add">Add</button>
                     </div>
@@ -53,10 +52,39 @@
                     <button type="submit" class="btn-submit">Submit</button>
                 </div>
             </form>
+
+            <!-- Message Screen (initially hidden) -->
+            <div id="messageScreen" class="message-screen">
+                <h3>Server Messages</h3>
+                <div id="messageContent" class="message-content">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+                <a class="back-to-form" id="backToForm">Back to Form</a>
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="socket.io/socket.io.js"></script>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="error-modal">
+        <div class="error-modal-content">
+            <div class="error-header">
+                <div class="error-icon"></div>
+                <h3 class="error-title">Error Occurred</h3>
+            </div>
+            <div id="errorMessage" class="error-message">
+                An unexpected error occurred while processing your request.
+            </div>
+            <div id="errorCode" class="error-code">
+                Error Code: UNKNOWN
+            </div>
+            <div class="error-actions">
+                <button id="retryButton" class="btn-retry">Retry</button>
+                <button id="closeErrorButton" class="btn-close">Close</button>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="./js/addDevice.js"></script>
+    
 </body>
 </html>

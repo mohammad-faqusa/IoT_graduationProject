@@ -1,3 +1,4 @@
+
 const dotenv = require('dotenv')
 const path = require('path')
 dotenv.config({path: path.join(__dirname, '.env')});
@@ -5,7 +6,7 @@ dotenv.config({path: path.join(__dirname, '.env')});
 require('./database.js')
 
 const socketio = require('socket.io')
-const socketMain = require('./socketMain')
+const socketMain = require('./socket/socketMain')
 const app = require('./app.js')
 
 

@@ -1,5 +1,8 @@
 const fs = require('fs')
-const {mainTemplate, bootTemplate} = require('./templates')
+const path = require('path')
+
+const {mainTemplate, bootTemplate} = require(path.join(__dirname, 'templates'))
+
 const generateFiles = (id, pList) => {
      
     let p = {}; 
@@ -36,15 +39,17 @@ const generateFiles = (id, pList) => {
 
     let body = `
 async def main(client):
-    p = {}
+    global p
+    global readP
+
     await client.connect()
     n = 0
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
         print('publish', n)
         ${pDictPython}
+        p['id'] = ${id}
         ${callfunctions}
-        # If WiFi is down the following will pause for the duration.
         if readP:
             await client.publish('esp32/result', json.dumps(p), qos = 1)
             readP = False
@@ -55,8 +60,8 @@ ${functions}
 `
 
 
-    fs.writeFileSync(__dirname + '/espFiles/main.py', mainTemplate(id, body, libraries))
-    fs.writeFileSync(__dirname + '/espFiles/boot.py', bootTemplate())
+    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(id, body, libraries))
+    fs.writeFileSync(`${__dirname}/espFiles/boot.py`, bootTemplate())
 
 
     
