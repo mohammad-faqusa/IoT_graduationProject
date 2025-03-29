@@ -7,6 +7,7 @@ const generateFiles = require(path.join(__dirname, 'generateFiles'))
 
 
 function espSetup(id, plist, socket) {
+  return new Promise((resolve, reject) => {
   socket.emit('processSetup', {status: 'processing', data: 'generating files'} )
 
   generateFiles(id, plist);
@@ -16,55 +17,49 @@ function espSetup(id, plist, socket) {
 
     if (error) {
       console.error(`Error: ${error.message}`);
-      socket.emit('errorSetup', {status: 'processing', data: `Error: ${error.message}` } )
-      return;
+      return reject(`Error: ${error.message}`); 
+      
     }
     if (stderr) {
       console.error(`Stderr: ${stderr}`);
-      socket.emit('errorSetup', `Stderr: ${stderr}` )
-
-      return;
     }
     socket.emit('processSetup', {status: 'processing', data: 'finished soft resetting'} )
     socket.emit('processSetup', {status: 'processing', data: 'installing libraries...'} )
     exec(`mpremote mip install github:peterhinch/micropython-mqtt`, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error: ${error.message}`);
-        socket.emit('errorSetup', `Error: ${error.message}` )
-
-        return;
+        return reject(`Error: ${error.message}`); 
+         
       }
       if (stderr) {
         console.error(`Stderr: ${stderr}`);
-        socket.emit('errorSetup', `Stderr: ${stderr}` )
-
-        return;
+        return reject(`Stderr: ${stderr}`); 
+         
       }
       socket.emit('processSetup', {status: 'processing', data: 'finished installing libraries.'} )
       socket.emit('processSetup', {status: 'processing', data: 'copying the files to esp32...'} )
       exec(`mpremote connect COM3 fs cp ${__dirname}/espFiles/main.py :main.py`, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error: ${error.message}`);
-          socket.emit('errorSetup', `Error: ${error.message}` )
-          return;
+          return reject(`Error: ${error.message}`); 
+           
         }
         if (stderr) {
           console.error(`Stderr: ${stderr}`);
-          socket.emit('errorSetup', `Stderr: ${stderr}` )
-          return;
+          return reject(`Stderr: ${stderr}`);
+           
         }
     
         exec(`mpremote connect COM3 fs cp ${__dirname}/espFiles/boot.py :boot.py`, (error, stdout, stderr) => {
           if (error) {
             console.error(`Error: ${error.message}`);
-            socket.emit('errorSetup', `Error: ${error.message}` )
-            return;
+            return reject(`Error: ${error.message}`);
+            
           }
           if (stderr) {
             console.error(`Stderr: ${stderr}`);
-            socket.emit('errorSetup', `Stderr: ${stderr}` )
-
-            return;
+            return reject(`Stderr: ${stderr}`); 
+            
           }
           socket.emit('processSetup', {status: 'finished', data: 'the setup is done successfully!'} )
         });
@@ -73,8 +68,7 @@ function espSetup(id, plist, socket) {
     })
     
   })
-  
-
+})
 }
 
 module.exports = espSetup

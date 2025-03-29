@@ -23,7 +23,6 @@ const displayDevicesSocket = async (socket) => {
         if (topic === 'esp32/result'){
             const deviceId = JSON.parse(message).id;
             try{
-                console.log('this is device id', deviceId)
                 const device = devices.find(device => device.id === deviceId )
                 device.dictVariables = JSON.parse(message)
             } catch(err) {
@@ -42,18 +41,16 @@ const displayDevicesSocket = async (socket) => {
                 statusLog = [];
                 devices.forEach(device => device.status = onlineDevices.includes(device.id) ? 'online' : 'offline')
                 socket.emit('onlineDevices', onlineDevices)
-            }, 12000);
+            }, 3000);
         }
     })
 
     socket.on('deviceClick', async (data, ackCallBack) => {
         selectedDeviceId = data * 1  ;
         const  device = devices.find(device => device.id === data * 1)
-        console.log('this is device from click', device); 
         
         client.publish(`esp32/${device.id}/getDict`, '')
         ackCallBack(device)
-        console.log(device.status); 
 
     })
 

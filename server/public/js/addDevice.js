@@ -13,11 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorCode = document.getElementById('errorCode');
     const retryButton = document.getElementById('retryButton');
     const closeErrorButton = document.getElementById('closeErrorButton');
+
     
     // Array to store selected peripherals
     let selectedPeripherals = [];
     // Store form data for retry functionality
     let lastFormData = null;
+    // device Id if device is added to database
+    let deviceId = null ;
     
     // Add peripheral to the list
     addButton.addEventListener('click', function() {
@@ -72,6 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
         peripheralList.innerHTML = '';
         selectedPeripherals = [];
         selectedPeripheralsInput.value = '';
+
+        window.location.href = '/devices'; 
+
     });
     
     // Back to form button
@@ -235,10 +241,12 @@ document.addEventListener('DOMContentLoaded', function() {
         addMessage('Form submitted successfully! Connecting to server...', 'success');
 
         const socket = io();
-        socket.on('connect', ()=>{
+        socket.on('connect', async ()=>{
             addMessage('Connected to the server', 'success');
             addMessage('Sending Data to the server', 'success');
-            socket.emitWithAck('addDevice', formData)
+            deviceId = await socket.emitWithAck('addDevice', formData)
+            addMessage(`The device is added to the database, setup the device...`, 'success');
+            socket.emit('setupDevice', deviceId)
         })
         
         socket.on('processSetup', res => {

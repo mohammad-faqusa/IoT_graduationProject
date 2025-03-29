@@ -45,7 +45,7 @@ async def main(client):
     await client.connect()
     n = 0
     while True:
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         print('publish', n)
         ${pDictPython}
         p['id'] = ${id}
@@ -53,6 +53,7 @@ async def main(client):
         if readP:
             await client.publish('esp32/result', json.dumps(p), qos = 1)
             readP = False
+        await asyncio.sleep(1)
         await client.publish('esp32/status', '${id}', qos = 1)
         n += 1
 
