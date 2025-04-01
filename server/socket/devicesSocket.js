@@ -1,6 +1,6 @@
 const {getDevices} = require('./../data/devices')
-
 const mqtt = require('mqtt');
+
 
 
 const displayDevicesSocket = async (socket) => {
@@ -13,9 +13,8 @@ const displayDevicesSocket = async (socket) => {
     let devices = await getDevices(); 
 
     devices.forEach(device => device.dictList = Object.entries(device.dictVariables).map(([key, val]) => key))
-    
     const client = mqtt.connect('mqtt:localhost');
-
+    
     client.on('connect', ()=> console.log('connected to the broker'))
     client.subscribe('esp32/result');
     client.subscribe('esp32/status');
@@ -31,7 +30,9 @@ const displayDevicesSocket = async (socket) => {
         }
         if (topic === 'esp32/status')
             statusLog.push(message.toString()*1)       
-    }) 
+    })
+    
+    
 
     socket.on('fetchDevices', (data, ackCallBack) => {
         ackCallBack(devices)
