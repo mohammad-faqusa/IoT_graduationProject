@@ -41,7 +41,7 @@ const generateFiles = (id, pList) => {
 async def main(client):
     global p
     global readP
-
+    global currentTopic
     await client.connect()
     n = 0
     while True:
@@ -51,6 +51,7 @@ async def main(client):
         p['id'] = ${id}
         ${callfunctions}
         if readP:
+            await client.publish('esp32/result', json.dumps(p), qos = 1)
             await client.publish('esp32/result', json.dumps(p), qos = 1)
             readP = False
         await asyncio.sleep(1)

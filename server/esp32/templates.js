@@ -15,10 +15,13 @@ config['wifi_pw'] = '${config.pass}'
 config['server'] = '${config.server}'  # Change to suit e.g. 'iot.eclipse.org'
 
 readP = False
+currentTopic = ''
 p = {}
 
 def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
     global readP
+    global currentTopic
+    currentTopic = topic.split('/')[1:-1]
     readP = True
     print((topic.decode(), msg.decode(), retained))
 
