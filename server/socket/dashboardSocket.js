@@ -15,10 +15,8 @@ dashboardSocket =  async (socket) => {
         // message is Buffer
 
         const varPath = topic.split('/').slice(1,-1).join('/')
-        console.log(varPath); 
-        console.log(message); 
-        dashboardVariables[varPath] = message.toString()
-        
+        dashboardVariables[varPath].data = message.toString()
+        dashboardVariables[varPath].received = true; 
         // client.end();
       });
     
@@ -27,21 +25,24 @@ dashboardSocket =  async (socket) => {
 
     })
     
-    socket.on('dashboardCardReq', (data) => {
+    socket.on('dashboardCardReq', (data, ackCallBack) => {
         // console.log(data);
-        console.log('this is the form : ', data.form)
+        console.log(data)
+     
         const device = devices.find(device => data.form.device === device.name);
-        const variablePath = `${device.name}/${data.form.source}`
+        const variablePath = `${device.id}/${data.form.source}`
         if(!dashboardVariables[variablePath]) {
-            dashboardVariables[variablePath] = ''
+            dashboardVariables[variablePath] = {}
             client.subscribe(`esp32/${variablePath}/res`)
+            dashboardVariables[variablePath].received = true; 
         }
         // publish 
-        client.publish(`esp32/${variablePath}/req`, `server published ${variablePath}`)
+        if(dashboardVariables[variablePath].received){
+            client.publish(`esp32/${variablePath}/req`, `server published ${variablePath}`)
+            dashboardVariables[variablePath].received = false
+        }
  
-        // console.log('this is the selected device : ', device)
-        const temp = Math.floor((Math.random() * 100) * 100)/100; 
-        socket.emit('dashboardCardRes', {id: data.id, data: dashboardVariables[variablePath]})
+        ackCallBack({id: data.id, data: dashboardVariables[variablePath].data})
 
     })
 

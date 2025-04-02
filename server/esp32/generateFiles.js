@@ -22,6 +22,7 @@ const generateFiles = (id, pList) => {
     let callfunctions = 'print(';  
     let writtenLibraries = [];
     let pDictPython = ''; 
+    let subscribe_topics = ''; 
     let newLine = `
 `
     let tap = `    `
@@ -34,6 +35,8 @@ const generateFiles = (id, pList) => {
         functions += `${val.func}\n`;
         pDictPython += `p['${key}'] = ${val.call}${newLine+tap+tap}`
         callfunctions += `'\\n${key}:', p['${key}'],`
+        // await client.subscribe('esp32/device_1/Mouse/req', 1)
+        subscribe_topics+= `await client.subscribe('esp32/${id}/${key}/req', 1)${newLine+tap}`  
     })
     callfunctions += '"\\n")'
 
@@ -41,7 +44,10 @@ const generateFiles = (id, pList) => {
 async def main(client):
     global p
     global readP
+    global readAll
     global currentTopic
+    global currentP
+
     await client.connect()
     n = 0
     while True:
@@ -50,10 +56,13 @@ async def main(client):
         ${pDictPython}
         p['id'] = ${id}
         ${callfunctions}
+        await asyncio.sleep(1)
         if readP:
-            await client.publish('esp32/result', json.dumps(p), qos = 1)
-            await client.publish('esp32/result', json.dumps(p), qos = 1)
+            await client.publish(currentTopic , json.dumps(p[currentP]), qos = 1)
             readP = False
+        if readAll:
+            await client.publish('esp32/${id}/getDict' , json.dumps(p), qos = 1)
+            readAll = False
         await asyncio.sleep(1)
         await client.publish('esp32/status', '${id}', qos = 1)
         n += 1
@@ -62,7 +71,7 @@ ${functions}
 `
 
 
-    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(id, body, libraries))
+    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(id, body, libraries,subscribe_topics))
     fs.writeFileSync(`${__dirname}/espFiles/boot.py`, bootTemplate())
 
 

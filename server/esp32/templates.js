@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-exports.mainTemplate = (id, body, libraries, config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
+exports.mainTemplate = (id, body, libraries,subscribe_topics, config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
     return `
     
 from time import sleep
@@ -15,19 +15,31 @@ config['wifi_pw'] = '${config.pass}'
 config['server'] = '${config.server}'  # Change to suit e.g. 'iot.eclipse.org'
 
 readP = False
+readAll = False
 currentTopic = ''
+currentP = '' 
 p = {}
 
 def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
     global readP
+    global readAll
     global currentTopic
-    currentTopic = topic.split('/')[1:-1]
-    readP = True
+    global currentP
+    
+    textTopic = topic.decode()
+    topicArr = textTopic.split('/')
+    if(textTopic == 'esp32/${id}/getDict'):
+        readAll = True
+    if(topicArr[-1] == 'req'):
+        currentTopic = '/'.join(topicArr[0:-1]) + '/res'
+        currentP = topicArr[2]
+        readP = True
+    
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
     await client.subscribe('esp32/${id}/getDict', 1)
-    
+    ${subscribe_topics}
 
 
 config['subs_cb'] = callback

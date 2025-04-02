@@ -1027,13 +1027,27 @@
                 connectStatus(); 
             }, 5000);
             
-            setInterval(() => {
-                Object.entries(components).forEach(([key, val]) => {
+            setInterval(async () => {
+               
+                
+                
+                
+            }, 3000);
+            async function runTask() {
+                Object.entries(components).forEach(async ([key, val], index) => {
                     // console.log(val); 
                     const outputElement = val.component.querySelector('.'+val.componentType)
-                    socket.emit('dashboardCardReq', {id:key,  form: val.formData})
+                    const data = await socket.emitWithAck('dashboardCardReq', {id:key,  form: val.formData})
+                    console.log('here is the data : ', data); 
+                    console.log('here is component with id :', data.id, ':', components[data.id])
+                    const outputDisplay = components[data.id].component.querySelector('.'+components[data.id].componentType)
+                    outputDisplay.textContent = data.data
                 })
-            }, 2000);
+                setTimeout(runTask, 1000); // Wait 1 second before calling again
+            }
+
+            runTask();
+
 
             editModeBtn.addEventListener('click', function() {
                 toggleEditMode();
@@ -1359,7 +1373,7 @@
                     if (field.dynamic && field.name === 'device') {
                         // console.log(field);
                         field.options = devices.map(device => ({value: device.name, label: device.name}));
-                        field.default = devices[0] 
+                        field.default = devices[0]
                     }
                     if(field.dynamic && field.name === 'source'){
                         field.options = devices[0].pList.map(p => ({ value: p, label: p }))
