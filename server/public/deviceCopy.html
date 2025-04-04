@@ -1011,7 +1011,7 @@
             const cancelConfig = document.getElementById('cancelConfig');
             const saveConfig = document.getElementById('saveConfig');
             const closeModal = document.getElementById('closeModal');
-
+            
 
 
             let isEditMode = false;
@@ -1019,7 +1019,7 @@
             let isConnected = false;
             let prevConnected = false; 
             let currentDeviceData = {};
-
+            const devicesCards = {}
 
             
             setInterval(async () => {
@@ -1028,26 +1028,25 @@
             }, 5000);
             
             setInterval(async () => {
-               
-                
-                
-                
-            }, 3000);
-            async function runTask() {
-                Object.entries(components).forEach(async ([key, val], index) => {
+                // Object.entries(components).forEach(([key, val], index) => {
+                //     const cardsValues =  []
+                //     console.log(devicesCards); 
+                    
                     // console.log(val); 
-                    const outputElement = val.component.querySelector('.'+val.componentType)
-                    const data = await socket.emitWithAck('dashboardCardReq', {id:key,  form: val.formData})
-                    console.log('here is the data : ', data); 
-                    console.log('here is component with id :', data.id, ':', components[data.id])
-                    const outputDisplay = components[data.id].component.querySelector('.'+components[data.id].componentType)
-                    outputDisplay.textContent = data.data
-                })
-                setTimeout(runTask, 1000); // Wait 1 second before calling again
-            }
+                    // const outputElement = val.component.querySelector('.'+val.componentType)
+                    // const data = await socket.emitWithAck('dashboardCardReq', {id:key,  form: val.formData})
+                    // console.log('here is the data : ', data); 
+                    // console.log('here is component with id :', data.id, ':', components[data.id]) 
+                    // const outputDisplay = components[data.id].component.querySelector('.'+components[data.id].componentType)
+                    // outputDisplay.textContent = data.data 
+                    if(Object.keys(devicesCards).length !== 0){
+                        const resDeviceCards = await socket.emitWithAck('devicesCards', devicesCards)
+                        console.log(resDeviceCards)
+                    }   
+                    
+                } , 3000);
 
-            runTask();
-
+ 
 
             editModeBtn.addEventListener('click', function() {
                 toggleEditMode();
@@ -1508,6 +1507,15 @@
                 });
                 components[currentComponent.id].formData = formData
 
+                const deviceName = formData.device
+
+                if(!devicesCards[deviceName])
+                    devicesCards[deviceName] = {}
+                
+                const sourceName = formData.source 
+                devicesCards[deviceName][sourceName] = {componentId: currentComponent.id, value:''}
+            
+                console.log(devicesCards)
                 // Update component title
                 const cardTitle = component.querySelector('.card-title');
                 if (cardTitle && formData.title) {
@@ -1748,11 +1756,7 @@
                     }
                 });
             }
-
-            
-        })
-
-            
+        })      
     </script>
 </body>
 </html>

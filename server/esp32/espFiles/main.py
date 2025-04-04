@@ -26,7 +26,7 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
     
     textTopic = topic.decode()
     topicArr = textTopic.split('/')
-    if(textTopic == 'esp32/4/getDict'):
+    if(textTopic == 'esp32/1/getDict'):
         readAll = True
     if(topicArr[-1] == 'req'):
         currentTopic = '/'.join(topicArr[0:-1]) + '/res'
@@ -36,10 +36,10 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
-    await client.subscribe('esp32/4/getDict', 1)
-    await client.subscribe('esp32/4/Headset/req', 1)
-        await client.subscribe('esp32/4/Webcam/req', 1)
-        
+    await client.subscribe('esp32/1/getDict', 1)
+    await client.subscribe('esp32/1/Keyboard/req', 1)
+    await client.subscribe('esp32/1/Mouse/req', 1)
+    
 
 
 config['subs_cb'] = callback
@@ -58,28 +58,28 @@ async def main(client):
     while True:
         await asyncio.sleep(1)
         print('publish', n)
-        p['Headset'] = Headset(0, 180)
-        p['Webcam'] = Webcam(0, 180)
+        p['Keyboard'] = Keyboard(0, 180)
+        p['Mouse'] = Mouse(0, 180)
         
-        p['id'] = 4
-        print('\nHeadset:', p['Headset'],'\nWebcam:', p['Webcam'],"\n")
+        p['id'] = 1
+        print('\nKeyboard:', p['Keyboard'],'\nMouse:', p['Mouse'],"\n")
         await asyncio.sleep(1)
         if readP:
             await client.publish(currentTopic , json.dumps(p[currentP]), qos = 1)
             readP = False
         if readAll:
-            await client.publish('esp32/4/getDict' , json.dumps(p), qos = 1)
+            await client.publish('esp32/1/getDict' , json.dumps(p), qos = 1)
             readAll = False
         await asyncio.sleep(1)
-        await client.publish('esp32/status', '4', qos = 1)
+        await client.publish('esp32/status', '1', qos = 1)
         n += 1
 
 
-def Headset(min_val, max_val):
+def Keyboard(min_val, max_val):
     return random.randint(min_val, max_val)
     
 
-def Webcam(min_val, max_val):
+def Mouse(min_val, max_val):
     return random.randint(min_val, max_val)
     
 

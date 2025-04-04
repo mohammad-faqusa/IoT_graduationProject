@@ -1,10 +1,15 @@
+const { json } = require('express');
 const Device = require('../models/Device')
 const {getDevices} = require('./../data/devices')
 
 const mqtt = require('mqtt');
 // brokerConnectStatus
 
-const dashboardVariables = {}; 
+const dashboardVariables = {};
+const devicesCardsRes = {}
+const devicesIds = {}
+const subscribedDevices = [] 
+const componentsIds = {} 
 
 dashboardSocket =  async (socket) => {
     let devices = await getDevices();
@@ -12,51 +17,53 @@ dashboardSocket =  async (socket) => {
     client.on('connect', ()=> console.log('connected to the broker'))
 
     client.on("message", (topic, message) => {
-        // message is Buffer
-
-        const varPath = topic.split('/').slice(1,-1).join('/')
-        dashboardVariables[varPath].data = message.toString()
-        dashboardVariables[varPath].received = true; 
-        // client.end();
-      });
+        const topicArr = topic.split('/');
+        const messageObj = JSON.parse(message)
+        
+        if(topicArr.at(-1) === 'res'){
+            
+            if(topicArr.at(-2) === 'getSub'){
+                
+                const deviceName = devices.find(device => device.id === topicArr.at(-3)*1).name
+                devicesCardsRes[deviceName] = {} 
+                Object.entries(messageObj).forEach(([pName, pValue]) => {
+                    devicesCardsRes[deviceName][pName] = {value: pValue, componentId:componentsIds[deviceName][pName] }
+                })
+                
+            }
+        }
+    });
     
     socket.on('brokerStatus', (data, ackCallBack) => {
         ackCallBack(client.connected);
 
     })
     
-    socket.on('dashboardCardReq', (data, ackCallBack) => {
-        // console.log(data);
-        console.log(data)
-     
-        const device = devices.find(device => data.form.device === device.name);
-        const variablePath = `${device.id}/${data.form.source}`
-        if(!dashboardVariables[variablePath]) {
-            dashboardVariables[variablePath] = {}
-            client.subscribe(`esp32/${variablePath}/res`)
-            dashboardVariables[variablePath].received = true; 
-        }
-        // publish 
-        if(dashboardVariables[variablePath].received){
-            client.publish(`esp32/${variablePath}/req`, `server published ${variablePath}`)
-            dashboardVariables[variablePath].received = false
-        }
- 
-        ackCallBack({id: data.id, data: dashboardVariables[variablePath].data})
+    socket.on('devicesCards', (devicesCards, ackCallBack) => {
 
+        Object.entries(devicesCards).forEach(async ([deviceName, peripherals]) => {
+            if(!devicesCardsRes[deviceName]){
+                devicesCardsRes[deviceName] = {}
+                componentsIds[deviceName] = {}
+                devicesIds[deviceName] = devices.find(device => device.name === deviceName).id
+                client.subscribe(`esp32/${devicesIds[deviceName]}/getSub/res`)
+                devicesCardsRes[deviceName] = peripherals         
+            }
+            const deviceId = devicesIds[deviceName]
+
+            const selectedPDict = {} 
+            Object.entries(peripherals).forEach(([pName, pObj]) => {
+                selectedPDict[pName] = pObj.value
+                componentsIds[deviceName][pName] = pObj.componentId
+            })
+            client.publish(`esp32/${deviceId}/getSub/req`, JSON.stringify(selectedPDict))
+        })
+
+        ackCallBack(devicesCardsRes)
     })
 
     socket.on('fetchDevices', (data, ackCallBack) => {
         ackCallBack(devices)
-        
-        // if(data === 'all') {
-        //     onlineStatusInterval = setInterval(() => {
-        //         onlineDevices = [...new Set(statusLog)]
-        //         statusLog = [];
-        //         devices.forEach(device => device.status = onlineDevices.includes(device.id) ? 'online' : 'offline')
-        //         socket.emit('onlineDevices', onlineDevices)
-        //     }, 3000);
-        // }
     })
 
 }
