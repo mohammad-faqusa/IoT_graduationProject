@@ -1039,9 +1039,19 @@
                     // console.log('here is component with id :', data.id, ':', components[data.id]) 
                     // const outputDisplay = components[data.id].component.querySelector('.'+components[data.id].componentType)
                     // outputDisplay.textContent = data.data 
-                    if(Object.keys(devicesCards).length !== 0){
+                    if(Object.keys(components).length !== 0){
                         const resDeviceCards = await socket.emitWithAck('devicesCards', devicesCards)
-                        console.log(resDeviceCards)
+                   
+                        Object.entries(resDeviceCards).forEach(([deviceName, peripherals]) => {
+                            Object.values(peripherals).forEach(peripheral => {
+                                console.log(peripheral.componentId);
+                                if(components[peripheral.componentId]){
+                                    const outputDisplay = components[peripheral.componentId].component.querySelector('.'+components[peripheral.componentId].componentType)
+                                    outputDisplay.textContent = peripheral.value
+                                }
+                                
+                            })
+                        })
                     }   
                     
                 } , 3000);
