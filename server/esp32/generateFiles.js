@@ -46,7 +46,7 @@ async def main(client):
     global readP
     global readAll
     global currentTopic
-    global currentP
+    global pSelected
 
     await client.connect()
     n = 0
@@ -58,7 +58,7 @@ async def main(client):
         ${callfunctions}
         await asyncio.sleep(1)
         if readP:
-            await client.publish(currentTopic , json.dumps(p[currentP]), qos = 1)
+            await client.publish(currentTopic , json.dumps(pSelected), qos = 1)
             readP = False
         if readAll:
             await client.publish('esp32/${id}/getDict' , json.dumps(p), qos = 1)

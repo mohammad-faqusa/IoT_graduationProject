@@ -17,31 +17,42 @@ config['server'] = '${config.server}'  # Change to suit e.g. 'iot.eclipse.org'
 readP = False
 readAll = False
 currentTopic = ''
-currentP = '' 
 p = {}
+pfunctions = {}
+pSelected = {} 
 
 def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
     global readP
     global readAll
     global currentTopic
-    global currentP
-    
+    global pSelected
+    global p
     textTopic = topic.decode()
+    msgObj = json.loads(msg.decode())
+    
     topicArr = textTopic.split('/')
-    if(textTopic == 'esp32/${id}/getDict'):
-        readAll = True
     if(topicArr[-1] == 'req'):
         currentTopic = '/'.join(topicArr[0:-1]) + '/res'
-        currentP = topicArr[2]
-        readP = True
+        if(topicArr[-2] == 'getSub'):
+            pSelected = {} 
+            for key,val in msgObj.items():
+                print(key, val)
+                if(val):
+                    print(val)
+                else:
+                    pSelected[key] = p[key] 
+            readP = True
+            
+    if(textTopic == 'esp32/${id}/getDict'):
+        readAll = True
+        
     
     print((topic.decode(), msg.decode(), retained))
 
 async def conn_han(client):
     await client.subscribe('esp32/${id}/getDict', 1)
-    ${subscribe_topics}
-
-
+    await client.subscribe('esp32/${id}/getSub/req', 1)
+    
 config['subs_cb'] = callback
 config['connect_coro'] = conn_han
 
