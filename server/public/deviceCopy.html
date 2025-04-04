@@ -301,6 +301,9 @@
             color: white;
         }
 
+        .delete-component{
+            background-color: #f44336
+        }
         .btn-success {
             background-color: var(--success-color);
             color: white;
@@ -1103,7 +1106,7 @@
                     const cards = document.querySelectorAll('.card');
                     cards.forEach(card => {
                         card.classList.add('draggable');
-                        
+                        const componentId = card.getAttribute('data-component-id');
                         // Add edit button to each card
                         const cardHeader = card.querySelector('.card-header');
                         const cardFooter = card.querySelector('.card-footer')
@@ -1113,7 +1116,7 @@
                             editBtn.innerHTML = '⚙️';
                             editBtn.addEventListener('click', function(e) {
                                 e.stopPropagation();
-                                const componentId = card.getAttribute('data-component-id');
+                                
                                 openComponentConfig(componentId);
                             });
                             
@@ -1129,7 +1132,7 @@
                             deleteBtn.innerHTML = '🗑';
                             deleteBtn.addEventListener('click', function(e) {
                                 e.stopPropagation();
-                                console.log('the element is deleted')
+                                
                             });
                             cardFooter.appendChild(deleteBtn);  
                         }
@@ -1296,6 +1299,15 @@
                     deleteBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
                         console.log('the element is deleted')
+                        console.log('the element is deleted')
+                        const component = document.querySelector(`[data-component-id="${componentId}"]`);
+                        console.log('this is component : ', component);
+                        devicesCards
+                        const deviceName = components[componentId].formData.device
+                        const pName = components[componentId].formData.source
+                        delete devicesCards[deviceName][pName]
+                        delete components[componentId]
+                        component.remove(); 
                     });
                 }
                 
