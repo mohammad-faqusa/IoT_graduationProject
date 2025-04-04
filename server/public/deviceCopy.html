@@ -1493,9 +1493,19 @@
 
             function saveComponentConfig() {
                 if (!currentComponent) return;
+
+                let prevDeviceName = '';
+                let prevPeripheralName = ''; 
                 
                 const component = currentComponent.element;
                 const componentType = currentComponent.type;
+            
+                if (components[currentComponent.id]){
+                    prevDeviceName = components[currentComponent.id].formData.device
+                    prevPeripheralName = components[currentComponent.id].formData.source
+                    delete devicesCards[prevDeviceName][prevPeripheralName]
+                }
+
                 components[currentComponent.id] = {} 
                 components[currentComponent.id].component = component
                 components[currentComponent.id].componentType = componentType
@@ -1513,6 +1523,7 @@
                     }
                 });
                 components[currentComponent.id].formData = formData
+
 
                 const deviceName = formData.device
 
