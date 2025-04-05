@@ -1079,6 +1079,10 @@
                                     indicator.classList.add('off');
                                     indicator.textContent = config.offText;
                                 }
+                            
+                            case "gauge": 
+                                updateGauge(component.component, component.formData, value)
+                                break; 
                                 
                             
                         }
@@ -1622,7 +1626,7 @@
                         updateOnOffIndicator(component, formData);
                         break;
                     case 'gauge':
-                        updateGauge(component, formData);
+                        updateGauge(component, formData, 0);
                         break;
                     case 'chart':
                         updateChart(component, formData);
@@ -1937,6 +1941,8 @@
                     );
                 }
 
+            
+
                 
                 // display.setAttribute('data-source', config.source);
                 // display.setAttribute('data-format', config.format);
@@ -1947,6 +1953,30 @@
                 //     const formattedValue = config.format.replace('{value}', randomTemp);
                 //     display.textContent = formattedValue;
                 // }
+            }
+
+            // Update gauge component
+            function updateGauge(component, config, value) {
+                const gauge = component.querySelector('.gauge');
+                const gaugeFill = component.querySelector('.gauge-fill');
+                const gaugeValue = component.querySelector('.gauge-value');
+                const gaugeLabel = component.querySelector('.gauge-label');
+                
+                if (!gauge || !gaugeFill || !gaugeValue || !gaugeLabel) return;
+                
+                gauge.setAttribute('data-source', config.source);
+                gauge.setAttribute('data-min', config.min);
+                gauge.setAttribute('data-max', config.max);
+                gaugeLabel.textContent = config.label;
+                
+                
+                const min = parseInt(config.min);
+                const max = parseInt(config.max);
+                const percentage = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+                
+                gaugeFill.style.height = percentage + '%';
+                gaugeValue.textContent = value;
+                
             }
 
         })      

@@ -88,6 +88,10 @@ const componentTemplates = {
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'Gauge' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
             { name: 'source', type: 'select', label: 'Data Source', 
               options: [
                   { value: 'temperature', label: 'Temperature' },
