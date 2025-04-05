@@ -1032,34 +1032,59 @@
             setInterval(async () => {
                 if(Object.keys(components).length !== 0){
                     const resDeviceCards = await socket.emitWithAck('devicesCards', devicesCards)
-                
-                    Object.entries(resDeviceCards).forEach(([deviceName, peripherals]) => {
-                        Object.values(peripherals).forEach(peripheral => {
-                            console.log(peripheral.componentId);
-                            if(components[peripheral.componentId]){
+                    
+                    console.log('this is components : ', components)
 
-                                if(components[peripheral.componentId].componentType == 'text-display'){
-                                    const outputDisplay = components[peripheral.componentId].component.querySelector('.'+components[peripheral.componentId].componentType)
-                                    outputDisplay.textContent = peripheral.value
-                                }
-
-                                if(components[peripheral.componentId].componentType == 'circle-canvas'){
-                                    console.log('here is component for canvas : ', components[peripheral.componentId])
-                                    const canvas = components[peripheral.componentId].component.querySelector('canvas');
-                                    let value = peripheral.value
-                                    drawCircleCanvas(
-                                        canvas._ctx, 
-                                        value, 
-                                        canvas._min, 
-                                        canvas._max, 
-                                        canvas._colorMin, 
-                                        canvas._colorMax
-                                    );
-                                }
-                                
-                            }
-                        })
+                    Object.entries(components).forEach(([componentId, component]) => {
+                        const deviceName = component.formData.device
+                        const peripheralName = component.formData.source
+                        const peripheral = resDeviceCards[deviceName][peripheralName]
+                        switch(component.componentType){
+                            case 'text-display' :
+                                const outputDisplay = component.component.querySelector('.'+component.componentType)
+                                outputDisplay.textContent = peripheral.value
+                                break;
+                            case 'circle-canvas':
+                                const canvas = component.component.querySelector('canvas');
+                                let value = peripheral.value
+                                drawCircleCanvas(
+                                    canvas._ctx, 
+                                    value, 
+                                    canvas._min, 
+                                    canvas._max, 
+                                    canvas._colorMin, 
+                                    canvas._colorMax
+                                );
+                                break;
+                            
+                        }
                     })
+                    // Object.entries(resDeviceCards).forEach(([deviceName, peripherals]) => {
+                    //     Object.values(peripherals).forEach(peripheral => {
+                    //         if(components[peripheral.componentId]){
+
+                    //             if(components[peripheral.componentId].componentType == 'text-display'){
+                    //                 const outputDisplay = components[peripheral.componentId].component.querySelector('.'+components[peripheral.componentId].componentType)
+                    //                 outputDisplay.textContent = peripheral.value
+                    //             }
+
+                    //             if(components[peripheral.componentId].componentType == 'circle-canvas'){
+                    //                 console.log('here is component for canvas : ', components[peripheral.componentId])
+                    //                 const canvas = components[peripheral.componentId].component.querySelector('canvas');
+                    //                 let value = peripheral.value
+                    //                 drawCircleCanvas(
+                    //                     canvas._ctx, 
+                    //                     value, 
+                    //                     canvas._min, 
+                    //                     canvas._max, 
+                    //                     canvas._colorMin, 
+                    //                     canvas._colorMax
+                    //                 );
+                    //             }
+                                
+                    //         }
+                    //     })
+                    // })
                 }
                 
                 
