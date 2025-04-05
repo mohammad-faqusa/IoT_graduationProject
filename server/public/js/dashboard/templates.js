@@ -60,6 +60,10 @@ const componentTemplates = {
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'On/Off Indicator' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
             { name: 'source', type: 'select', label: 'Data Source', 
               options: [
                   { value: 'power', label: 'Power' },

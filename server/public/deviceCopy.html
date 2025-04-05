@@ -1039,6 +1039,8 @@
                         const deviceName = component.formData.device
                         const peripheralName = component.formData.source
                         const peripheral = resDeviceCards[deviceName][peripheralName]
+                        console.log(component.componentType)
+                        const value = peripheral.value
                         switch(component.componentType){
                             case 'text-display' :
                                 const outputDisplay = component.component.querySelector('.'+component.componentType)
@@ -1046,7 +1048,6 @@
                                 break;
                             case 'circle-canvas':
                                 const canvas = component.component.querySelector('canvas');
-                                let value = peripheral.value
                                 drawCircleCanvas(
                                     canvas._ctx, 
                                     value, 
@@ -1056,6 +1057,29 @@
                                     canvas._colorMax
                                 );
                                 break;
+                            
+                            case 'onoff-indicator':
+                                const indicator = component.component.querySelector('.onoff-indicator');
+                                if (!indicator) return;
+
+                                config = component.formData; 
+
+                                indicator.setAttribute('data-source', config.source);
+                                indicator.setAttribute('data-on-text', config.onText);
+                                indicator.setAttribute('data-off-text', config.offText);
+                                indicator.setAttribute('data-device', config.device);
+                                
+                                                            
+                                if (value) {
+                                    indicator.classList.remove('off');
+                                    indicator.classList.add('on');
+                                    indicator.textContent = config.onText;
+                                } else {
+                                    indicator.classList.remove('on');
+                                    indicator.classList.add('off');
+                                    indicator.textContent = config.offText;
+                                }
+                                
                             
                         }
                     })
@@ -1346,11 +1370,12 @@
                         console.log('the element is deleted')
                         const component = document.querySelector(`[data-component-id="${componentId}"]`);
                         console.log('this is component : ', component);
-                        devicesCards
+                
                         const deviceName = components[componentId].formData.device
                         const pName = components[componentId].formData.source
                         delete devicesCards[deviceName][pName]
                         delete components[componentId]
+
                         component.remove(); 
                     });
                 }
