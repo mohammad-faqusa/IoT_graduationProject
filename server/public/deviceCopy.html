@@ -1029,6 +1029,7 @@
                 connectStatus(); 
             }, 5000);
             
+            
             setInterval(async () => {
                 if(Object.keys(components).length !== 0){
                     const resDeviceCards = await socket.emitWithAck('devicesCards', devicesCards)
@@ -1039,6 +1040,8 @@
                         const deviceName = component.formData.device
                         const peripheralName = component.formData.source
                         const peripheral = resDeviceCards[deviceName][peripheralName]
+                        
+                        console.log('this is received peripheral value : ', peripheral)
                         console.log(component.componentType)
                         const value = peripheral.value
                         switch(component.componentType){
@@ -1082,6 +1085,11 @@
                             
                             case "gauge": 
                                 updateGauge(component.component, component.formData, value)
+                                break; 
+                            
+                            case "chart":
+                                devicesCards[deviceName][peripheralName].dataArray.push(peripheral.value); 
+                                updateChart(component.component, component.formData, devicesCards[deviceName][peripheralName].dataArray);
                                 break; 
                                 
                             
@@ -1573,7 +1581,7 @@
                 
                 const component = currentComponent.element;
                 const componentType = currentComponent.type;
-            
+                
                 if (components[currentComponent.id]){
                     prevDeviceName = components[currentComponent.id].formData.device
                     prevPeripheralName = components[currentComponent.id].formData.source
@@ -1629,7 +1637,8 @@
                         updateGauge(component, formData, 0);
                         break;
                     case 'chart':
-                        updateChart(component, formData);
+                        devicesCards[deviceName][sourceName].dataArray = []; 
+                        updateChart(component, formData, [1 , 2 , 3 , 20 , 5 ,6 , 7 , 8]);
                         break;
                     case 'text-input':
                         updateTextInput(component, formData);
@@ -1977,6 +1986,83 @@
                 gaugeFill.style.height = percentage + '%';
                 gaugeValue.textContent = value;
                 
+            }
+
+            // Initialize chart
+            function initializeChart(component, dataArray) {
+                const canvas = component.querySelector('canvas');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                const source = canvas.getAttribute('data-source');
+                const chartType = canvas.getAttribute('data-chart-type') || 'line';
+                const timeRange = parseInt(canvas.getAttribute('data-time-range') || 10);
+
+                // Generate time labels based on timeRange
+                const labels = Array.from({length: dataArray.length}, (_, i) => {
+                    const date = new Date();
+                    date.setMinutes(date.getMinutes() - (dataArray.length - 1 - i) * (timeRange / dataArray.length));
+                    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                });
+
+                console.log('this is source:', source);
+
+                // Create chart
+                const chart = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: source.charAt(0).toUpperCase() + source.slice(1),
+                            data: dataArray,
+                            borderColor: '#2196f3',
+                            backgroundColor: chartType === 'line' ? 'rgba(33, 150, 243, 0.1)' : 'rgba(33, 150, 243, 0.7)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: chartType === 'line'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: {
+                                    stepSize: 20
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+
+                // Store chart for updates
+                canvas._chart = chart;
+                canvas._data = dataArray;
+            }
+
+            // Update chart component
+            function updateChart(component, config, dataArray) {
+                const canvas = component.querySelector('canvas');
+                if (!canvas) return;
+                
+                // Destroy existing chart if it exists
+                if (canvas._chart) {
+                    canvas._chart.destroy();
+                }
+                
+                canvas.setAttribute('data-source', config.source);
+                canvas.setAttribute('data-chart-type', config.chartType);
+                canvas.setAttribute('data-time-range', config.timeRange); 
+                canvas.setAttribute('data-time-range', config.timeRange);
+                
+                // Initialize new chart
+                initializeChart(component, dataArray);
             }
 
         })      
