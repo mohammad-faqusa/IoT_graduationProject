@@ -146,7 +146,7 @@ const componentTemplates = {
             { name: 'source', type: 'select', label: 'Data Source', 
                 options: [],
                 default: 'temperature'
-              },
+            },
             { name: 'label', type: 'text', label: 'Label', default: 'Input' },
             { name: 'placeholder', type: 'text', label: 'Placeholder', default: 'Enter text...' },
             { name: 'target', type: 'text', label: 'Target Command', default: 'customCommand' }
@@ -195,6 +195,14 @@ const componentTemplates = {
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'Slider' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
+            { name: 'source', type: 'select', label: 'Data Source', 
+                options: [],
+                default: 'temperature'
+            },
             { name: 'label', type: 'text', label: 'Label', default: 'Slider' },
             { name: 'min', type: 'number', label: 'Minimum Value', default: 0 },
             { name: 'max', type: 'number', label: 'Maximum Value', default: 100 },
