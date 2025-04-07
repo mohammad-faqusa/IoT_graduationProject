@@ -255,6 +255,14 @@ const componentTemplates = {
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'Push Button' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
+            { name: 'source', type: 'select', label: 'Data Source', 
+                options: [],
+                default: 'temperature'
+            },
             { name: 'label', type: 'text', label: 'Label', default: 'Button' },
             { name: 'buttonText', type: 'text', label: 'Button Text', default: 'Press' },
             { name: 'buttonStyle', type: 'select', label: 'Button Style', 

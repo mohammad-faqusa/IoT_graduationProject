@@ -2134,6 +2134,43 @@
                 }
             }
 
+            // Update push button component
+            function updatePushButton(component, config) {
+                const controlItem = component.querySelector('.control-item');
+                if (!controlItem) return;
+                
+                const label = controlItem.querySelector('.control-label');
+                const button = controlItem.querySelector('button');
+                
+                if (label) label.textContent = config.label;
+                
+                if (button) {
+                    button.textContent = config.buttonText;
+                    button.setAttribute('data-target', config.target);
+                    button.setAttribute('data-confirm', config.confirm);
+                    
+                    // Update button style
+                    button.className = `btn ${config.buttonStyle}`;
+                    
+                    // Add event listener if not already added
+                    if (!button._hasListener) {
+                        button.addEventListener('click', function() {
+                            const target = this.getAttribute('data-target');
+                            const requireConfirm = this.getAttribute('data-confirm') === 'true';
+                            
+                            if (requireConfirm) {
+                                if (confirm(`Are you sure you want to execute the ${target} command?`)) {
+                                    socket.emit('deviceCardControl', {device: config.device, peripheral: config.source, value: config.buttonText})
+                                }
+                            } else {
+                                socket.emit('deviceCardControl', {device: config.device, peripheral: config.source, value: config.buttonText})
+
+                            }
+                        });
+                        button._hasListener = true;
+                    }
+                }
+            }
 
 
 
