@@ -231,6 +231,14 @@ const componentTemplates = {
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'Select Dropdown' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
+            { name: 'source', type: 'select', label: 'Data Source', 
+                options: [],
+                default: 'temperature'
+            },
             { name: 'label', type: 'text', label: 'Label', default: 'Select' },
             { name: 'options', type: 'textarea', label: 'Options (one per line, value:label)', 
               default: 'auto:Auto\nperformance:Performance\neco:Eco' },

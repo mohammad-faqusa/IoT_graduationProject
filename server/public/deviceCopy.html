@@ -2095,6 +2095,45 @@
                     }
                 }
             }
+            // Update select dropdown component
+            function updateSelectDropdown(component, config) {
+                const controlItem = component.querySelector('.control-item');
+                if (!controlItem) return;
+                
+                const label = controlItem.querySelector('.control-label');
+                const select = controlItem.querySelector('select');
+                
+                if (label) label.textContent = config.label;
+                
+                if (select) {
+                    select.setAttribute('data-target', config.target);
+                    
+                    // Clear existing options
+                    select.innerHTML = '';
+                    
+                    // Add new options
+                    const options = config.options.split('\n');
+                    options.forEach(option => {
+                        if (option.trim()) {
+                            const [value, label] = option.split(':');
+                            const optionEl = document.createElement('option');
+                            optionEl.value = value.trim();
+                            optionEl.textContent = label ? label.trim() : value.trim();
+                            select.appendChild(optionEl);
+                        }
+                    });
+                    
+                    // Add event listener if not already added
+                    if (!select._hasListener) {
+                        select.addEventListener('change', function() {
+                            socket.emit('deviceCardControl', {device: config.device, peripheral: config.source, value: this.value})
+
+                        });
+                        select._hasListener = true;
+                    }
+                }
+            }
+
 
 
 
