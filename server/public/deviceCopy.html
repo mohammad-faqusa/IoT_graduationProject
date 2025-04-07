@@ -1028,21 +1028,18 @@
                 isConnected = await socket.emitWithAck('brokerStatus', '')
                 connectStatus(); 
             }, 5000);
-            
-            
+             
             setInterval(async () => {
                 if(Object.keys(components).length !== 0){
                     const resDeviceCards = await socket.emitWithAck('devicesCards', devicesCards)
                     
-                    console.log('this is components : ', components)
-
+                    console.log(resDeviceCards)
                     Object.entries(components).forEach(([componentId, component]) => {
                         const deviceName = component.formData.device
                         const peripheralName = component.formData.source
                         const peripheral = resDeviceCards[deviceName][peripheralName]
+                        devicesCards[deviceName][peripheralName].sendValue = ''
                         
-                        console.log('this is received peripheral value : ', peripheral)
-                        console.log(component.componentType)
                         const value = peripheral.value
                         switch(component.componentType){
                             case 'text-display' :
@@ -1088,43 +1085,13 @@
                                 break; 
                             
                             case "chart":
-                                devicesCards[deviceName][peripheralName].dataArray.push(peripheral.value); 
-                                updateChart(component.component, component.formData, devicesCards[deviceName][peripheralName].dataArray);
+                                component.dataArray.push(peripheral.value); 
+                                updateChart(component.component, component.formData, component.dataArray);
                                 break; 
-                                
-                            
                         }
                     })
-                    // Object.entries(resDeviceCards).forEach(([deviceName, peripherals]) => {
-                    //     Object.values(peripherals).forEach(peripheral => {
-                    //         if(components[peripheral.componentId]){
-
-                    //             if(components[peripheral.componentId].componentType == 'text-display'){
-                    //                 const outputDisplay = components[peripheral.componentId].component.querySelector('.'+components[peripheral.componentId].componentType)
-                    //                 outputDisplay.textContent = peripheral.value
-                    //             }
-
-                    //             if(components[peripheral.componentId].componentType == 'circle-canvas'){
-                    //                 console.log('here is component for canvas : ', components[peripheral.componentId])
-                    //                 const canvas = components[peripheral.componentId].component.querySelector('canvas');
-                    //                 let value = peripheral.value
-                    //                 drawCircleCanvas(
-                    //                     canvas._ctx, 
-                    //                     value, 
-                    //                     canvas._min, 
-                    //                     canvas._max, 
-                    //                     canvas._colorMin, 
-                    //                     canvas._colorMax
-                    //                 );
-                    //             }
-                                
-                    //         }
-                    //     })
-                    // })
                 }
-                
-                
-                } , 3000);
+            } , 3000);
 
             editModeBtn.addEventListener('click', function() {
                 toggleEditMode();
@@ -1378,8 +1345,6 @@
                 if(deleteBtn) {
                     deleteBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        console.log('the element is deleted')
-                        console.log('the element is deleted')
                         const component = document.querySelector(`[data-component-id="${componentId}"]`);
                         console.log('this is component : ', component);
                 
@@ -1613,7 +1578,7 @@
                     devicesCards[deviceName] = {}
                 
                 const sourceName = formData.source 
-                devicesCards[deviceName][sourceName] = {componentId: currentComponent.id, value:''}
+                devicesCards[deviceName][sourceName] = {componentId: currentComponent.id, value:'', sendValue: ''}
             
                 console.log('this is device cards: ', devicesCards)
                 // Update component title
@@ -1637,7 +1602,7 @@
                         updateGauge(component, formData, 0);
                         break;
                     case 'chart':
-                        devicesCards[deviceName][sourceName].dataArray = []; 
+                        components[currentComponent.id].dataArray = [] 
                         updateChart(component, formData, [1 , 2 , 3 , 20 , 5 ,6 , 7 , 8]);
                         break;
                     case 'text-input':
@@ -1949,21 +1914,7 @@
                         canvas._colorMax
                     );
                 }
-
-            
-
-                
-                // display.setAttribute('data-source', config.source);
-                // display.setAttribute('data-format', config.format);
-                
-                // // Update with current data if available
-                // if (currentDeviceData && currentDeviceData[config.source] !== undefined) {
-                //     let value = currentDeviceData[config.source];
-                //     const formattedValue = config.format.replace('{value}', randomTemp);
-                //     display.textContent = formattedValue;
-                // }
             }
-
             // Update gauge component
             function updateGauge(component, config, value) {
                 const gauge = component.querySelector('.gauge');
@@ -1987,7 +1938,6 @@
                 gaugeValue.textContent = value;
                 
             }
-
             // Initialize chart
             function initializeChart(component, dataArray) {
                 const canvas = component.querySelector('canvas');
@@ -2045,7 +1995,6 @@
                 canvas._chart = chart;
                 canvas._data = dataArray;
             }
-
             // Update chart component
             function updateChart(component, config, dataArray) {
                 const canvas = component.querySelector('canvas');
@@ -2063,6 +2012,27 @@
                 
                 // Initialize new chart
                 initializeChart(component, dataArray);
+            }
+            // Update text input component
+            function updateTextInput(component, config) {
+                const controlItem = component.querySelector('.control-item');
+                const sendButton = component.querySelector('.send-component')
+                const input = controlItem.querySelector('.text-input');
+                sendButton.addEventListener('click', ()=> {
+                    console.log(devicesCards[config.device][config.source].value)
+                    devicesCards[config.device][config.source].sendValue = input.value
+                })
+                if (!controlItem) return;
+                
+                const label = controlItem.querySelector('.control-label');
+                
+                
+                if (label) label.textContent = config.label;
+                
+                if (input) {
+                    input.setAttribute('data-target', config.target);
+                    input.setAttribute('placeholder', config.placeholder);
+                }
             }
 
         })      

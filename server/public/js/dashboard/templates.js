@@ -151,10 +151,23 @@ const componentTemplates = {
             <div class="control-item">
                 <span class="control-label">Input</span>
                 <input type="text" class="text-input" data-target="customCommand">
+                <button class="btn btn-secondary send-component">Send 📩</button>
             </div>
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'Text Input' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
+            { name: 'source', type: 'select', label: 'Data Source', 
+                options: [
+                    { value: 'temperature', label: 'Temperature' },
+                    { value: 'cpuUsage', label: 'CPU Usage' },
+                    { value: 'memoryUsage', label: 'Memory Usage' }
+                ],
+                default: 'temperature'
+              },
             { name: 'label', type: 'text', label: 'Label', default: 'Input' },
             { name: 'placeholder', type: 'text', label: 'Placeholder', default: 'Enter text...' },
             { name: 'target', type: 'text', label: 'Target Command', default: 'customCommand' }

@@ -41,6 +41,8 @@ dashboardSocket =  async (socket) => {
     
     socket.on('devicesCards', (devicesCards, ackCallBack) => {
 
+        console.log(devicesCards); 
+
         Object.entries(devicesCards).forEach(async ([deviceName, peripherals]) => {
             if(!devicesCardsRes[deviceName]){
                 devicesCardsRes[deviceName] = {}
@@ -53,7 +55,7 @@ dashboardSocket =  async (socket) => {
 
             const selectedPDict = {} 
             Object.entries(peripherals).forEach(([pName, pObj]) => {
-                selectedPDict[pName] = pObj.value
+                selectedPDict[pName] = pObj.sendValue
                 componentsIds[deviceName][pName] = pObj.componentId
             })
             client.publish(`esp32/${deviceId}/getSub/req`, JSON.stringify(selectedPDict))
