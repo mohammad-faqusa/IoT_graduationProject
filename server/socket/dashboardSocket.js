@@ -41,7 +41,6 @@ dashboardSocket =  async (socket) => {
     
     socket.on('devicesCards', (devicesCards, ackCallBack) => {
 
-        console.log(devicesCards); 
 
         Object.entries(devicesCards).forEach(async ([deviceName, peripherals]) => {
             if(!devicesCardsRes[deviceName]){
@@ -64,6 +63,17 @@ dashboardSocket =  async (socket) => {
         ackCallBack(devicesCardsRes)
     })
 
+    socket.on('deviceCardControl', (device)=>{
+        console.log(device);
+        pObj = {} 
+        pObj[device.peripheral] = device.value
+
+        const deviceId = devices.find(dev => dev.name === device.device).id
+
+
+        client.publish(`esp32/${deviceId}/getSub/req`, JSON.stringify(pObj))
+    })
+ 
     socket.on('fetchDevices', (data, ackCallBack) => {
         ackCallBack(devices)
     })

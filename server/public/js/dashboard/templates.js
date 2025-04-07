@@ -93,12 +93,7 @@ const componentTemplates = {
                 default: ''
             },
             { name: 'source', type: 'select', label: 'Data Source', 
-              options: [
-                  { value: 'temperature', label: 'Temperature' },
-                  { value: 'cpuUsage', label: 'CPU Usage' },
-                  { value: 'memoryUsage', label: 'Memory Usage' },
-                  { value: 'fanSpeed', label: 'Fan Speed' }
-              ],
+              options: [],
               default: 'cpuUsage'
             },
             { name: 'label', type: 'text', label: 'Label', default: 'Value' },
@@ -120,27 +115,15 @@ const componentTemplates = {
                 default: ''
             },
             { name: 'source', type: 'select', label: 'Data Source', 
-              options: [
-                  { value: 'temperature', label: 'Temperature' },
-                  { value: 'cpuUsage', label: 'CPU Usage' },
-                  { value: 'memoryUsage', label: 'Memory Usage' }
-              ],
+              options: [],
               default: 'temperature'
             },
             { name: 'chartType', type: 'select', label: 'Chart Type', 
-              options: [
-                  { value: 'line', label: 'Line' },
-                  { value: 'bar', label: 'Bar' }
-              ],
+              options: [],
               default: 'line'
             },
             { name: 'timeRange', type: 'select', label: 'Time Range', 
-              options: [
-                  { value: '5', label: '5 minutes' },
-                  { value: '10', label: '10 minutes' },
-                  { value: '30', label: '30 minutes' },
-                  { value: '60', label: '1 hour' }
-              ],
+              options: [],
               default: '10'
             }
         ]
@@ -161,11 +144,7 @@ const componentTemplates = {
                 default: ''
             },
             { name: 'source', type: 'select', label: 'Data Source', 
-                options: [
-                    { value: 'temperature', label: 'Temperature' },
-                    { value: 'cpuUsage', label: 'CPU Usage' },
-                    { value: 'memoryUsage', label: 'Memory Usage' }
-                ],
+                options: [],
                 default: 'temperature'
               },
             { name: 'label', type: 'text', label: 'Label', default: 'Input' },
@@ -186,6 +165,14 @@ const componentTemplates = {
         `,
         config: [
             { name: 'title', type: 'text', label: 'Title', default: 'Switch Button' },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
+            { name: 'source', type: 'select', label: 'Data Source', 
+                options: [],
+                default: 'temperature'
+            },
             { name: 'label', type: 'text', label: 'Label', default: 'Switch' },
             { name: 'target', type: 'select', label: 'Target Command', 
               options: [

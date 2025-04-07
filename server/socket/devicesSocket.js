@@ -19,7 +19,7 @@ const displayDevicesSocket = async (socket) => {
     client.subscribe('esp32/result');
     client.subscribe('esp32/status');
     client.on('message', (topic, message) => {
-        console.log(JSON.parse(message)); 
+        // console.log(JSON.parse(message)); 
         if (topic === 'esp32/result'){
             const deviceId = JSON.parse(message).id;
             try{
