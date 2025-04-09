@@ -962,6 +962,8 @@
                     </div>
                 </div>
             </div>
+
+            
           
 
             <!-- Automation Panel -->
@@ -1302,7 +1304,13 @@
                 const componentId = `component-${Date.now()}`;
                 // Create card
                 const card = document.createElement('div');
+                
                 card.className = 'card';
+
+                if(componentType == 'automation-rule'){
+                    card.classList.add('wide')
+                }
+                
                 card.setAttribute('data-component-id', componentId);
                 card.setAttribute('data-component-type', componentType);
 
@@ -2163,7 +2171,7 @@
                                     socket.emit('deviceCardControl', {device: config.device, peripheral: config.source, value: config.buttonText})
                                 }
                             } else {
-                                socket.emit('deviceCardControl', {device: config.device, peripheral: config.source, value: config.buttonText})
+                                socket.emit('deviceCardControl', {device: config.device, peripheral: config.source, value: this.value})
 
                             }
                         });

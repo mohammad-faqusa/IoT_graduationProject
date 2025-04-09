@@ -1,10 +1,19 @@
 
-const Device = require('../models/Device')
+// require('./../database.js')
+const Device = require('../models/Device.js')
+const Peripheral = require('../models/Peripheral.js')
 const espSetup = require('../esp32/espSetup2')
+
+pList = ['servo', 'dht', 'motion', 'gas_sensor', 'switch', 'led', 'accelorometer', 'encoder']
 
 
 deviceSocket =  (socket) => {
     
+    socket.on('addDevice_pList', async (data, ackCallBack) => {
+        const pList = (await Peripheral.find()).map(p => p.name); 
+        console.log('this is plist : ', pList)
+        ackCallBack(pList); 
+    })
     socket.on('addDevice', async (data, ackCallBack) => {
         try{
             const peripherals = {}; 

@@ -1,9 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const form = document.getElementById('peripheralForm');
-    const peripheralSelect = document.getElementById('peripheral');
-    const addButton = document.getElementById('addPeripheral');
+    
     const peripheralList = document.getElementById('peripheralList');
-    const selectedPeripheralsInput = document.getElementById('selectedPeripherals');
+    
     const cancelButton = document.getElementById('cancelButton');
     const messageScreen = document.getElementById('messageScreen');
     const messageContent = document.getElementById('messageContent');
@@ -14,7 +13,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const retryButton = document.getElementById('retryButton');
     const closeErrorButton = document.getElementById('closeErrorButton');
 
+    const socket = io(); 
+
+    let isDisconnected = false 
     
+    socket.on('disconnect', ()=> {
+        console.log('disconnected from the server !')
+        isDisconnected = true 
+        socket.disconnect()
+    })
+    let pList = [] 
+
+    pList = await socket.emitWithAck('addDevice_pList',  '')
+    console.log(pList)
+
+    
+
+    const pSelectContainer = document.querySelector('.peripheral-select-container');
+
+    pSelectContainer.innerHTML =  `<select id="peripheral" name="peripheral">
+        ${pList.map(p => {
+            pName = p.includes('_') ? p.split('_').map(word => word[0].toUpperCase() + word.slice(1)).join(' ') : p[0].toUpperCase() + p.slice(1)
+            return `<option value="${p}">${pName}</option>`
+        }).join('\n')}
+    </select>
+    <button type="button" id="addPeripheral" class="btn-add">Add</button>
+    `
+    const addButton = document.getElementById('addPeripheral');
+    
+    const peripheralSelect = document.getElementById('peripheral');
+    const selectedPeripheralsInput = document.getElementById('selectedPeripherals');
+
+
+    // pSelectContainer.appendChild(pSelect)
+
     // Array to store selected peripherals
     let selectedPeripherals = [];
     // Store form data for retry functionality
@@ -24,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add peripheral to the list
     addButton.addEventListener('click', function() {
+        console.log('clicked!')
         const peripheral = peripheralSelect.value;
         
         if (peripheral && !selectedPeripherals.includes(peripheral)) {
@@ -206,6 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     addMessage('Your request is still being processed. Please wait.', 'info');
                 }, 1000);
                 break;
+            
+            case 'reload':
+                window.location.href = "http://localhost:3000/addDevice";
+                break;
             default:
                 addMessage('Unknown action', 'error');
         }
@@ -219,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Process form submission
-    function processFormSubmission(formData) {
+    async function processFormSubmission(formData) {
         // Store form data for retry functionality
         lastFormData = formData;
         
@@ -240,14 +277,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add initial message
         addMessage('Form submitted successfully! Connecting to server...', 'success');
 
-        const socket = io();
-        socket.on('connect', async ()=>{
-            addMessage('Connected to the server', 'success');
-            addMessage('Sending Data to the server', 'success');
-            deviceId = await socket.emitWithAck('addDevice', formData)
-            addMessage(`The device is added to the database, setup the device...`, 'success');
-            socket.emit('setupDevice', deviceId)
-        })
+    
+     
+        addMessage('Connecting to the server', 'success');
+        if(isDisconnected){
+            const errorDetails = {
+                code: 'err.message',
+                id: 'server-' + Date.now(),
+                actionable: true,
+                action: 'reload',
+                actionText: 'reload the page'
+            };
+    
+            addMessage('Disconnected from the server', 'error', errorDetails);
+    
+            // Show error modal
+            showErrorModal(
+                'Disconnected from the server, please reload the page!',
+                'SERVER_ERROR_500'
+            );
+
+            return 
+            
+        }
+        addMessage('Sending Data to the server', 'success');
+        deviceId = await socket.emitWithAck('addDevice', formData)
+        addMessage(`The device is added to the database, setup the device...`, 'success');
+        socket.emit('setupDevice', deviceId)
+    
         
         socket.on('processSetup', res => {
             addMessage(res.data, 'success');

@@ -16,6 +16,9 @@ readP = False
 readAll = False
 currentTopic = ''
 p = {}
+p['servo'] = ''
+p['led'] = ''
+
 pfunctions = {}
 pSelected = {} 
 
@@ -35,8 +38,8 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
             pSelected = {} 
             for key,val in msgObj.items():
                 print(key, val)
-                if(val):
-                    print(val)
+                if(val != ''):
+                    p[key] = val
                 else:
                     pSelected[key] = p[key] 
             readP = True
@@ -67,12 +70,10 @@ async def main(client):
     while True:
         await asyncio.sleep(1)
         print('publish', n)
-        p['Keyboard'] = Keyboard(0, 180)
-        p['Headset'] = Headset(0, 180)
-        p['Webcam'] = Webcam(0, 180)
+        p['motion'] = motion(0, 180)
         
         p['id'] = 4
-        print('\nKeyboard:', p['Keyboard'],'\nHeadset:', p['Headset'],'\nWebcam:', p['Webcam'],"\n")
+        print('\nservo:', p['servo'],'\nmotion:', p['motion'],'\nled:', p['led'],"\n")
         await asyncio.sleep(1)
         if readP:
             await client.publish(currentTopic , json.dumps(pSelected), qos = 1)
@@ -85,15 +86,7 @@ async def main(client):
         n += 1
 
 
-def Keyboard(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def Headset(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def Webcam(min_val, max_val):
+def motion(min_val, max_val):
     return random.randint(min_val, max_val)
     
 

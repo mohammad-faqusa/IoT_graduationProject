@@ -314,6 +314,14 @@ const componentTemplates = {
               ],
               default: 'cpuUsage'
             },
+            { name: 'device', type: 'select', label: 'Data Source', dynamic: true, 
+                options: [],
+                default: ''
+            },
+            { name: 'source', type: 'select', label: 'Data Source', 
+                options: [],
+                default: 'temperature'
+            },
             { name: 'condition', type: 'select', label: 'Condition', 
               options: [
                   { value: 'gt', label: 'Greater Than' },

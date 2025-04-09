@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-exports.mainTemplate = (id, body, libraries,subscribe_topics, config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
+exports.mainTemplate = (id, body, libraries,initP, config = {ssid: 'clear', pass: '13141516', server: '192.168.137.1'}) => {
     return `
     
 from time import sleep
@@ -18,6 +18,7 @@ readP = False
 readAll = False
 currentTopic = ''
 p = {}
+${initP}
 pfunctions = {}
 pSelected = {} 
 
@@ -37,8 +38,8 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
             pSelected = {} 
             for key,val in msgObj.items():
                 print(key, val)
-                if(val):
-                    print(val)
+                if(val != ''):
+                    p[key] = val
                 else:
                     pSelected[key] = p[key] 
             readP = True

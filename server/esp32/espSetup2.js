@@ -23,7 +23,6 @@ async function espSetup (id, plist, socket)  {
     console.log("Output:", stdout2);
     if (stderr2) 
         socket.emit('processSetup', {status: 'processing', data: `Error Output:, ${stderr2}`} )
-    socket.emit('processSetup', {status: 'processing', data: `finished installing the libraries.`} )
     
     socket.emit('processSetup', {status: 'processing', data: `finished installing the libraries.`} )
     const { stdout3, stderr3 } = await execPromise(`mpremote connect COM3 fs cp ${__dirname}/espFiles/main.py :main.py`);
