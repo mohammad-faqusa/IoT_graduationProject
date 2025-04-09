@@ -15,7 +15,8 @@ async function espSetup (id, plist, socket)  {
     const { stdout, stderr } = await execPromise('mpremote soft-reset');
     console.log("Output:", stdout);
     if (stderr)
-        socket.emit('processSetup', {status: 'processing', data: `Error Output:, ${stderr}`} )
+      socket.emit('processSetup', {status: 'processing', data: `Error Output:, ${stderr}`} )
+
     socket.emit('processSetup', {status: 'processing', data: `finished soft reset`} )
     
     socket.emit('processSetup', {status: 'processing', data: `installing libraries...`} )

@@ -8,6 +8,9 @@ from mqtt_as import MQTTClient, config
 import asyncio
 import json
 ${libraries} 
+from machine import Pin
+
+led = Pin(2, Pin.OUT)
 
 # Local configuration
 config['ssid'] = '${config.ssid}'  # Optional on ESP8266
@@ -28,6 +31,7 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
     global currentTopic
     global pSelected
     global p
+    global led
     textTopic = topic.decode()
     msgObj = json.loads(msg.decode())
     
@@ -36,17 +40,25 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
         currentTopic = '/'.join(topicArr[0:-1]) + '/res'
         if(topicArr[-2] == 'getSub'):
             pSelected = {} 
-            for key,val in msgObj.items():
+            for key, val in msgObj.items():
                 print(key, val)
                 if(val != ''):
+                    print(key, val)
+                    if(key =='led'):
+                        if(val):
+                            led.value(1)
+                        else:
+                            led.value(0)
+                        
                     p[key] = val
+                    pSelected[key] = p[key]
+                    asyncio.create_task(sendImmediateFunction(client))
                 else:
                     pSelected[key] = p[key] 
             readP = True
             
     if(textTopic == 'esp32/${id}/getDict'):
         readAll = True
-        
     
     print((topic.decode(), msg.decode(), retained))
 
@@ -56,6 +68,12 @@ async def conn_han(client):
     
 config['subs_cb'] = callback
 config['connect_coro'] = conn_han
+
+# Define the sendImmediate function
+async def sendImmediateFunction(client):
+    pSelected['sendImmediate'] = True 
+    await client.publish(currentTopic, json.dumps(pSelected), qos=1)
+    pSelected['sendImmediate'] = False 
 
 ${body}
 
