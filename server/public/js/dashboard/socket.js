@@ -11,6 +11,9 @@ socket.on('connect', async ()=> {
     console.log(devices); 
 })
 
+socket.on('sendImmediate', data => {
+    console.log(data); 
+})
 // socket.on('dashboardCardRes', data => {
 //     // console.log(data);
     

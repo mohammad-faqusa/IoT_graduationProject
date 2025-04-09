@@ -19,6 +19,7 @@ dashboardSocket =  async (socket) => {
     client.on("message", (topic, message) => {
         const topicArr = topic.split('/');
         const messageObj = JSON.parse(message)
+        console.log(messageObj); 
         
         if(topicArr.at(-1) === 'res'){
             
@@ -29,6 +30,11 @@ dashboardSocket =  async (socket) => {
                 Object.entries(messageObj).forEach(([pName, pValue]) => {
                     devicesCardsRes[deviceName][pName] = {value: pValue, componentId:componentsIds[deviceName][pName] }
                 })
+                console.log('this is message object immediate : ', messageObj)
+                if(messageObj.sendImmediate){
+                    socket.emit('sendImmediate', devicesCardsRes[deviceName])
+                }
+
                 
             }
         }
