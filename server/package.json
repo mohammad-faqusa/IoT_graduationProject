@@ -6,6 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,6 +17,7 @@
     "mongodb": "^6.14.2",
     "mongoose": "^8.12.1",
     "mqtt": "^5.10.4",
+    "openai": "^4.95.0",
     "path": "^0.12.7",
     "pug": "^3.0.3",
     "socket.io": "^4.8.1"
