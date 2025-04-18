@@ -1,65 +1,62 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require("fs");
+const path = require("path");
 // const dotenv = require('dotenv')
 
 // dotenv.config({path: './../.env'})
 
 // require('./../database.js')
 
-const Peripheral = require(path.join(__dirname + '/../models/Peripheral.js'))
+// const Peripheral = require(path.join(__dirname + '/../models/Peripheral.js'))
 
-const {mainTemplate, bootTemplate} = require(path.join(__dirname, 'templates'))
+const { mainTemplate, bootTemplate } = require(path.join(
+  __dirname,
+  "templates"
+));
 
 const generateFiles = async (id, pList) => {
+  const pDB = await Peripheral.find();
+  console.log(pDB);
 
-    const pDB = await Peripheral.find()
-    console.log(pDB) ; 
-    
-    let p = {}; 
+  let p = {};
 
-    pList.forEach(element => {
-        console.log('this is element : ', element);  
-        const pDoc = pDB.find(p => p.name === element)
-        console.log('this is pDoc : ', pDoc)
-        p[element] = {func: '', library: '', call: ''}
-        p[element].func = generateRandomIntFunc(element);  
-        p[element].library = 'random'
-        p[element].call = callRandomIntFunc(element, 0, 180)
-        p[element].writable = pDoc.writable
-        p[element].readable = pDoc.readable
-    });
+  pList.forEach((element) => {
+    console.log("this is element : ", element);
+    // const pDoc = pDB.find(p => p.name === element)
+    // console.log('this is pDoc : ', pDoc)
+    p[element] = { func: "", library: "", call: "" };
+    p[element].func = generateRandomIntFunc(element);
+    p[element].library = "random";
+    p[element].call = callRandomIntFunc(element, 0, 180);
+    // p[element].writable = pDoc.writable
+    // p[element].readable = pDoc.readable
+  });
 
+  let content = "";
+  let libraries = "";
+  let functions = "";
+  let callfunctions = "print(";
+  let writtenLibraries = [];
+  let pDictPython = "";
+  let initP = "";
+  let newLine = `
+`;
+  let tap = `    `;
 
-    let content = ''; 
-    let libraries = '';
-    let functions = '';
-    let callfunctions = 'print(';  
-    let writtenLibraries = [];
-    let pDictPython = ''; 
-    let initP = ''; 
-    let newLine = `
-`
-    let tap = `    `
+  Object.entries(p).forEach(([key, val]) => {
+    libraries += writtenLibraries.includes(val.library)
+      ? ""
+      : `import ${val.library}\n`;
+    writtenLibraries.push(val.library);
+    initP += `p['${key}'] = ''\n`;
+    functions += `${val.func}\n`;
+    pDictPython += `p['${key}'] = ${val.call}${newLine + tap + tap}`;
+    callfunctions += `'\\n${key}:', p['${key}'],`;
+    // await client.subscribe('esp32/device_1/Mouse/req', 1)
+    // subscribe_topics+= `await client.subscribe('esp32/${id}/${key}/req', 1)${newLine+tap}`
+  });
+  callfunctions += '"\\n")';
 
-
-
-    Object.entries(p).forEach(([key, val]) => {
-        libraries += writtenLibraries.includes(val.library) ? '' : `import ${val.library}\n`;
-        writtenLibraries.push(val.library)
-        if(!val.readable || (val.readable && val.writable)){
-            initP += `p['${key}'] = ''\n`
-        } else {
-            functions += `${val.func}\n`;
-            pDictPython += `p['${key}'] = ${val.call}${newLine+tap+tap}`
-            
-        }
-        callfunctions += `'\\n${key}:', p['${key}'],`
-        // await client.subscribe('esp32/device_1/Mouse/req', 1)
-        // subscribe_topics+= `await client.subscribe('esp32/${id}/${key}/req', 1)${newLine+tap}`  
-    })
-    callfunctions += '"\\n")'
-
-    let body = `
+  let body = `
 async def main(client):
     global p
     global readP
@@ -87,27 +84,24 @@ async def main(client):
         n += 1
 
 ${functions}
-`
+`;
 
-
-    fs.writeFileSync(`${__dirname}/espFiles/main.py`, mainTemplate(id, body, libraries,initP))
-    fs.writeFileSync(`${__dirname}/espFiles/boot.py`, bootTemplate())
-
-
-    
-}
+  fs.writeFileSync(
+    `${__dirname}/espFiles/main.py`,
+    mainTemplate(id, body, libraries, initP)
+  );
+  fs.writeFileSync(`${__dirname}/espFiles/boot.py`, bootTemplate());
+};
 
 function generateRandomIntFunc(pName) {
-    return `
+  return `
 def ${pName}(min_val, max_val):
     return random.randint(min_val, max_val)
-    `
+    `;
 }
-
 
 function callRandomIntFunc(pName, min, max) {
-    return `${pName}(${min}, ${max})`
+  return `${pName}(${min}, ${max})`;
 }
 
-module.exports = generateFiles; 
-
+module.exports = generateFiles;
