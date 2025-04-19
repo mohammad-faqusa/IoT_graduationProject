@@ -1,0 +1,46 @@
+[
+  {
+    "library": "accelerometer",
+    "class": "MPU6050"
+  },
+  {
+    "library": "dht_sensor",
+    "class": "DHTSensor"
+  },
+  {
+    "library": "encoder",
+    "class": "Encoder"
+  },
+  {
+    "library": "gas_sensor",
+    "class": "GasSensor"
+  },
+  {
+    "library": "led",
+    "class": "LED"
+  },
+  {
+    "library": "internal_led",
+    "class": "InternalLED"
+  },
+  {
+    "library": "motion_sensor",
+    "class": "MotionSensor"
+  },
+  {
+    "library": "push_button",
+    "class": "PushButton"
+  },
+  {
+    "library": "relay",
+    "class": "Relay"
+  },
+  {
+    "library": "servo_motor",
+    "class": "Servo"
+  },
+  {
+    "library": "slide_switch",
+    "class": "SlideSwitch"
+  }
+]

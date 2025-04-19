@@ -1,6 +1,7 @@
 [
   {
     "name": "accelerometer",
+    "title": "Accelerometer",
     "library_name": "accelerometer",
     "class_name": "MPU6050",
     "attributes": {
@@ -111,7 +112,8 @@
   },
   {
     "name": "dht_sensor",
-    "library_name": "dht_sensor",
+    "title": "DHT Sensor",
+    "library_name": "dht",
     "class_name": "DHTSensor",
     "attributes": {
       "pin": {
@@ -121,10 +123,7 @@
       "sensor_type": {
         "dataType": "String",
         "default": "DHT22",
-        "allowedValues": [
-          "DHT11",
-          "DHT22"
-        ],
+        "allowedValues": ["DHT11", "DHT22"],
         "purpose": "Specifies the type of DHT sensor being used"
       },
       "simulate": {
@@ -199,10 +198,7 @@
           "name": "sensor_type",
           "dataType": "String",
           "default": "DHT22",
-          "allowedValues": [
-            "DHT11",
-            "DHT22"
-          ],
+          "allowedValues": ["DHT11", "DHT22"],
           "purpose": "Specifies the type of DHT sensor being used"
         },
         {
@@ -225,6 +221,7 @@
   },
   {
     "name": "encoder",
+    "title": "Encoder",
     "library_name": "encoder",
     "class_name": "Encoder",
     "attributes": {
@@ -312,6 +309,7 @@
   },
   {
     "name": "gas_sensor",
+    "title": "Gas Sensor",
     "library_name": "gas_sensor",
     "class_name": "GasSensor",
     "attributes": {
@@ -398,6 +396,7 @@
   },
   {
     "name": "led",
+    "title": "Led",
     "library_name": "led",
     "class_name": "LED",
     "attributes": {
@@ -492,7 +491,8 @@
   },
   {
     "name": "internal_led",
-    "library_name": "internal_led",
+    "title": "Internal Led",
+    "library_name": "led",
     "class_name": "InternalLED",
     "inherited_from": "LED",
     "attributes": {
@@ -564,6 +564,7 @@
   },
   {
     "name": "motion_sensor",
+    "title": "Motion Sensor",
     "library_name": "motion_sensor",
     "class_name": "MotionSensor",
     "attributes": {
@@ -648,6 +649,7 @@
   },
   {
     "name": "push_button",
+    "title": "Push Button",
     "library_name": "push_button",
     "class_name": "PushButton",
     "attributes": {
@@ -773,6 +775,7 @@
   },
   {
     "name": "relay",
+    "title": "Relay",
     "library_name": "relay",
     "class_name": "Relay",
     "attributes": {
@@ -868,6 +871,7 @@
   },
   {
     "name": "servo_motor",
+    "title": "Servo Motor",
     "library_name": "servo_motor",
     "class_name": "Servo",
     "attributes": {
@@ -1054,6 +1058,7 @@
   },
   {
     "name": "slide_switch",
+    "title": "Slide Switch",
     "library_name": "slide_switch",
     "class_name": "SlideSwitch",
     "attributes": {
