@@ -33,7 +33,7 @@ async def main(client):
     await client.connect()
     n = 0
     while True:
-        await asyncio.sleep(1)
+        await asyncio.sleep(1) 
         await client.publish('esp32/status', '4', qos = 1)
         n += 1
 
