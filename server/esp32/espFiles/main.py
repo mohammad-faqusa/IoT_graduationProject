@@ -1,125 +1,26 @@
+from accelerometer import MPU6050
+from dht_sensor import DHTSensor
+from encoder import Encoder
+from gas_sensor import GasSensor
+from led import LED
+from led import InternalLED
+from motion_sensor import MotionSensor
+from push_button import PushButton
+from relay import Relay
+from servo_motor import Servo
+from slide_switch import SlideSwitch
 
-    
-from time import sleep
-from mqtt_as import MQTTClient, config
-import asyncio
-import json
-import random
- 
-from machine import Pin
+peripherals = {}
 
-led = Pin(2, Pin.OUT)
-
-# Local configuration
-config['ssid'] = 'clear'  # Optional on ESP8266
-config['wifi_pw'] = '13141516'
-config['server'] = '192.168.137.1'  # Change to suit e.g. 'iot.eclipse.org'
-
-readP = False
-readAll = False
-currentTopic = ''
-p = {}
-p['servo'] = ''
-p['led'] = ''
-
-pfunctions = {}
-pSelected = {} 
-
-def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
-    global readP
-    global readAll
-    global currentTopic
-    global pSelected
-    global p
-    global led
-    textTopic = topic.decode()
-    msgObj = json.loads(msg.decode())
-    
-    topicArr = textTopic.split('/')
-    if(topicArr[-1] == 'req'):
-        currentTopic = '/'.join(topicArr[0:-1]) + '/res'
-        if(topicArr[-2] == 'getSub'):
-            pSelected = {} 
-            for key, val in msgObj.items():
-                print(key, val)
-                if(val != ''):
-                    print(key, val)
-                    if(key =='led'):
-                        if(val):
-                            led.value(1)
-                        else:
-                            led.value(0)
-                        
-                    p[key] = val
-                    pSelected[key] = p[key]
-                    asyncio.create_task(sendImmediateFunction(client))
-                else:
-                    pSelected[key] = p[key] 
-            readP = True
-            
-    if(textTopic == 'esp32/4/getDict'):
-        readAll = True
-    
-    print((topic.decode(), msg.decode(), retained))
-
-async def conn_han(client):
-    await client.subscribe('esp32/4/getDict', 1)
-    await client.subscribe('esp32/4/getSub/req', 1)
-    
-config['subs_cb'] = callback
-config['connect_coro'] = conn_han
-
-# Define the sendImmediate function
-async def sendImmediateFunction(client):
-    pSelected['sendImmediate'] = True 
-    await client.publish(currentTopic, json.dumps(pSelected), qos=1)
-    pSelected['sendImmediate'] = False 
-
-
-async def main(client):
-    global p
-    global readP
-    global readAll
-    global currentTopic
-    global pSelected
-
-    await client.connect()
-    n = 0
-    while True:
-        await asyncio.sleep(1)
-        print('publish', n)
-        p['motion'] = motion(0, 180)
-        p['gas_sensor'] = gas_sensor(0, 180)
-        
-        p['id'] = 4
-        print('\nservo:', p['servo'],'\nled:', p['led'],'\nmotion:', p['motion'],'\ngas_sensor:', p['gas_sensor'],"\n")
-        await asyncio.sleep(1)
-        if readP:
-            await client.publish(currentTopic , json.dumps(pSelected), qos = 1)
-            readP = False
-        if readAll:
-            await client.publish('esp32/4/getDict' , json.dumps(p), qos = 1)
-            readAll = False
-        await asyncio.sleep(1)
-        await client.publish('esp32/status', '4', qos = 1)
-        n += 1
-
-
-def motion(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-def gas_sensor(min_val, max_val):
-    return random.randint(min_val, max_val)
-    
-
-
-
-
-MQTTClient.DEBUG = True  # Optional: print diagnostic messages
-client = MQTTClient(config)
-try:
-    asyncio.run(main(client))
-finally:
-    client.close()  # Prevent LmacRxBlk:1 errors
-
+# Initialize each peripheral and store in the peripherals dictionary
+peripherals['accelerometer'] = MPU6050(i2c=None, addr=0x68, simulate=True)
+peripherals['dht_sensor'] = DHTSensor(pin=4, sensor_type="DHT22", simulate=True)
+peripherals['encoder'] = Encoder(pin_a=5, pin_b=6, simulate=True)
+peripherals['gas_sensor'] = GasSensor(pin=7, analog=True, simulate=True)
+peripherals['led'] = LED(pin=8, active_high=True, simulate=True)
+peripherals['internal_led'] = InternalLED(simulate=False)
+peripherals['motion_sensor'] = MotionSensor(pin=9, simulate=True)
+peripherals['push_button'] = PushButton(pin=10, simulate=True, debounce_ms=50)
+peripherals['relay'] = Relay(pin=11, active_high=True, simulate=True)
+peripherals['servo_motor'] = Servo(pin=12, freq=50, min_us=500, max_us=2500, angle_range=180)
+peripherals['slide_switch'] = SlideSwitch(pin=13, simulate=True)

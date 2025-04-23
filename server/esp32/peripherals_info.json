@@ -113,7 +113,7 @@
   {
     "name": "dht_sensor",
     "title": "DHT Sensor",
-    "library_name": "dht",
+    "library_name": "dht_sensor",
     "class_name": "DHTSensor",
     "attributes": {
       "pin": {
