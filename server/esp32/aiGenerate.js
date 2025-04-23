@@ -37,14 +37,18 @@ ${peripherals_info
 
 `;
 
-let methodsPrompt = `
+function generateMethodPrompt(peripherals_info) {
+  return `
 you are micropython esp32 code generator 
 
 you need to write just micropyhton, to copy it directly on micropyhton file, 
 
 I have dict of peripherals object in 'peripherals' dictionary micropython
 
-and I need to use the methods of each peripheral for testing in (run_all_methods) function as following : 
+and I need to use the methods of each peripheral for testing in a written function, just write the body of function, and don't write the name of function 
+consider writing try, except for each peripheral 
+don't write function return 
+and write the methods as following  : 
 ${peripherals_info.map(
   (p) => `for peripheral ${p.name}, the object of ${
     p.class_name
@@ -62,11 +66,42 @@ ${peripherals_info.map(
       )
       .join("\n\t")}}`
 )}
-
-
-
 `;
-fs.writeFileSync("prompt.txt", methodsPrompt);
-fs.writeFileSync("methods_prompt.txt", prompt);
-callClaude(prompt, path.join(__dirname, "espFiles/main.py"));
-callClaude(methodsPrompt, path.join(__dirname, "espFiles/run_all_methods.py"));
+}
+
+function groupArrayElements(arr, groupSize) {
+  const result = [];
+  for (let i = 0; i < arr.length; i += groupSize) {
+    result.push(arr.slice(i, i + groupSize));
+  }
+  return result;
+}
+
+async function methodsGeneration(peripherals_info) {
+  const new_line_tapped_line = `
+    `;
+  const new_inner_line = `
+            
+        `;
+
+  const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
+  const arrCode = await Promise.all(
+    grouped_peripherals_info.map(async (group_p, index) => {
+      const prompt = generateMethodPrompt(group_p);
+      fs.writeFileSync(`methods_prompt_${index}.txt`, prompt);
+      const finalCode = await callClaude(prompt);
+      // console.log(finalCode);
+      return await finalCode;
+    })
+  );
+  console.log(arrCode);
+  const finalBody = arrCode.join("\n");
+  const function_code = `
+def run_all_methods():${new_line_tapped_line}${finalBody}`;
+
+  fs.writeFileSync("test_all_methods.py", function_code);
+
+  return;
+}
+
+methodsGeneration(peripherals_info);

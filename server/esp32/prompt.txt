@@ -1,316 +1,45 @@
-
+ 
 you are micropython esp32 code generator 
+just write a python code to copy it directly on python file 'main.py'
+I need to use the following peripherals : accelerometer,dht_sensor,encoder,gas_sensor,led,internal_led,motion_sensor,push_button,relay,servo_motor,slide_switch,
 
-you need to write just micropyhton, to copy it directly on micropyhton file, 
+first import the class for each peripheral as following : 
+from accelerometer import MPU6050
+from dht_sensor import DHTSensor
+from encoder import Encoder
+from gas_sensor import GasSensor
+from led import LED
+from led import InternalLED
+from motion_sensor import MotionSensor
+from push_button import PushButton
+from relay import Relay
+from servo_motor import Servo
+from slide_switch import SlideSwitch
 
-I have dict of peripherals object in 'peripherals' dictionary micropython
+then initialize each peripheral class as following, and store it in peripherals dict 'peripherals' : 
 
-and I need to use the methods of each peripheral for testing in (run_all_methods) function as following : 
-for peripheral accelerometer, the object of MPU6050, which is stored in 'peripherals[accelerometer]', run it's methods as following : 
-    the properties of method read_accel, as following : {
-  "returns": {
-    "dataType": "Array",
-    "elementType": "Number",
-    "length": 3,
-    "unit": "g"
-  },
-  "purpose": "Returns a tuple of X, Y, Z acceleration values"
-}
-	the properties of method read_gyro, as following : {
-  "returns": {
-    "dataType": "Array",
-    "elementType": "Number",
-    "length": 3,
-    "unit": "deg/s"
-  },
-  "purpose": "Returns a tuple of X, Y, Z gyroscope values"
-}
-	the properties of method read_all, as following : {
-  "returns": {
-    "dataType": "Object",
-    "properties": {
-      "accel": {
-        "dataType": "Array",
-        "elementType": "Number",
-        "length": 3,
-        "unit": "g"
-      },
-      "gyro": {
-        "dataType": "Array",
-        "elementType": "Number",
-        "length": 3,
-        "unit": "deg/s"
-      }
-    }
-  },
-  "purpose": "Returns both accelerometer and gyroscope readings in one call"
-}},for peripheral dht_sensor, the object of DHTSensor, which is stored in 'peripherals[dht_sensor]', run it's methods as following : 
-    the properties of method measure, as following : {
-  "returns": "void",
-  "purpose": "Triggers the sensor to update temperature and humidity readings"
-}
-	the properties of method temperature, as following : {
-  "returns": {
-    "dataType": "Number",
-    "unit": "°C",
-    "range": {
-      "min": -40,
-      "max": 125
-    }
-  },
-  "purpose": "Returns the last measured temperature value. Range: -40°C to 125°C"
-}
-	the properties of method humidity, as following : {
-  "returns": {
-    "dataType": "Number",
-    "unit": "%",
-    "range": {
-      "min": 0,
-      "max": 100
-    }
-  },
-  "purpose": "Returns the last measured humidity value. Range: 0% to 100%"
-}},for peripheral encoder, the object of Encoder, which is stored in 'peripherals[encoder]', run it's methods as following : 
-    the properties of method get_position, as following : {
-  "returns": {
-    "dataType": "Number",
-    "purpose": "Returns the current position of the encoder"
-  }
-}
-	the properties of method reset, as following : {
-  "returns": "void",
-  "purpose": "Resets the encoder position back to zero"
-}
-	the properties of method simulate_step, as following : {
-  "parameters": {
-    "steps": {
-      "dataType": "Number",
-      "purpose": "Number of steps to increment or decrement position (for simulate mode)"
-    }
-  },
-  "returns": "void",
-  "purpose": "Manually updates the encoder position during simulation mode",
-  "availability": "Only available when simulate=true"
-}},for peripheral gas_sensor, the object of GasSensor, which is stored in 'peripherals[gas_sensor]', run it's methods as following : 
-    the properties of method read, as following : {
-  "returns": {
-    "dataType": "Number",
-    "range": {
-      "min": 0,
-      "max": 1023
-    }
-  },
-  "purpose": "Reads the current gas level from the sensor. Range: 0 to 1023 (analog) or 0/1 (digital)"
-}},for peripheral led, the object of LED, which is stored in 'peripherals[led]', run it's methods as following : 
-    the properties of method on, as following : {
-  "returns": "void",
-  "purpose": "Turns the LED ON (sets the state to ON)"
-}
-	the properties of method off, as following : {
-  "returns": "void",
-  "purpose": "Turns the LED OFF (sets the state to OFF)"
-}
-	the properties of method toggle, as following : {
-  "returns": "void",
-  "purpose": "Toggles the state of the LED (ON if OFF, OFF if ON)"
-}
-	the properties of method is_on, as following : {
-  "returns": {
-    "dataType": "Boolean"
-  },
-  "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
-}},for peripheral internal_led, the object of InternalLED, which is stored in 'peripherals[internal_led]', run it's methods as following : 
-    the properties of method on, as following : {
-  "returns": "void",
-  "purpose": "Turns the internal LED ON (sets the state to ON)"
-}
-	the properties of method off, as following : {
-  "returns": "void",
-  "purpose": "Turns the internal LED OFF (sets the state to OFF)"
-}
-	the properties of method toggle, as following : {
-  "returns": "void",
-  "purpose": "Toggles the state of the internal LED (ON if OFF, OFF if ON)"
-}
-	the properties of method is_on, as following : {
-  "returns": {
-    "dataType": "Boolean"
-  },
-  "purpose": "Returns the current state of the internal LED (True if ON, False if OFF)"
-}},for peripheral motion_sensor, the object of MotionSensor, which is stored in 'peripherals[motion_sensor]', run it's methods as following : 
-    the properties of method read, as following : {
-  "returns": {
-    "dataType": "Boolean",
-    "values_meaning": {
-      "true": "Motion detected",
-      "false": "No motion detected"
-    }
-  },
-  "purpose": "Reads the current state of the motion sensor"
-}
-	the properties of method wait_for_motion, as following : {
-  "returns": {
-    "dataType": "Boolean",
-    "values_meaning": {
-      "true": "Motion detected within timeout",
-      "false": "No motion detected within timeout"
-    }
-  },
-  "parameters": {
-    "timeout": {
-      "dataType": "Number",
-      "default": 10,
-      "unit": "seconds",
-      "purpose": "Timeout duration to wait for motion detection"
-    }
-  },
-  "purpose": "Waits for motion detection for a specified timeout period"
-}},for peripheral push_button, the object of PushButton, which is stored in 'peripherals[push_button]', run it's methods as following : 
-    the properties of method set_simulated_state, as following : {
-  "parameters": {
-    "pressed": {
-      "dataType": "Boolean",
-      "values_meaning": {
-        "true": "Simulates button pressed",
-        "false": "Simulates button released"
-      },
-      "purpose": "Sets the simulated state of the button (only used in simulation mode)"
-    }
-  },
-  "returns": "void",
-  "purpose": "Sets the simulated button state"
-}
-	the properties of method is_pressed, as following : {
-  "returns": {
-    "dataType": "Boolean",
-    "values_meaning": {
-      "true": "Button is pressed",
-      "false": "Button is released"
-    }
-  },
-  "purpose": "Checks if the button is pressed or released, applies debounce logic"
-}
-	the properties of method push, as following : {
-  "returns": "void",
-  "purpose": "Simulates a button press and release cycle (only for simulation mode)"
-}
-	the properties of method get_event, as following : {
-  "returns": {
-    "dataType": "Boolean",
-    "values_meaning": {
-      "true": "Button was pressed",
-      "false": "No button press detected"
-    }
-  },
-  "purpose": "Returns and clears the `was_pressed` flag indicating whether the button was pressed"
-}},for peripheral relay, the object of Relay, which is stored in 'peripherals[relay]', run it's methods as following : 
-    the properties of method on, as following : {
-  "returns": "void",
-  "purpose": "Turns the relay ON (sets pin to HIGH or LOW based on active_high)"
-}
-	the properties of method off, as following : {
-  "returns": "void",
-  "purpose": "Turns the relay OFF (sets pin to LOW or HIGH based on active_high)"
-}
-	the properties of method toggle, as following : {
-  "returns": "void",
-  "purpose": "Toggles the relay state between ON and OFF"
-}
-	the properties of method is_on, as following : {
-  "returns": {
-    "dataType": "Boolean"
-  },
-  "purpose": "Returns the current state of the relay (True if ON, False if OFF)"
-}},for peripheral servo_motor, the object of Servo, which is stored in 'peripherals[servo_motor]', run it's methods as following : 
-    the properties of method write_angle, as following : {
-  "returns": "void",
-  "parameters": {
-    "angle": {
-      "dataType": "Number",
-      "range": {
-        "min": 0,
-        "max": 180
-      },
-      "unit": "°",
-      "purpose": "Sets the servo motor to a specific angle, from 0° to 180°"
-    }
-  },
-  "purpose": "Sets the servo motor's angle by calculating the corresponding pulse width"
-}
-	the properties of method write_us, as following : {
-  "returns": "void",
-  "parameters": {
-    "us": {
-      "dataType": "Number",
-      "range": {
-        "min": 500,
-        "max": 2500
-      },
-      "unit": "μs",
-      "purpose": "Sets the servo motor's pulse width directly in microseconds"
-    }
-  },
-  "purpose": "Sets the servo motor's pulse width directly in microseconds and updates the angle"
-}
-	the properties of method get_state, as following : {
-  "returns": {
-    "dataType": "Object",
-    "properties": {
-      "pin": {
-        "dataType": "Number",
-        "purpose": "GPIO pin the servo is connected to"
-      },
-      "angle": {
-        "dataType": "Number",
-        "unit": "°",
-        "purpose": "Current angle of the servo motor"
-      },
-      "pulse_us": {
-        "dataType": "Number",
-        "unit": "μs",
-        "purpose": "Current pulse width of the servo motor"
-      }
-    }
-  },
-  "purpose": "Returns the current state of the servo motor including pin, angle, and pulse width"
-}
-	the properties of method deinit, as following : {
-  "returns": "void",
-  "purpose": "Deinitializes the servo motor and releases resources"
-}},for peripheral slide_switch, the object of SlideSwitch, which is stored in 'peripherals[slide_switch]', run it's methods as following : 
-    the properties of method set_simulated_state, as following : {
-  "parameters": {
-    "state": {
-      "dataType": "Boolean",
-      "values_meaning": {
-        "true": "Simulates turning the switch ON",
-        "false": "Simulates turning the switch OFF"
-      }
-    }
-  },
-  "returns": "void",
-  "purpose": "Sets the internal state of the switch during simulation"
-}
-	the properties of method read, as following : {
-  "returns": {
-    "dataType": "Boolean",
-    "values_meaning": {
-      "true": "Switch is ON",
-      "false": "Switch is OFF"
-    }
-  },
-  "purpose": "Reads the current switch state (either simulated or from the actual pin)"
-}
-	the properties of method state, as following : {
-  "returns": {
-    "dataType": "Boolean",
-    "values_meaning": {
-      "true": "Switch is ON",
-      "false": "Switch is OFF"
-    }
-  },
-  "purpose": "Property alias for reading the switch state"
-}}
+the class name for peripheral accelerometer is MPU6050, and the constructor parameters are : [{"name":"i2c","dataType":"Object","default":null,"optional":true,"purpose":"I2C bus instance used to communicate with the sensor"},{"name":"addr","dataType":"Number","default":104,"prefix":"hex","range":{"min":0,"max":127},"purpose":"I2C address of the MPU6050 sensor (default is 0x68)"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Simulated data (random values)","false":"Real hardware readings"},"purpose":"Enables simulation mode if set to true"}]
+        and it is intialized like this : peripherals[accelerometer]=MPU6050(parameters...)
+the class name for peripheral dht_sensor is DHTSensor, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number connected to the DHT sensor"},{"name":"sensor_type","dataType":"String","default":"DHT22","allowedValues":["DHT11","DHT22"],"purpose":"Specifies the type of DHT sensor being used"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Sensor data will be simulated using random values","false":"Sensor will read actual values via GPIO"},"purpose":"Controls whether the sensor operates in simulation or real mode"}]
+        and it is intialized like this : peripherals[dht_sensor]=DHTSensor(parameters...)
+the class name for peripheral encoder is Encoder, and the constructor parameters are : [{"name":"pin_a","dataType":"Number","purpose":"GPIO pin connected to encoder channel A"},{"name":"pin_b","dataType":"Number","purpose":"GPIO pin connected to encoder channel B"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Enables simulation mode, position can be changed manually","false":"Enables real hardware mode using interrupts on GPIO pins"},"purpose":"Controls whether the encoder operates in simulation or real mode"}]
+        and it is intialized like this : peripherals[encoder]=Encoder(parameters...)
+the class name for peripheral gas_sensor is GasSensor, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number to which the gas sensor is connected"},{"name":"analog","dataType":"Boolean","default":true,"values_meaning":{"true":"Uses analog pin and ADC to read varying gas levels","false":"Uses digital pin to detect gas presence (binary value)"},"purpose":"Determines if the sensor is analog or digital"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Sensor values are simulated randomly","false":"Reads actual values from the connected hardware"},"purpose":"Controls whether the sensor operates in simulation or real mode"}]
+        and it is intialized like this : peripherals[gas_sensor]=GasSensor(parameters...)
+the class name for peripheral led is LED, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number connected to the LED"},{"name":"active_high","dataType":"Boolean","default":true,"values_meaning":{"true":"LED turns ON when the GPIO pin is set HIGH","false":"LED turns ON when the GPIO pin is set LOW"},"purpose":"Controls whether the LED is active-high or active-low"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Simulated LED behavior (no real hardware interaction)","false":"Real LED control via hardware GPIO"},"purpose":"Enables or disables simulation mode"}]
+        and it is intialized like this : peripherals[led]=LED(parameters...)
+the class name for peripheral internal_led is InternalLED, and the constructor parameters are : [{"name":"simulate","dataType":"Boolean","default":false,"values_meaning":{"true":"LED behavior will be simulated with print statements instead of real hardware interaction","false":"Controls the actual onboard LED"},"purpose":"Determines whether the internal LED runs in simulation mode or hardware mode"}]
+        and it is intialized like this : peripherals[internal_led]=InternalLED(parameters...)
+the class name for peripheral motion_sensor is MotionSensor, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number connected to the motion sensor"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Sensor data will be simulated (random motion values)","false":"Reads actual motion detection data from the connected pin"},"purpose":"Whether to operate in simulation mode or real mode"}]
+        and it is intialized like this : peripherals[motion_sensor]=MotionSensor(parameters...)
+the class name for peripheral push_button is PushButton, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number connected to the push button"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Button state is simulated","false":"Button state is read from the physical hardware pin"},"purpose":"Specifies whether the button is in simulation mode"},{"name":"debounce_ms","dataType":"Number","default":50,"unit":"ms","range":{"min":0,"max":1000},"purpose":"Debounce duration to prevent false multiple button presses"}]
+        and it is intialized like this : peripherals[push_button]=PushButton(parameters...)
+the class name for peripheral relay is Relay, and the constructor parameters are : [{"name":"pin","dataType":"Number","required":true,"purpose":"GPIO pin number connected to the relay control input"},{"name":"active_high","dataType":"Boolean","default":true,"values_meaning":{"true":"Relay is activated when the pin is set to HIGH","false":"Relay is activated when the pin is set to LOW"},"purpose":"Determines the logic level that activates the relay"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Relay behavior is simulated with console output","false":"Relay controls actual GPIO pin"},"purpose":"Controls whether the relay operates in simulation or real mode"}]
+        and it is intialized like this : peripherals[relay]=Relay(parameters...)
+the class name for peripheral servo_motor is Servo, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number connected to the Servo motor"},{"name":"freq","dataType":"Number","default":50,"range":{"min":1,"max":1000},"unit":"Hz","purpose":"PWM frequency for the servo control signal (default is 50Hz)"},{"name":"min_us","dataType":"Number","default":500,"range":{"min":0,"max":2000},"unit":"μs","purpose":"Minimum pulse width in microseconds, corresponding to 0° angle"},{"name":"max_us","dataType":"Number","default":2500,"range":{"min":2000,"max":5000},"unit":"μs","purpose":"Maximum pulse width in microseconds, corresponding to max angle"},{"name":"angle_range","dataType":"Number","default":180,"range":{"min":0,"max":360},"unit":"°","purpose":"Range of servo motion in degrees"}]
+        and it is intialized like this : peripherals[servo_motor]=Servo(parameters...)
+the class name for peripheral slide_switch is SlideSwitch, and the constructor parameters are : [{"name":"pin","dataType":"Number","purpose":"GPIO pin number to which the slide switch is connected"},{"name":"simulate","dataType":"Boolean","default":true,"values_meaning":{"true":"Simulated mode enabled; state changes can be simulated programmatically","false":"Reads the actual hardware state of the slide switch"},"purpose":"Determines whether the switch operates in simulation or real hardware mode"}]
+        and it is intialized like this : peripherals[slide_switch]=SlideSwitch(parameters...)
 
-
+  and don't write anything else. 
 

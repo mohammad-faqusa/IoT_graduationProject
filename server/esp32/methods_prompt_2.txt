@@ -1,0 +1,96 @@
+
+you are micropython esp32 code generator 
+
+you need to write just micropyhton, to copy it directly on micropyhton file, 
+
+I have dict of peripherals object in 'peripherals' dictionary micropython
+
+and I need to use the methods of each peripheral for testing in a written function, just write the body of function, and don't write the name of function 
+consider writing try, except for each peripheral 
+don't write function return 
+and write the methods as following  : 
+for peripheral motion_sensor, the object of MotionSensor, which is stored in 'peripherals[motion_sensor]', run it's methods as following : 
+    the properties of method read, as following : {
+  "returns": {
+    "dataType": "Boolean",
+    "values_meaning": {
+      "true": "Motion detected",
+      "false": "No motion detected"
+    }
+  },
+  "purpose": "Reads the current state of the motion sensor"
+}
+	the properties of method wait_for_motion, as following : {
+  "returns": {
+    "dataType": "Boolean",
+    "values_meaning": {
+      "true": "Motion detected within timeout",
+      "false": "No motion detected within timeout"
+    }
+  },
+  "parameters": {
+    "timeout": {
+      "dataType": "Number",
+      "default": 10,
+      "unit": "seconds",
+      "purpose": "Timeout duration to wait for motion detection"
+    }
+  },
+  "purpose": "Waits for motion detection for a specified timeout period"
+}},for peripheral push_button, the object of PushButton, which is stored in 'peripherals[push_button]', run it's methods as following : 
+    the properties of method set_simulated_state, as following : {
+  "parameters": {
+    "pressed": {
+      "dataType": "Boolean",
+      "values_meaning": {
+        "true": "Simulates button pressed",
+        "false": "Simulates button released"
+      },
+      "purpose": "Sets the simulated state of the button (only used in simulation mode)"
+    }
+  },
+  "returns": "void",
+  "purpose": "Sets the simulated button state"
+}
+	the properties of method is_pressed, as following : {
+  "returns": {
+    "dataType": "Boolean",
+    "values_meaning": {
+      "true": "Button is pressed",
+      "false": "Button is released"
+    }
+  },
+  "purpose": "Checks if the button is pressed or released, applies debounce logic"
+}
+	the properties of method push, as following : {
+  "returns": "void",
+  "purpose": "Simulates a button press and release cycle (only for simulation mode)"
+}
+	the properties of method get_event, as following : {
+  "returns": {
+    "dataType": "Boolean",
+    "values_meaning": {
+      "true": "Button was pressed",
+      "false": "No button press detected"
+    }
+  },
+  "purpose": "Returns and clears the `was_pressed` flag indicating whether the button was pressed"
+}},for peripheral relay, the object of Relay, which is stored in 'peripherals[relay]', run it's methods as following : 
+    the properties of method on, as following : {
+  "returns": "void",
+  "purpose": "Turns the relay ON (sets pin to HIGH or LOW based on active_high)"
+}
+	the properties of method off, as following : {
+  "returns": "void",
+  "purpose": "Turns the relay OFF (sets pin to LOW or HIGH based on active_high)"
+}
+	the properties of method toggle, as following : {
+  "returns": "void",
+  "purpose": "Toggles the relay state between ON and OFF"
+}
+	the properties of method is_on, as following : {
+  "returns": {
+    "dataType": "Boolean"
+  },
+  "purpose": "Returns the current state of the relay (True if ON, False if OFF)"
+}}

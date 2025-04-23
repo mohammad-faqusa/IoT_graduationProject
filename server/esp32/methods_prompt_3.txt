@@ -1,0 +1,101 @@
+
+you are micropython esp32 code generator 
+
+you need to write just micropyhton, to copy it directly on micropyhton file, 
+
+I have dict of peripherals object in 'peripherals' dictionary micropython
+
+and I need to use the methods of each peripheral for testing in a written function, just write the body of function, and don't write the name of function 
+consider writing try, except for each peripheral 
+don't write function return 
+and write the methods as following  : 
+for peripheral servo_motor, the object of Servo, which is stored in 'peripherals[servo_motor]', run it's methods as following : 
+    the properties of method write_angle, as following : {
+  "returns": "void",
+  "parameters": {
+    "angle": {
+      "dataType": "Number",
+      "range": {
+        "min": 0,
+        "max": 180
+      },
+      "unit": "°",
+      "purpose": "Sets the servo motor to a specific angle, from 0° to 180°"
+    }
+  },
+  "purpose": "Sets the servo motor's angle by calculating the corresponding pulse width"
+}
+	the properties of method write_us, as following : {
+  "returns": "void",
+  "parameters": {
+    "us": {
+      "dataType": "Number",
+      "range": {
+        "min": 500,
+        "max": 2500
+      },
+      "unit": "μs",
+      "purpose": "Sets the servo motor's pulse width directly in microseconds"
+    }
+  },
+  "purpose": "Sets the servo motor's pulse width directly in microseconds and updates the angle"
+}
+	the properties of method get_state, as following : {
+  "returns": {
+    "dataType": "Object",
+    "properties": {
+      "pin": {
+        "dataType": "Number",
+        "purpose": "GPIO pin the servo is connected to"
+      },
+      "angle": {
+        "dataType": "Number",
+        "unit": "°",
+        "purpose": "Current angle of the servo motor"
+      },
+      "pulse_us": {
+        "dataType": "Number",
+        "unit": "μs",
+        "purpose": "Current pulse width of the servo motor"
+      }
+    }
+  },
+  "purpose": "Returns the current state of the servo motor including pin, angle, and pulse width"
+}
+	the properties of method deinit, as following : {
+  "returns": "void",
+  "purpose": "Deinitializes the servo motor and releases resources"
+}},for peripheral slide_switch, the object of SlideSwitch, which is stored in 'peripherals[slide_switch]', run it's methods as following : 
+    the properties of method set_simulated_state, as following : {
+  "parameters": {
+    "state": {
+      "dataType": "Boolean",
+      "values_meaning": {
+        "true": "Simulates turning the switch ON",
+        "false": "Simulates turning the switch OFF"
+      }
+    }
+  },
+  "returns": "void",
+  "purpose": "Sets the internal state of the switch during simulation"
+}
+	the properties of method read, as following : {
+  "returns": {
+    "dataType": "Boolean",
+    "values_meaning": {
+      "true": "Switch is ON",
+      "false": "Switch is OFF"
+    }
+  },
+  "purpose": "Reads the current switch state (either simulated or from the actual pin)"
+}
+	the properties of method state, as following : {
+  "returns": {
+    "dataType": "Boolean",
+    "values_meaning": {
+      "true": "Switch is ON",
+      "false": "Switch is OFF"
+    }
+  },
+  "purpose": "Property alias for reading the switch state"
+}}

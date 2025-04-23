@@ -14,13 +14,14 @@ async function callClaude(prompt, outputPath) {
     messages: [{ role: "user", content: prompt }],
   });
   //   console.log(msg.content[0].text);
-  const input = `\`\`\`python
-// your code here
-\`\`\``;
 
-  const output = msg.content[0].text.replace(/^```python\s*|\s*```$/g, "");
+  const output = msg.content[0].text
+    .replace(/^```python\s*|\s*```$/g, "")
+    .split("\n")
+    .map((line) => "    " + line)
+    .join("\n");
 
-  fs.writeFileSync(outputPath, output);
+  return await output;
 }
 // callClaude();
 module.exports = callClaude;

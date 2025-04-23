@@ -1,0 +1,97 @@
+
+you are micropython esp32 code generator 
+
+you need to write just micropyhton, to copy it directly on micropyhton file, 
+
+I have dict of peripherals object in 'peripherals' dictionary micropython
+
+and I need to use the methods of each peripheral for testing in a written function, just write the body of function, and don't write the name of function 
+consider writing try, except for each peripheral 
+don't write function return 
+and write the methods as following  : 
+for peripheral accelerometer, the object of MPU6050, which is stored in 'peripherals[accelerometer]', run it's methods as following : 
+    the properties of method read_accel, as following : {
+  "returns": {
+    "dataType": "Array",
+    "elementType": "Number",
+    "length": 3,
+    "unit": "g"
+  },
+  "purpose": "Returns a tuple of X, Y, Z acceleration values"
+}
+	the properties of method read_gyro, as following : {
+  "returns": {
+    "dataType": "Array",
+    "elementType": "Number",
+    "length": 3,
+    "unit": "deg/s"
+  },
+  "purpose": "Returns a tuple of X, Y, Z gyroscope values"
+}
+	the properties of method read_all, as following : {
+  "returns": {
+    "dataType": "Object",
+    "properties": {
+      "accel": {
+        "dataType": "Array",
+        "elementType": "Number",
+        "length": 3,
+        "unit": "g"
+      },
+      "gyro": {
+        "dataType": "Array",
+        "elementType": "Number",
+        "length": 3,
+        "unit": "deg/s"
+      }
+    }
+  },
+  "purpose": "Returns both accelerometer and gyroscope readings in one call"
+}},for peripheral dht_sensor, the object of DHTSensor, which is stored in 'peripherals[dht_sensor]', run it's methods as following : 
+    the properties of method measure, as following : {
+  "returns": "void",
+  "purpose": "Triggers the sensor to update temperature and humidity readings"
+}
+	the properties of method temperature, as following : {
+  "returns": {
+    "dataType": "Number",
+    "unit": "°C",
+    "range": {
+      "min": -40,
+      "max": 125
+    }
+  },
+  "purpose": "Returns the last measured temperature value. Range: -40°C to 125°C"
+}
+	the properties of method humidity, as following : {
+  "returns": {
+    "dataType": "Number",
+    "unit": "%",
+    "range": {
+      "min": 0,
+      "max": 100
+    }
+  },
+  "purpose": "Returns the last measured humidity value. Range: 0% to 100%"
+}},for peripheral encoder, the object of Encoder, which is stored in 'peripherals[encoder]', run it's methods as following : 
+    the properties of method get_position, as following : {
+  "returns": {
+    "dataType": "Number",
+    "purpose": "Returns the current position of the encoder"
+  }
+}
+	the properties of method reset, as following : {
+  "returns": "void",
+  "purpose": "Resets the encoder position back to zero"
+}
+	the properties of method simulate_step, as following : {
+  "parameters": {
+    "steps": {
+      "dataType": "Number",
+      "purpose": "Number of steps to increment or decrement position (for simulate mode)"
+    }
+  },
+  "returns": "void",
+  "purpose": "Manually updates the encoder position during simulation mode",
+  "availability": "Only available when simulate=true"
+}}
