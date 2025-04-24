@@ -23,7 +23,8 @@ function initializePeripheralsPrompt(peripherals_info) {
         )}
           and it is intialized like this : peripherals[${p.name}]=${
           p.class_name
-        }(parameters...)`
+        }(parameters...), consider the default values of parameters. 
+  `
     )
     .join("\n")}
   
