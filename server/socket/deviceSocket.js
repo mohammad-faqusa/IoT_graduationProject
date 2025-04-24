@@ -31,7 +31,8 @@ deviceSocket = (socket) => {
       const device = await doc.save();
       ackCallBack(device.id);
     } catch (err) {
-      socket.emit("errorSetup", err.message);
+      ackCallBack(-1);
+      // socket.emit("errorSetup", err.message);
       console.log(err);
     }
   });

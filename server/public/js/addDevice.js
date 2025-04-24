@@ -326,6 +326,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     addMessage("Sending Data to the server", "success");
     deviceId = await socket.emitWithAck("addDevice", formData);
+    if (deviceId == -1) {
+      const errorDetails = {
+        code: "err.message",
+        id: "server-" + Date.now(),
+        actionable: true,
+        action: "reload",
+        actionText: "reload the page",
+      };
+
+      addMessage("dublicated key name device", "error", errorDetails);
+      return;
+    }
     addMessage(
       `The device is added to the database, setup the device...`,
       "success"

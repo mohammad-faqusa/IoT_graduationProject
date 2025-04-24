@@ -3,6 +3,7 @@ const util = require("util");
 const execPromise = util.promisify(exec);
 const fs = require("fs");
 const path = require("path");
+const codeGeneration = require("./aiGenerate");
 
 // Replace with your actual port (or use "auto" if only one board is connected)
 const port = "COM3";
@@ -74,11 +75,40 @@ async function installLibraries(plist, socket) {
   }
 }
 
+async function copyFilesToESP32(filesArray, socket) {
+  for (const fileName of filesArray) {
+    try {
+      // const fileName = path.basename(file); // Target name on ESP32
+      console.log(`📁 Uploading ${fileName} -> ESP32: ${fileName}`);
+      socket.emit("processSetup", {
+        status: "processing",
+        data: `📁 Uploading ${fileName} -> ESP32: ${fileName}`,
+      });
+
+      const command = `mpremote connect ${port} fs cp ${__dirname}/espFiles/${fileName} :${fileName}`;
+      const { stdout } = await execPromise(command);
+      console.log("✅ Uploaded:", fileName);
+      socket.emit("processSetup", {
+        status: "processing",
+        data: `✅ Uploaded: ${fileName}`,
+      });
+      if (stdout) console.log(stdout);
+    } catch (err) {
+      console.error(
+        `❌ Failed to upload ${fileName}:`,
+        err.stderr || err.message
+      );
+      throw err;
+    }
+  }
+}
+
 async function espSetup(id, plist, socket) {
   try {
     await prepareESP32(socket);
     await installLibraries(plist, socket);
-
+    await codeGeneration(plist, socket);
+    await copyFilesToESP32(["main.py"], socket);
     socket.emit("processSetup", {
       status: "finished",
       data: `the esp32 setup is finished successfully!`,
