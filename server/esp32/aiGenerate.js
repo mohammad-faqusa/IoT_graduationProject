@@ -15,7 +15,7 @@ function groupArrayElements(arr, groupSize) {
   return result;
 }
 
-const peripherals_info = JSON.parse(fs.readFileSync("peripherals_info.json"));
+// const peripherals_info = JSON.parse(fs.readFileSync(path.join()));
 
 async function initializeCode(peripherals_info) {
   const prompt = initializePeripheralsPrompt(peripherals_info);
@@ -45,7 +45,7 @@ def run_all_methods(peripherals):\n${finalBody}`;
 
 async function codeGeneration(selectedPeripherals) {
   const peripherals_info = JSON.parse(
-    fs.readFileSync("peripherals_info.json")
+    fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
   ).filter((p) => selectedPeripherals.includes(p.name));
 
   const init_code = await initializeCode(peripherals_info);
@@ -55,6 +55,6 @@ async function codeGeneration(selectedPeripherals) {
   fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), final_code);
 }
 
-codeGeneration(["accelerometer", "dht_sensor", "internal_led"]);
+module.exports = codeGeneration;
 // methodsCode(peripherals_info);
 // initializeCode(peripherals_info);

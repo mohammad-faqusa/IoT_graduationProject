@@ -1,18 +1,13 @@
 // require('./../database.js')
+const path = require("path");
+const fs = require("fs");
 const Device = require("../models/Device.js");
 // const Peripheral = require('../models/Peripheral.js')
-const espSetup = require("../esp32/espSetup2");
+const espSetup = require("../esp32/espSetup");
 
-pList = [
-  "servo",
-  "dht",
-  "motion",
-  "gas_sensor",
-  "switch",
-  "led",
-  "accelorometer",
-  "encoder",
-];
+const pList = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
+).map((p) => p.name);
 
 deviceSocket = (socket) => {
   socket.on("addDevice_pList", async (data, ackCallBack) => {
@@ -49,11 +44,14 @@ deviceSocket = (socket) => {
       console.log("this is pList : ", pList);
       await espSetup(deviceId, pList, socket);
     } catch (err) {
-      socket.emit("errorSetup", `error in device setup, ${err.message}`);
       await Device.findByIdAndDelete(device._id);
-      socket.emit("processSetup", {
+      socket.emit("errorSetup", {
+        status: "error",
+        data: `❌failed:", ${err.stderr || err.message}`,
+      });
+      socket.emit("errorSetup", {
         status: "finished",
-        data: "the device is deleted from the database",
+        data: `the device is deleted from the database`,
       });
     }
   });

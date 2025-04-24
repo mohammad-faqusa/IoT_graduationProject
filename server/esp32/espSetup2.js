@@ -1,6 +1,6 @@
 const { exec } = require("child_process");
 const util = require("util");
-const generateFiles = require("./generateFiles");
+const codeGeneration = require("./aiGenerate.js");
 
 const execPromise = util.promisify(exec);
 
@@ -10,7 +10,7 @@ async function espSetup(id, plist, socket) {
       status: "processing",
       data: `generating files...`,
     });
-    generateFiles(id, plist);
+    codeGeneration(plist);
     socket.emit("processSetup", {
       status: "processing",
       data: `finished generating files`,
@@ -38,7 +38,7 @@ async function espSetup(id, plist, socket) {
       data: `installing libraries...`,
     });
     const { stdout2, stderr2 } = await execPromise(
-      "mpremote mip install github:peterhinch/micropython-mqtt"
+      "mpremote mip install github:mohammad0faqusa/micropython-mqtt"
     );
     console.log("Output:", stdout2);
     if (stderr2)
@@ -47,6 +47,12 @@ async function espSetup(id, plist, socket) {
         data: `Error Output:, ${stderr2}`,
       });
 
+    plist.forEach(async (peripheral) => {
+      const { stdout, stderr } = await execPromise(
+        `mpremote mip install github:mohammad0faqusa/mip-packages/${peripheral}/package.json`
+      );
+      console.log("library of ", peripheral, stdout);
+    });
     socket.emit("processSetup", {
       status: "processing",
       data: `finished installing the libraries.`,
