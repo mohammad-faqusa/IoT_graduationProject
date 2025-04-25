@@ -12,7 +12,8 @@ def callback(topic, msg, retained, properties=None):  # MQTT V5 passes propertie
 #topics : esp32/deviceId: 
     #read methods 
     #write methods 
-    #properties 
+    #properties
+    #test
     #util: 
     
     # read {method_name: 'parameter_values', send back what returns } , write : {maethod_name : 'parameters values'}, properties : {read_methods: {method: {name, parameter_data_types, }}, write_methods: {}}

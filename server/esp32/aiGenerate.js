@@ -1,9 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const { initializePeripheralsPrompt, methodsPrompt } = require(path.join(
-  __dirname,
-  "generatePrompts"
-));
+const {
+  initializePeripheralsPrompt,
+  methodsPrompt,
+  generateMQTTCallbackPrompt,
+} = require(path.join(__dirname, "generatePrompts"));
 
 const callClaude = require(path.join(__dirname, "claude_console/lib/index"));
 
@@ -15,12 +16,20 @@ function groupArrayElements(arr, groupSize) {
   return result;
 }
 
-// const peripherals_info = JSON.parse(fs.readFileSync(path.join()));
+const peripherals_info = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
+);
 
 async function initializeCode(peripherals_info) {
   const prompt = initializePeripheralsPrompt(peripherals_info);
   const finalCode = await callClaude(prompt);
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
+  return finalCode;
+}
+async function mqttCallbackCode(peripherals_info) {
+  const prompt = generateMQTTCallbackPrompt(peripherals_info.slice(0, 3));
+  const finalCode = await callClaude(prompt);
+  fs.writeFileSync(path.join(__dirname, "espFiles/output.py"), finalCode);
   return finalCode;
 }
 
@@ -97,4 +106,5 @@ async function codeGeneration(selectedPeripherals, socket) {
   }
 }
 
-module.exports = codeGeneration;
+mqttCallbackCode(peripherals_info);
+// module.exports = codeGeneration;
