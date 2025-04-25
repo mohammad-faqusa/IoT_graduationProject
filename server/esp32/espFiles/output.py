@@ -1,5 +1,6 @@
-# Process accelerometer peripheral
+# Check for accelerometer methods
 if "accelerometer" in msg:
+    # Read methods
     if "read_accel" in msg["accelerometer"]:
         result = peripherals["accelerometer"].read_accel()
         output_dict["accelerometer"]["read_accel"] = result
@@ -12,12 +13,14 @@ if "accelerometer" in msg:
         result = peripherals["accelerometer"].read_all()
         output_dict["accelerometer"]["read_all"] = result
 
-# Process DHT sensor peripheral
+# Check for DHT sensor methods
 if "dht_sensor" in msg:
+    # Write methods
     if "measure" in msg["dht_sensor"]:
         peripherals["dht_sensor"].measure()
         output_dict["dht_sensor"]["measure"] = {"status": "ok"}
     
+    # Read methods
     if "temperature" in msg["dht_sensor"]:
         result = peripherals["dht_sensor"].temperature()
         output_dict["dht_sensor"]["temperature"] = result
@@ -26,17 +29,19 @@ if "dht_sensor" in msg:
         result = peripherals["dht_sensor"].humidity()
         output_dict["dht_sensor"]["humidity"] = result
 
-# Process encoder peripheral
+# Check for encoder methods
 if "encoder" in msg:
+    # Read methods
     if "get_position" in msg["encoder"]:
         result = peripherals["encoder"].get_position()
         output_dict["encoder"]["get_position"] = result
     
+    # Write methods
     if "reset" in msg["encoder"]:
         peripherals["encoder"].reset()
         output_dict["encoder"]["reset"] = {"status": "ok"}
     
     if "simulate_step" in msg["encoder"]:
-        steps = msg["encoder"]["simulate_step"].get("steps", 0)
+        steps = msg["encoder"]["simulate_step"]
         peripherals["encoder"].simulate_step(steps)
         output_dict["encoder"]["simulate_step"] = {"status": "ok"}

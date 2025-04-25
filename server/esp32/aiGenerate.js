@@ -27,10 +27,35 @@ async function initializeCode(peripherals_info) {
   return finalCode;
 }
 async function mqttCallbackCode(peripherals_info) {
-  const prompt = generateMQTTCallbackPrompt(peripherals_info.slice(0, 3));
-  const finalCode = await callClaude(prompt);
-  fs.writeFileSync(path.join(__dirname, "espFiles/output.py"), finalCode);
-  return finalCode;
+  const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
+  const arrCode = await Promise.all(
+    grouped_peripherals_info.map(async (group_p, index) => {
+      const prompt = generateMQTTCallbackPrompt(group_p);
+      const finalCode = await callClaude(prompt);
+
+      console.log(finalCode);
+      return await finalCode;
+    })
+  );
+  const function_header = `def callback(topic, msg, retained, properties=None):
+    print((topic.decode(), msg.decode(), retained))
+    msg = msg.decode()
+    msg = json.loads(msg)
+    output_dict = {}`;
+  arrCode[arrCode.length - 1] =
+    arrCode[arrCode.length - 1] +
+    "\n" +
+    "# Run the async sender from sync context\nasyncio.create_task(send_message(output_dict))";
+  const function_code =
+    function_header +
+    "\n" +
+    arrCode
+      .join("\n")
+      .split("\n")
+      .map((line) => "    " + line)
+      .join("\n");
+  fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), function_code);
+  return function_code;
 }
 
 async function testMethodsCode(peripherals_info) {
@@ -38,7 +63,11 @@ async function testMethodsCode(peripherals_info) {
   const arrCode = await Promise.all(
     grouped_peripherals_info.map(async (group_p, index) => {
       const prompt = methodsPrompt(group_p);
-      const finalCode = await callClaude(prompt, true);
+      const finalBody = await callClaude(prompt);
+      const finalCode = finalCode
+        .split("\n")
+        .map((line) => "    " + line)
+        .join("\n");
       // console.log(finalCode);
       return await finalCode;
     })

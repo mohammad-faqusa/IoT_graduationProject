@@ -13,15 +13,8 @@ async function callClaude(prompt, shifted) {
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
   });
-  if (shifted) {
-    return await msg.content[0].text
-      .replace(/^```python\s*|\s*```$/g, "")
-      .split("\n")
-      .map((line) => "    " + line)
-      .join("\n");
-  } else {
-    return await msg.content[0].text.replace(/^```python\s*|\s*```$/g, "");
-  }
+
+  return await msg.content[0].text.replace(/^```python\s*|\s*```$/g, "");
 }
 // callClaude();
 module.exports = callClaude;
