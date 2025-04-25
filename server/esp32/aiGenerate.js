@@ -24,7 +24,7 @@ async function initializeCode(peripherals_info) {
   return finalCode;
 }
 
-async function methodsCode(peripherals_info) {
+async function testMethodsCode(peripherals_info) {
   const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
   const arrCode = await Promise.all(
     grouped_peripherals_info.map(async (group_p, index) => {
@@ -42,18 +42,6 @@ def run_all_methods(peripherals):\n${finalBody}`;
 
   return function_code;
 }
-
-// async function codeGeneration(selectedPeripherals, socket) {
-//   const peripherals_info = JSON.parse(
-//     fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
-//   ).filter((p) => selectedPeripherals.includes(p.name));
-
-//   const init_code = await initializeCode(peripherals_info);
-//   const test_code = await methodsCode(peripherals_info);
-
-//   const final_code = init_code + "\n" + test_code;
-//   fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), final_code);
-// }
 
 async function codeGeneration(selectedPeripherals, socket) {
   try {
@@ -80,24 +68,29 @@ async function codeGeneration(selectedPeripherals, socket) {
       status: "processing",
       data: "🧪 Generating methods/testing code...",
     });
-    const test_code = await methodsCode(peripherals_info);
+    const test_code = await testMethodsCode(peripherals_info);
 
-    const final_code = init_code + "\n" + test_code;
+    // const final_code = init_code + "\n" + test_code;
 
     socket.emit("processSetup", {
       status: "processing",
       data: "💾 Writing main.py to espFiles...",
     });
 
-    const outputPath = path.join(__dirname, "espFiles/main.py");
-    fs.writeFileSync(outputPath, final_code);
+    const init_path = path.join(__dirname, "espFiles/main.py");
+    const test_methods_path = path.join(
+      __dirname,
+      "espFiles/test_all_methods.py"
+    );
+    fs.writeFileSync(init_path, init_code);
+    fs.writeFileSync(test_methods_path, test_code);
 
     socket.emit("processSetup", {
       status: "processing",
       data: "✅ Code generation complete!",
     });
 
-    return final_code; // Optional, in case caller needs it
+    // return final_code; // Optional, in case caller needs it
   } catch (err) {
     // No socket or console output, just rethrow
     throw err;
@@ -105,5 +98,3 @@ async function codeGeneration(selectedPeripherals, socket) {
 }
 
 module.exports = codeGeneration;
-// methodsCode(peripherals_info);
-// initializeCode(peripherals_info);

@@ -143,7 +143,7 @@ async function espSetup(id, plist, socket) {
     await prepareESP32(socket);
     await installLibraries(plist, socket);
     await codeGeneration(plist, socket);
-    await copyFilesToESP32(["main.py"], socket);
+    await copyFilesToESP32(["main.py", "run_all_methods.py"], socket);
     socket.emit("processSetup", {
       status: "finished",
       data: `the esp32 setup is finished successfully!`,

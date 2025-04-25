@@ -39,24 +39,40 @@
     },
     "methods": {
       "read_accel": {
+        "type": "read",
+        "label": "Read Acceleration",
         "returns": {
           "dataType": "Array",
           "elementType": "Number",
           "length": 3,
-          "unit": "g"
+          "unit": "g",
+          "elementNames": ["x", "y", "z"],
+          "range": {
+            "min": -2,
+            "max": 2
+          }
         },
         "purpose": "Returns a tuple of X, Y, Z acceleration values"
       },
       "read_gyro": {
+        "type": "read",
+        "label": "Read Gyroscope",
         "returns": {
           "dataType": "Array",
           "elementType": "Number",
           "length": 3,
-          "unit": "deg/s"
+          "unit": "deg/s",
+          "elementNames": ["x", "y", "z"],
+          "range": {
+            "min": -250,
+            "max": 250
+          }
         },
         "purpose": "Returns a tuple of X, Y, Z gyroscope values"
       },
       "read_all": {
+        "type": "read",
+        "label": "Read All Sensors",
         "returns": {
           "dataType": "Object",
           "properties": {
@@ -64,13 +80,23 @@
               "dataType": "Array",
               "elementType": "Number",
               "length": 3,
-              "unit": "g"
+              "unit": "g",
+              "elementNames": ["x", "y", "z"],
+              "range": {
+                "min": -2,
+                "max": 2
+              }
             },
             "gyro": {
               "dataType": "Array",
               "elementType": "Number",
               "length": 3,
-              "unit": "deg/s"
+              "unit": "deg/s",
+              "elementNames": ["x", "y", "z"],
+              "range": {
+                "min": -250,
+                "max": 250
+              }
             }
           }
         },
@@ -160,10 +186,16 @@
     },
     "methods": {
       "measure": {
-        "returns": "void",
+        "type": "write",
+        "label": "Trigger Measurement",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Triggers the sensor to update temperature and humidity readings"
       },
       "temperature": {
+        "type": "read",
+        "label": "Read Temperature",
         "returns": {
           "dataType": "Number",
           "unit": "°C",
@@ -175,6 +207,8 @@
         "purpose": "Returns the last measured temperature value. Range: -40°C to 125°C"
       },
       "humidity": {
+        "type": "read",
+        "label": "Read Humidity",
         "returns": {
           "dataType": "Number",
           "unit": "%",
@@ -255,23 +289,42 @@
     },
     "methods": {
       "get_position": {
+        "type": "read",
+        "label": "Get Position",
         "returns": {
           "dataType": "Number",
-          "purpose": "Returns the current position of the encoder"
-        }
+          "range": {
+            "min": null,
+            "max": null
+          }
+        },
+        "purpose": "Returns the current position of the encoder"
       },
       "reset": {
-        "returns": "void",
+        "type": "write",
+        "label": "Reset Position",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Resets the encoder position back to zero"
       },
       "simulate_step": {
-        "parameters": {
-          "steps": {
+        "type": "write",
+        "label": "Simulate Step",
+        "parameters": [
+          {
+            "name": "steps",
             "dataType": "Number",
+            "range": {
+              "min": -1000,
+              "max": 1000
+            },
             "purpose": "Number of steps to increment or decrement position (for simulate mode)"
           }
+        ],
+        "returns": {
+          "dataType": "void"
         },
-        "returns": "void",
         "purpose": "Manually updates the encoder position during simulation mode",
         "availability": "Only available when simulate=true"
       }
@@ -348,6 +401,8 @@
     },
     "methods": {
       "read": {
+        "type": "read",
+        "label": "Read Gas Level",
         "returns": {
           "dataType": "Number",
           "range": {
@@ -435,18 +490,32 @@
     },
     "methods": {
       "on": {
-        "returns": "void",
+        "type": "write",
+        "label": "Turn ON",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Turns the LED ON (sets the state to ON)"
       },
       "off": {
-        "returns": "void",
+        "type": "write",
+        "label": "Turn OFF",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Turns the LED OFF (sets the state to OFF)"
       },
       "toggle": {
-        "returns": "void",
+        "type": "write",
+        "label": "Toggle",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Toggles the state of the LED (ON if OFF, OFF if ON)"
       },
       "is_on": {
+        "type": "read",
+        "label": "Check if ON",
         "returns": {
           "dataType": "Boolean"
         },
@@ -508,22 +577,36 @@
     },
     "methods": {
       "on": {
-        "returns": "void",
-        "purpose": "Turns the internal LED ON (sets the state to ON)"
+        "type": "write",
+        "label": "Turn ON",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Turns the LED ON (sets the state to ON)"
       },
       "off": {
-        "returns": "void",
-        "purpose": "Turns the internal LED OFF (sets the state to OFF)"
+        "type": "write",
+        "label": "Turn OFF",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Turns the LED OFF (sets the state to OFF)"
       },
       "toggle": {
-        "returns": "void",
-        "purpose": "Toggles the state of the internal LED (ON if OFF, OFF if ON)"
+        "type": "write",
+        "label": "Toggle",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Toggles the state of the LED (ON if OFF, OFF if ON)"
       },
       "is_on": {
+        "type": "read",
+        "label": "Check if ON",
         "returns": {
           "dataType": "Boolean"
         },
-        "purpose": "Returns the current state of the internal LED (True if ON, False if OFF)"
+        "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
       }
     },
     "constructor": {
@@ -593,6 +676,8 @@
     },
     "methods": {
       "read": {
+        "type": "read",
+        "label": "Read Motion State",
         "returns": {
           "dataType": "Boolean",
           "values_meaning": {
@@ -603,6 +688,8 @@
         "purpose": "Reads the current state of the motion sensor"
       },
       "wait_for_motion": {
+        "type": "write",
+        "label": "Wait for Motion",
         "returns": {
           "dataType": "Boolean",
           "values_meaning": {
@@ -610,14 +697,19 @@
             "false": "No motion detected within timeout"
           }
         },
-        "parameters": {
-          "timeout": {
+        "parameters": [
+          {
+            "name": "timeout",
             "dataType": "Number",
             "default": 10,
             "unit": "seconds",
+            "range": {
+              "min": 0,
+              "max": 300
+            },
             "purpose": "Timeout duration to wait for motion detection"
           }
-        },
+        ],
         "purpose": "Waits for motion detection for a specified timeout period"
       }
     },
@@ -698,8 +790,11 @@
     },
     "methods": {
       "set_simulated_state": {
-        "parameters": {
-          "pressed": {
+        "type": "write",
+        "label": "Set Simulated State",
+        "parameters": [
+          {
+            "name": "pressed",
             "dataType": "Boolean",
             "values_meaning": {
               "true": "Simulates button pressed",
@@ -707,11 +802,15 @@
             },
             "purpose": "Sets the simulated state of the button (only used in simulation mode)"
           }
+        ],
+        "returns": {
+          "dataType": "void"
         },
-        "returns": "void",
         "purpose": "Sets the simulated button state"
       },
       "is_pressed": {
+        "type": "read",
+        "label": "Is Pressed",
         "returns": {
           "dataType": "Boolean",
           "values_meaning": {
@@ -722,10 +821,16 @@
         "purpose": "Checks if the button is pressed or released, applies debounce logic"
       },
       "push": {
-        "returns": "void",
+        "type": "write",
+        "label": "Push Button",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Simulates a button press and release cycle (only for simulation mode)"
       },
       "get_event": {
+        "type": "read",
+        "label": "Get Event",
         "returns": {
           "dataType": "Boolean",
           "values_meaning": {
@@ -814,18 +919,32 @@
     },
     "methods": {
       "on": {
-        "returns": "void",
+        "type": "write",
+        "label": "Turn On Relay",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Turns the relay ON (sets pin to HIGH or LOW based on active_high)"
       },
       "off": {
-        "returns": "void",
+        "type": "write",
+        "label": "Turn Off Relay",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Turns the relay OFF (sets pin to LOW or HIGH based on active_high)"
       },
       "toggle": {
-        "returns": "void",
+        "type": "write",
+        "label": "Toggle Relay State",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Toggles the relay state between ON and OFF"
       },
       "is_on": {
+        "type": "read",
+        "label": "Check Relay State",
         "returns": {
           "dataType": "Boolean"
         },
@@ -940,59 +1059,79 @@
     },
     "methods": {
       "write_angle": {
-        "returns": "void",
-        "parameters": {
-          "angle": {
+        "type": "write",
+        "label": "Write Angle",
+        "parameters": [
+          {
+            "name": "angle",
             "dataType": "Number",
             "range": {
               "min": 0,
               "max": 180
             },
             "unit": "°",
-            "purpose": "Sets the servo motor to a specific angle, from 0° to 180°"
+            "purpose": "Sets the servo motor to a specific angle, from 0° to 180°. The value must be between 0 and 180."
           }
+        ],
+        "returns": {
+          "dataType": "void"
         },
         "purpose": "Sets the servo motor's angle by calculating the corresponding pulse width"
       },
       "write_us": {
-        "returns": "void",
-        "parameters": {
-          "us": {
+        "type": "write",
+        "label": "Write Pulse Width",
+        "parameters": [
+          {
+            "name": "us",
             "dataType": "Number",
             "range": {
               "min": 500,
               "max": 2500
             },
             "unit": "μs",
-            "purpose": "Sets the servo motor's pulse width directly in microseconds"
+            "purpose": "Sets the servo motor's pulse width directly in microseconds. The value must be between 500 and 2500 μs."
           }
+        ],
+        "returns": {
+          "dataType": "void"
         },
         "purpose": "Sets the servo motor's pulse width directly in microseconds and updates the angle"
       },
-      "get_state": {
+      "read_angle": {
+        "type": "read",
+        "label": "Read Angle",
         "returns": {
-          "dataType": "Object",
-          "properties": {
-            "pin": {
-              "dataType": "Number",
-              "purpose": "GPIO pin the servo is connected to"
-            },
-            "angle": {
-              "dataType": "Number",
-              "unit": "°",
-              "purpose": "Current angle of the servo motor"
-            },
-            "pulse_us": {
-              "dataType": "Number",
-              "unit": "μs",
-              "purpose": "Current pulse width of the servo motor"
-            }
-          }
+          "dataType": "Number",
+          "range": {
+            "min": 0,
+            "max": 180
+          },
+          "unit": "°",
+          "purpose": "Returns the current angle of the servo motor, between 0° and 180°"
         },
-        "purpose": "Returns the current state of the servo motor including pin, angle, and pulse width"
+        "purpose": "Returns the current angle of the servo motor"
+      },
+      "read_us": {
+        "type": "read",
+        "label": "Read Pulse Width",
+        "returns": {
+          "dataType": "Number",
+          "range": {
+            "min": 500,
+            "max": 2500
+          },
+          "unit": "μs",
+          "purpose": "Returns the current pulse width of the servo motor, between 500μs and 2500μs"
+        },
+        "purpose": "Returns the current pulse width of the servo motor"
       },
       "deinit": {
-        "returns": "void",
+        "type": "write",
+        "label": "Deinitialize",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Deinitializes the servo motor and releases resources"
       }
     },
@@ -1088,19 +1227,27 @@
     },
     "methods": {
       "set_simulated_state": {
-        "parameters": {
-          "state": {
+        "type": "write",
+        "label": "Set Simulated State",
+        "parameters": [
+          {
+            "name": "state",
             "dataType": "Boolean",
             "values_meaning": {
               "true": "Simulates turning the switch ON",
               "false": "Simulates turning the switch OFF"
-            }
+            },
+            "purpose": "Controls the simulated state of the switch"
           }
+        ],
+        "returns": {
+          "dataType": "void"
         },
-        "returns": "void",
         "purpose": "Sets the internal state of the switch during simulation"
       },
       "read": {
+        "type": "read",
+        "label": "Read Switch State",
         "returns": {
           "dataType": "Boolean",
           "values_meaning": {
@@ -1111,6 +1258,8 @@
         "purpose": "Reads the current switch state (either simulated or from the actual pin)"
       },
       "state": {
+        "type": "read",
+        "label": "State Alias",
         "returns": {
           "dataType": "Boolean",
           "values_meaning": {

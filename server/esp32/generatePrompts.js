@@ -11,6 +11,7 @@ function initializePeripheralsPrompt(peripherals_info) {
     .map((p) => `from ${p.library_name} import ${p.class_name}`)
     .join("\n")}
   
+  initialize the 'peripherals_pins' dict, that take the peripheral name as key, and it's connected pins as dict value, it will be used later to know pin connection.
   then initialize each peripheral class as following, and store it in peripherals dict 'peripherals' : 
   
   ${peripherals_info
@@ -24,6 +25,7 @@ function initializePeripheralsPrompt(peripherals_info) {
           and it is intialized like this : peripherals[${p.name}]=${
           p.class_name
         }(parameters...), consider the default values of parameters. 
+        then insert the connected pins to 'peripherals_pins[${p.name}]'
   `
     )
     .join("\n")}
