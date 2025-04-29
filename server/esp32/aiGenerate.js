@@ -4,6 +4,7 @@ const {
   initializePeripheralsPrompt,
   methodsPrompt,
   generateMQTTCallbackPrompt,
+  generateLoopReadPrompt,
 } = require(path.join(__dirname, "generatePrompts"));
 
 const callClaude = require(path.join(__dirname, "claude_console/lib/index"));
@@ -54,7 +55,7 @@ async function mqttCallbackCode(peripherals_info) {
       .split("\n")
       .map((line) => "    " + line)
       .join("\n");
-  fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), function_code);
+  // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), function_code);
   return function_code;
 }
 
@@ -64,7 +65,7 @@ async function testMethodsCode(peripherals_info) {
     grouped_peripherals_info.map(async (group_p, index) => {
       const prompt = methodsPrompt(group_p);
       const finalBody = await callClaude(prompt);
-      const finalCode = finalCode
+      const finalCode = finalBody
         .split("\n")
         .map((line) => "    " + line)
         .join("\n");
@@ -79,6 +80,71 @@ def run_all_methods(peripherals):\n${finalBody}`;
   // fs.writeFileSync("test_all_methods.py", function_code);
 
   return function_code;
+}
+async function generateLoopRead(peripherals_info) {
+  const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
+  const arrCode = await Promise.all(
+    grouped_peripherals_info.map(async (group_p, index) => {
+      const prompt = generateLoopReadPrompt(group_p);
+      const finalBody = await callClaude(prompt);
+      const finalCode = finalBody
+        .split("\n")
+        .map((line) => "    " + "    " + line)
+        .join("\n");
+      // console.log(finalCode);
+      return await finalCode;
+    })
+  );
+  const finalBody = arrCode.join("\n");
+  const function_code = `def read_methods(peripherals):
+    result = {}
+    for peripheral_name, peripheral_obj in peripherals.items():\n${finalBody}\n${"    "}return result`;
+
+  fs.writeFileSync("read_methods.py", function_code);
+
+  return function_code;
+}
+
+function mqtt_part2(
+  id = 0,
+  network_name = "clear",
+  network_pass = "13141516",
+  server_id = "192.168.137.1"
+) {
+  return `from mqtt_as import MQTTClient, config
+import asyncio
+
+# Local configuration
+config['ssid'] = '${network_name}'  # Optional on ESP8266
+config['wifi_pw'] = '${network_pass}'
+config['server'] = '${server_id}'  # Change to suit e.g. 'iot.eclipse.org'
+
+async def conn_han(client):
+    await client.subscribe('esp32/${id}/receiver', 1)
+
+async def main(client):
+    await client.connect()
+    n = 0
+    while True:
+        await asyncio.sleep(1)
+        result = read_methods(peripherals)
+        if(result['err']):
+            await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(result[err])), qos = 1)
+        print('publish', n)
+        # If WiFi is down the following will pause for the duration.
+        await asyncio.sleep(1)
+        await client.publish('result', '{}'.format(n), qos = 1)
+        n += 1
+
+config['subs_cb'] = callback
+config['connect_coro'] = conn_han
+
+MQTTClient.DEBUG = True  # Optional: print diagnostic messages
+client = MQTTClient(config)
+try:
+    asyncio.run(main(client))
+finally:
+    client.close()  # Prevent LmacRxBlk:1 errors`;
 }
 
 async function codeGeneration(selectedPeripherals, socket) {
@@ -100,8 +166,16 @@ async function codeGeneration(selectedPeripherals, socket) {
       status: "processing",
       data: "⚙️ Generating initialization code...",
     });
-    const init_code = await initializeCode(peripherals_info);
+    const init_code = (await initializeCode(peripherals_info)) + "\n";
+    const read_methods_code = (await generateLoopRead(peripherals_info)) + "\n";
+    const mqtt_code =
+      "\nimport json\n" +
+      (await mqttCallbackCode(peripherals_info)) +
+      "\n" +
+      mqtt_part2() +
+      "\n";
 
+    const main_code = init_code + read_methods_code + mqtt_code;
     socket.emit("processSetup", {
       status: "processing",
       data: "🧪 Generating methods/testing code...",
@@ -115,12 +189,13 @@ async function codeGeneration(selectedPeripherals, socket) {
       data: "💾 Writing main.py to espFiles...",
     });
 
-    const init_path = path.join(__dirname, "espFiles/main.py");
+    const main_path = path.join(__dirname, "espFiles/main.py");
+
     const test_methods_path = path.join(
       __dirname,
       "espFiles/test_all_methods.py"
     );
-    fs.writeFileSync(init_path, init_code);
+    fs.writeFileSync(main_path, main_code);
     fs.writeFileSync(test_methods_path, test_code);
 
     socket.emit("processSetup", {
@@ -131,9 +206,10 @@ async function codeGeneration(selectedPeripherals, socket) {
     // return final_code; // Optional, in case caller needs it
   } catch (err) {
     // No socket or console output, just rethrow
+    console.log(err);
     throw err;
   }
 }
 
-mqttCallbackCode(peripherals_info);
-// module.exports = codeGeneration;
+// mqttCallbackCode(peripherals_info);
+module.exports = codeGeneration;

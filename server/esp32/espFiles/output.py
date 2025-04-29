@@ -1,47 +1,33 @@
-# Check for accelerometer methods
-if "accelerometer" in msg:
-    # Read methods
-    if "read_accel" in msg["accelerometer"]:
-        result = peripherals["accelerometer"].read_accel()
-        output_dict["accelerometer"]["read_accel"] = result
-    
-    if "read_gyro" in msg["accelerometer"]:
-        result = peripherals["accelerometer"].read_gyro()
-        output_dict["accelerometer"]["read_gyro"] = result
-    
-    if "read_all" in msg["accelerometer"]:
-        result = peripherals["accelerometer"].read_all()
-        output_dict["accelerometer"]["read_all"] = result
+from mqtt_as import MQTTClient, config
+import asyncio
 
-# Check for DHT sensor methods
-if "dht_sensor" in msg:
-    # Write methods
-    if "measure" in msg["dht_sensor"]:
-        peripherals["dht_sensor"].measure()
-        output_dict["dht_sensor"]["measure"] = {"status": "ok"}
-    
-    # Read methods
-    if "temperature" in msg["dht_sensor"]:
-        result = peripherals["dht_sensor"].temperature()
-        output_dict["dht_sensor"]["temperature"] = result
-    
-    if "humidity" in msg["dht_sensor"]:
-        result = peripherals["dht_sensor"].humidity()
-        output_dict["dht_sensor"]["humidity"] = result
+# Local configuration
+config['ssid'] = 'your_network_name'  # Optional on ESP8266
+config['wifi_pw'] = 'your_password'
+config['server'] = '192.168.0.10'  # Change to suit e.g. 'iot.eclipse.org'
 
-# Check for encoder methods
-if "encoder" in msg:
-    # Read methods
-    if "get_position" in msg["encoder"]:
-        result = peripherals["encoder"].get_position()
-        output_dict["encoder"]["get_position"] = result
-    
-    # Write methods
-    if "reset" in msg["encoder"]:
-        peripherals["encoder"].reset()
-        output_dict["encoder"]["reset"] = {"status": "ok"}
-    
-    if "simulate_step" in msg["encoder"]:
-        steps = msg["encoder"]["simulate_step"]
-        peripherals["encoder"].simulate_step(steps)
-        output_dict["encoder"]["simulate_step"] = {"status": "ok"}
+def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
+    print((topic.decode(), msg.decode(), retained))
+
+async def conn_han(client):
+    await client.subscribe('foo_topic', 1)
+
+async def main(client):
+    await client.connect()
+    n = 0
+    while True:
+        await asyncio.sleep(5)
+        print('publish', n)
+        # If WiFi is down the following will pause for the duration.
+        await client.publish('result', '{}'.format(n), qos = 1)
+        n += 1
+
+config['subs_cb'] = callback
+config['connect_coro'] = conn_han
+
+MQTTClient.DEBUG = True  # Optional: print diagnostic messages
+client = MQTTClient(config)
+try:
+    asyncio.run(main(client))
+finally:
+    client.close()  # Prevent LmacRxBlk:1 errors

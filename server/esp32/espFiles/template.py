@@ -1,11 +1,6 @@
 from mqtt_as import MQTTClient, config
 import asyncio
 
-# Local configuration
-config['ssid'] = 'your_network_name'  # Optional on ESP8266
-config['wifi_pw'] = 'your_password'
-config['server'] = '192.168.0.10'  # Change to suit e.g. 'iot.eclipse.org'
-
 def callback(topic, msg, retained, properties=None):  # MQTT V5 passes properties
     print((topic.decode(), msg.decode(), retained))
 

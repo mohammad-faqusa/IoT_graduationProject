@@ -95,7 +95,7 @@ function generateMQTTCallbackPrompt(peripherals_info) {
     ${peripherals_info.map(peripheral => `
       if msg contains a field for peripheral '${peripheral.name}', check if any of the following methods are specified under 'read_methods' or 'write_methods':
         ${JSON.stringify(peripheral.methods, null, 2)}
-
+      first initialize \`output_dict["${peripheral.name}"]\` = {} 
       If the peripheral contains 'read_methods', you should:
         - Call the method explicitly using: 'peripherals["${peripheral.name}"].methodName()'
         - Append the result to the 'output_dict', using this format:
@@ -114,10 +114,44 @@ function generateMQTTCallbackPrompt(peripherals_info) {
       'output_dict["peripheral_name"]["method_name"] = return_value'
     - For 'write_methods', append the status to 'output_dict' in the format:
       'output_dict["peripheral_name"]["method_name"] = {"status": "ok"}'`
-  }
+}
+
+function generateLoopReadPrompt(peripherals_info) {
+  return `
+  You are a MicroPython generator. Your task is write a function that loop through peripherals objects stored in 'peripherals' dict, 
+  to run the 'read' type methods.
+  **Consider:
+  1.The variable 'result' is previously written to save the value of what returned from read methods. 
+  **Do:
+  1.Just write the body of the function
+  2.write try except for each method, and the except will store the error
+  ### Do not:
+  1. write the name of the function 
+  2. write the return of the function
+  3. do not initialize 'result' variable, becuase it is perivously initialized
+  4. write the loop, becuase the code is written inside the loop 'for peripheral_name, peripheral_obj in peripherals.items():'
+
+  as following for each peripheral : 
+    ${peripherals_info.map(
+      (p) => `
+      for peripheral ${
+        p.name
+      }, here are the properties of read methods : ${JSON.stringify(
+        Object.entries(p.methods).filter(
+          ([method_name, method_body]) => method_body.type === "read"
+        )
+      )}
+      `
+    )}
+
+  `;
+}
+
+// console.log(generateLoopRead());
 
 module.exports = {
   initializePeripheralsPrompt,
   methodsPrompt,
   generateMQTTCallbackPrompt,
+  generateLoopReadPrompt,
 };

@@ -44,11 +44,11 @@ async function installLibraries(plist, socket) {
     .filter((p) => plist.includes(p.name))
     .map((p) => [
       p.name,
-      `github:mohammad0faqusa/mip-packages/${p.library_name}/package.json`,
+      `github:mohammad-faqusa/mip-packages/${p.library_name}/package.json`,
     ]);
   libraries.push([
     "micropython-mqtt",
-    `github:mohammad0faqusa/micropython-mqtt`,
+    `github:mohammad-faqusa/micropython-mqtt`,
   ]);
   for (const lib of libraries) {
     try {
@@ -115,7 +115,7 @@ async function copyCleanupScriptToMain(socket) {
       data: "📄 Preparing cleanup script...",
     });
 
-    const tempMainPath = path.join(__dirname, "espFiles/temp_main.py");
+    const tempMainPath = path.join(__dirname, "espFiles/clean_up.py");
     const content = fs.readFileSync(sourceFilePath, "utf-8");
     fs.writeFileSync(tempMainPath, content);
 
@@ -125,7 +125,7 @@ async function copyCleanupScriptToMain(socket) {
     });
 
     const { stdout } = await execPromise(
-      `mpremote fs cp ${tempMainPath} :main.py`
+      `mpremote fs cp ${tempMainPath} :boot.py`
     );
     socket.emit("processSetup", {
       status: "processing",
@@ -143,7 +143,10 @@ async function espSetup(id, plist, socket) {
     await prepareESP32(socket);
     await installLibraries(plist, socket);
     await codeGeneration(plist, socket);
-    await copyFilesToESP32(["main.py", "run_all_methods.py"], socket);
+    await copyFilesToESP32(
+      ["main.py", "run_all_methods.py", "boot.py"],
+      socket
+    );
     socket.emit("processSetup", {
       status: "finished",
       data: `the esp32 setup is finished successfully!`,
