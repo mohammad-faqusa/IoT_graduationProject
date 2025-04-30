@@ -39,7 +39,7 @@ dashboardSocket = async (socket) => {
       devicesCardsRes[deviceName] = {};
       Object.entries(messageObj).forEach(([pName, pValue]) => {
         devicesCardsRes[deviceName][pName] = {
-          value: pValue,
+          value: JSON.stringify(pValue),
           componentId: componentsIds[deviceName][pName],
         };
       });
@@ -65,7 +65,7 @@ dashboardSocket = async (socket) => {
 
       const selectedPDict = {};
       Object.entries(peripherals).forEach(([pName, pObj]) => {
-        selectedPDict[pName] = pObj.sendValue;
+        selectedPDict[pName] = pObj.method;
         componentsIds[deviceName][pName] = pObj.componentId;
       });
       client.publish(

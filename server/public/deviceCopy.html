@@ -1048,13 +1048,13 @@
         }, 5000);
 
         setInterval(async () => {
+          console.log(devicesCards);
           if (Object.keys(components).length !== 0) {
             const resDeviceCards = await socket.emitWithAck(
               "devicesCards",
               devicesCards
             );
 
-            console.log(resDeviceCards);
             Object.entries(components).forEach(([componentId, component]) => {
               const deviceName = component.formData.device;
               const peripheralName = component.formData.source;
@@ -1382,7 +1382,6 @@
               const component = document.querySelector(
                 `[data-component-id="${componentId}"]`
               );
-              console.log("this is component : ", component);
 
               const deviceName = components[componentId].formData.device;
               const pName = components[componentId].formData.source;
@@ -1464,7 +1463,6 @@
           // Add configuration fields
           componentTemplates[componentType].config.forEach((field) => {
             if (field.dynamic && field.name === "device") {
-              // console.log(field);
               field.options = devices.map((device) => ({
                 value: device.name,
                 label: device.name,
@@ -1572,8 +1570,7 @@
           configDevice.addEventListener("change", () => {
             removeOptions(configP);
             currentDevice = devices[configDevice.selectedIndex];
-            // console.log('this is current devices from selected : ', currentDevice)
-            console.log(componentTemplates[componentType].type);
+
             currentDevice.pList.forEach((p) => {
               const option = document.createElement("option");
               option.text = p;
@@ -1582,10 +1579,9 @@
           });
           configP.addEventListener("change", () => {
             removeOptions(configMethods);
-            console.log(configP.value);
+
             currentP = configP.value;
-            console.log(componentTemplates[componentType]);
-            console.log(peripherals_methods[currentP]);
+
             Object.entries(peripherals_methods[currentP]).forEach(
               ([name, body]) => {
                 if (body.type === componentTemplates[componentType].type) {
@@ -1650,6 +1646,7 @@
           const sourceName = formData.source;
           devicesCards[deviceName][sourceName] = {
             componentId: currentComponent.id,
+            method: formData.method,
             value: "",
             sendValue: "",
           };
@@ -1711,8 +1708,6 @@
           if (currentDeviceData) {
             updateDynamicComponents(currentDeviceData);
           }
-
-          // console.log('this is component list info :' , components)
         }
 
         function updateTextDisplay(component, config) {
@@ -1974,7 +1969,7 @@
         function updateCircleCanvas(component, config) {
           const canvas = component.querySelector("canvas");
           if (!canvas) return;
-          console.log("this is config : ", config);
+
           canvas.setAttribute("data-source", config.source);
           canvas.setAttribute("data-min", config.min);
           canvas.setAttribute("data-max", config.max);
@@ -2049,8 +2044,6 @@
               minute: "2-digit",
             });
           });
-
-          console.log("this is source:", source);
 
           // Create chart
           const chart = new Chart(ctx, {
@@ -2154,7 +2147,7 @@
             if (!input._hasListener) {
               input.addEventListener("change", function () {
                 // sendCommand(this.getAttribute('data-target'), { state: this.checked });
-                console.log("switched ", this.checked);
+
                 socket.emit("deviceCardControl", {
                   device: config.device,
                   peripheral: config.source,
@@ -2194,7 +2187,6 @@
               });
 
               slider.addEventListener("change", function () {
-                console.log(parseInt(this.value));
                 socket.emit("deviceCardControl", {
                   device: config.device,
                   peripheral: config.source,
