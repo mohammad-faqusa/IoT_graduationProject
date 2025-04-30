@@ -1584,12 +1584,17 @@
             removeOptions(configMethods);
             console.log(configP.value);
             currentP = configP.value;
+            console.log(componentTemplates[componentType]);
             console.log(peripherals_methods[currentP]);
-            Object.entries(peripherals_methods[currentP]).forEach((method) => {
-              const option = document.createElement("option");
-              option.text = method;
-              configMethods.add(option);
-            });
+            Object.entries(peripherals_methods[currentP]).forEach(
+              ([name, body]) => {
+                if (body.type === componentTemplates[componentType].type) {
+                  const option = document.createElement("option");
+                  option.text = name;
+                  configMethods.add(option);
+                }
+              }
+            );
           });
 
           // Show modal
