@@ -138,11 +138,12 @@ async function copyCleanupScriptToMain(socket) {
 
 async function espSetup(id, plist, socket) {
   try {
+    console.log("this is the id of the device : ", id);
     await prepareESP32(socket);
     await copyCleanupScriptToMain(socket);
     await prepareESP32(socket);
     await installLibraries(plist, socket);
-    await codeGeneration(plist, socket);
+    await codeGeneration(id, plist, socket);
     await copyFilesToESP32(
       ["main.py", "run_all_methods.py", "boot.py"],
       socket

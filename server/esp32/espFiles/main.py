@@ -4,18 +4,18 @@ from led import InternalLED
 # Initialize peripherals_pins dictionary
 peripherals_pins = {
     'accelerometer': {'sda': 21, 'scl': 22},
-    'internal_led': {}  # Internal LED typically doesn't require pins to be specified
+    'internal_led': {'pin': 2}  # ESP32 typically has internal LED on pin 2
 }
 
 # Initialize peripherals dictionary
 peripherals = {}
 
-# Initialize MPU6050 (accelerometer)
-from machine import I2C, Pin
-i2c = I2C(0, scl=Pin(peripherals_pins['accelerometer']['scl']), sda=Pin(peripherals_pins['accelerometer']['sda']))
-peripherals['accelerometer'] = MPU6050(i2c=i2c, addr=0x68, simulate=True)
+# Initialize accelerometer (MPU6050)
+# Using default values: addr=0x68 (104 in decimal), simulate=True
+peripherals['accelerometer'] = MPU6050(simulate=True)
 
-# Initialize Internal LED
+# Initialize internal LED
+# Using default value: simulate=False
 peripherals['internal_led'] = InternalLED(simulate=False)
 
 import json
@@ -24,28 +24,35 @@ def callback(topic, msg, retained, properties=None):
     msg = msg.decode()
     msg = json.loads(msg)
     output_dict = {}
-    # Get the peripheral names from the message
+    # Check for accelerometer related commands
     if "accelerometer" in msg:
-        # Initialize the peripheral in the output dictionary if not already present
-        if "accelerometer" not in output_dict:
-            output_dict["accelerometer"] = {}
+        output_dict["accelerometer"] = {}
         
-        # Check for specific methods and execute them
+        # Handle read_accel method
         if "read_accel" in msg["accelerometer"]:
-            output_dict["accelerometer"]["read_accel"] = peripherals["accelerometer"].read_accel()
+            accel_data = peripherals["accelerometer"].read_accel()
+            output_dict["accelerometer"]["read_accel"] = accel_data
         
+        # Handle read_gyro method
         if "read_gyro" in msg["accelerometer"]:
-            output_dict["accelerometer"]["read_gyro"] = peripherals["accelerometer"].read_gyro()
+            gyro_data = peripherals["accelerometer"].read_gyro()
+            output_dict["accelerometer"]["read_gyro"] = gyro_data
         
+        # Handle read_all method
         if "read_all" in msg["accelerometer"]:
-            output_dict["accelerometer"]["read_all"] = peripherals["accelerometer"].read_all()
+            all_data = peripherals["accelerometer"].read_all()
+            output_dict["accelerometer"]["read_all"] = all_data
     
+    # Check for internal LED related commands
     if "internal_led" in msg:
-        # Initialize the peripheral in the output dictionary if not already present
-        if "internal_led" not in output_dict:
-            output_dict["internal_led"] = {}
+        output_dict["internal_led"] = {}
         
-        # Check for specific methods and execute them
+        # Handle read method: is_on
+        if "is_on" in msg["internal_led"]:
+            led_state = peripherals["internal_led"].is_on()
+            output_dict["internal_led"]["is_on"] = led_state
+        
+        # Handle write methods
         if "on" in msg["internal_led"]:
             peripherals["internal_led"].on()
             output_dict["internal_led"]["on"] = {"status": "ok"}
@@ -57,9 +64,6 @@ def callback(topic, msg, retained, properties=None):
         if "toggle" in msg["internal_led"]:
             peripherals["internal_led"].toggle()
             output_dict["internal_led"]["toggle"] = {"status": "ok"}
-        
-        if "is_on" in msg["internal_led"]:
-            output_dict["internal_led"]["is_on"] = peripherals["internal_led"].is_on()
     # Run the async sender from sync context
     asyncio.create_task(send_message(output_dict))
 from mqtt_as import MQTTClient, config
@@ -71,11 +75,11 @@ config['wifi_pw'] = '13141516'
 config['server'] = '192.168.137.1'  # Change to suit e.g. 'iot.eclipse.org'
 
 async def conn_han(client):
-    await client.subscribe('esp32/0/receiver', 1)
+    await client.subscribe('esp32/6/receiver', 1)
 
 async def send_message(output_dict):
     print(output_dict);
-    await client.publish('result', '{}'.format(json.dumps(output_dict)), qos = 1)
+    await client.publish('esp32/6/sender', '{}'.format(json.dumps(output_dict)), qos = 1)
 
 async def main(client):
     await client.connect()
@@ -86,7 +90,7 @@ async def main(client):
         print('publish', n)
         # If WiFi is down the following will pause for the duration.
         await asyncio.sleep(1)
-        await client.publish('result', '{}'.format(n), qos = 1)
+        await client.publish('esp32/online', json.dumps({"id": 6, "times":n), qos = 1)
         n += 1
 
 config['subs_cb'] = callback

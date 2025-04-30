@@ -2399,6 +2399,7 @@
                             input.name = field.name;
                             
                             field.options.forEach(option => {
+                                console.log('this is option', option)
                                 const optionEl = document.createElement('option');
                                 optionEl.value = option.value;
                                 optionEl.textContent = option.label;

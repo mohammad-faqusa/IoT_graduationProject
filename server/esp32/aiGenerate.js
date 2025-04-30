@@ -124,18 +124,22 @@ async def conn_han(client):
 
 async def send_message(output_dict):
     print(output_dict);
-    await client.publish('result', '{}'.format(json.dumps(output_dict)), qos = 1)
+    await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(output_dict)), qos = 1)
 
 async def main(client):
     await client.connect()
     n = 0
+    esp_status = {}
+    esp_status['id'] = ${id}
     while True:
         await asyncio.sleep(1)
         
+        esp_status['times'] = n
+
         print('publish', n)
         # If WiFi is down the following will pause for the duration.
         await asyncio.sleep(1)
-        await client.publish('result', '{}'.format(n), qos = 1)
+        await client.publish('esp32/online', json.dumps(esp_status), qos = 1)
         n += 1
 
 config['subs_cb'] = callback
@@ -149,7 +153,7 @@ finally:
     client.close()  # Prevent LmacRxBlk:1 errors`;
 }
 
-async function codeGeneration(selectedPeripherals, socket) {
+async function codeGeneration(id, selectedPeripherals, socket) {
   try {
     socket.emit("processSetup", {
       status: "processing",
@@ -175,7 +179,7 @@ async function codeGeneration(selectedPeripherals, socket) {
       "\nimport json\n" +
       (await mqttCallbackCode(peripherals_info)) +
       "\n" +
-      mqtt_part2() +
+      mqtt_part2(id) +
       "\n";
 
     const main_code = init_code + mqtt_code;
