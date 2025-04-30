@@ -151,6 +151,7 @@ async function espSetup(id, plist, socket) {
       status: "finished",
       data: `the esp32 setup is finished successfully!`,
     });
+    await prepareESP32(socket);
   } catch (error) {
     console.log(error.stderr || error.message);
     socket.emit("errorSetup", {

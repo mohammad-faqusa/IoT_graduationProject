@@ -122,14 +122,16 @@ config['server'] = '${server_id}'  # Change to suit e.g. 'iot.eclipse.org'
 async def conn_han(client):
     await client.subscribe('esp32/${id}/receiver', 1)
 
+async def send_message(output_dict):
+    print(output_dict);
+    await client.publish('result', '{}'.format(json.dumps(output_dict)), qos = 1)
+
 async def main(client):
     await client.connect()
     n = 0
     while True:
         await asyncio.sleep(1)
-        result = read_methods(peripherals)
-        if(result['err']):
-            await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(result[err])), qos = 1)
+        
         print('publish', n)
         # If WiFi is down the following will pause for the duration.
         await asyncio.sleep(1)
@@ -167,7 +169,8 @@ async function codeGeneration(selectedPeripherals, socket) {
       data: "⚙️ Generating initialization code...",
     });
     const init_code = (await initializeCode(peripherals_info)) + "\n";
-    const read_methods_code = (await generateLoopRead(peripherals_info)) + "\n";
+    // const read_methods_code = (await generateLoopRead(peripherals_info)) + "\n";
+
     const mqtt_code =
       "\nimport json\n" +
       (await mqttCallbackCode(peripherals_info)) +
@@ -175,12 +178,12 @@ async function codeGeneration(selectedPeripherals, socket) {
       mqtt_part2() +
       "\n";
 
-    const main_code = init_code + read_methods_code + mqtt_code;
+    const main_code = init_code + mqtt_code;
     socket.emit("processSetup", {
       status: "processing",
       data: "🧪 Generating methods/testing code...",
     });
-    const test_code = await testMethodsCode(peripherals_info);
+    // const test_code = await testMethodsCode(peripherals_info);
 
     // const final_code = init_code + "\n" + test_code;
 
@@ -191,12 +194,12 @@ async function codeGeneration(selectedPeripherals, socket) {
 
     const main_path = path.join(__dirname, "espFiles/main.py");
 
-    const test_methods_path = path.join(
-      __dirname,
-      "espFiles/test_all_methods.py"
-    );
+    // const test_methods_path = path.join(
+    //   __dirname,
+    //   "espFiles/test_all_methods.py"
+    // );
     fs.writeFileSync(main_path, main_code);
-    fs.writeFileSync(test_methods_path, test_code);
+    // fs.writeFileSync(test_methods_path, test_code);
 
     socket.emit("processSetup", {
       status: "processing",

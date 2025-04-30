@@ -88,20 +88,21 @@ function generateMQTTCallbackPrompt(peripherals_info) {
   6. Iterate through the \`msg\` object. Instead, use explicit checks like \`if "peripheral_name" in msg\` to handle individual fields.
   7. Reinitialize or overwrite the \`output_dict\` for each peripheral. If you need to add data to it, modify the existing dictionary (e.g., \`output_dict["peripheral_name"]["method_name"] = value\`).
   8. write the line \`print((topic, msg, retained))\`. This has already been handled by the framework.
+  
   The MQTT client is already subscribed to the relevant topic, so no need to filter messages based on the topic.
 
   The \`msg\` dictionary will contain the fields that correspond to one or more peripherals. Each peripheral may have methods categorized as \`read_methods\` or \`write_methods\`. The structure for each peripheral is as follows:
 
     ${peripherals_info.map(peripheral => `
-      if msg contains a field for peripheral '${peripheral.name}', check if any of the following methods are specified under 'read_methods' or 'write_methods':
+      if msg contains a field for peripheral '${peripheral.name}', you can specify the read or write methods according to type of function written inside properties of methods as following : 
         ${JSON.stringify(peripheral.methods, null, 2)}
       first initialize \`output_dict["${peripheral.name}"]\` = {} 
-      If the peripheral contains 'read_methods', you should:
+      If the peripheral contains read method, you should:
         - Call the method explicitly using: 'peripherals["${peripheral.name}"].methodName()'
         - Append the result to the 'output_dict', using this format:
           'output_dict["${peripheral.name}"]["methodName"] = result'
 
-      If the peripheral contains 'write_methods', you should:
+      If the peripheral contains write , you should:
         - Call the write method explicitly using: 'peripherals["${peripheral.name}"].methodName()'
         - Append the result to 'output_dict' with a status like:
           'output_dict["${peripheral.name}"]["methodName"] = {"status": "ok"}'
