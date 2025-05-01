@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enhanced Device Dashboard</title>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./css/dashboard.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <div class="device-info">
+          <div class="device-icon">D</div>
+          <div class="device-details">
+            <h1>Smart Device Control Panel</h1>
+            <div class="device-status">
+              <div class="status-indicator" id="statusIndicator"></div>
+              <span id="statusText">Connecting...</span>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="editModeBtn" class="btn btn-secondary">
+            Edit Dashboard
+          </button>
+          <button id="refreshBtn" class="btn btn-primary">Refresh Data</button>
+          <button id="themeToggle" class="theme-toggle">🌙</button>
+        </div>
+      </header>
+
+      <!-- Component Toolbar (visible in edit mode) -->
+      <div
+        class="component-toolbar"
+        id="componentToolbar"
+        style="display: none"
+      >
+        <div class="toolbar-title">Add Components</div>
+
+        <div class="tabs">
+          <div class="tab active" data-tab="display">Display</div>
+          <div class="tab" data-tab="control">Control</div>
+          <div class="tab" data-tab="automation">Automation</div>
+        </div>
+
+        <div class="tab-content active" data-tab-content="display">
+          <div class="component-library">
+            <div class="component-item" data-component="text-display">
+              <div class="component-icon">📝</div>
+              <div class="component-name">Text Display</div>
+            </div>
+            <div class="component-item" data-component="circle-canvas">
+              <div class="component-icon">⭕</div>
+              <div class="component-name">Circle Canvas</div>
+            </div>
+            <div class="component-item" data-component="onoff-indicator">
+              <div class="component-icon">🔘</div>
+              <div class="component-name">On/Off Indicator</div>
+            </div>
+            <div class="component-item" data-component="gauge">
+              <div class="component-icon">🌡️</div>
+              <div class="component-name">Gauge</div>
+            </div>
+            <div class="component-item" data-component="chart">
+              <div class="component-icon">📊</div>
+              <div class="component-name">Chart</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" data-tab-content="control">
+          <div class="component-library">
+            <div class="component-item" data-component="text-input">
+              <div class="component-icon">✏️</div>
+              <div class="component-name">Text Input</div>
+            </div>
+            <div class="component-item" data-component="switch-button">
+              <div class="component-icon">🔄</div>
+              <div class="component-name">Switch Button</div>
+            </div>
+            <div class="component-item" data-component="slider">
+              <div class="component-icon">🎚️</div>
+              <div class="component-name">Slider</div>
+            </div>
+            <div class="component-item" data-component="select-dropdown">
+              <div class="component-icon">📋</div>
+              <div class="component-name">Select Dropdown</div>
+            </div>
+            <div class="component-item" data-component="push-button">
+              <div class="component-icon">🔘</div>
+              <div class="component-name">Push Button</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" data-tab-content="automation">
+          <div class="component-library">
+            <div class="component-item" data-component="automation-rule">
+              <div class="component-icon">⚙️</div>
+              <div class="component-name">Automation Rule</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid" id="dashboardGrid">
+        <div class="card wide" data-component-id="event-log">
+          <div class="card-header">
+            <div class="card-title">Event Log</div>
+            <div class="card-actions">
+              <button class="btn btn-secondary" id="clearLogBtn">
+                Clear Log
+              </button>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="event-log" id="eventLog"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="configModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title" id="modalTitle">Configure Component</div>
+          <button class="close-modal" id="closeModal">×</button>
+        </div>
+        <div class="modal-body">
+          <form id="configForm" class="config-form">
+            <!-- Configuration fields will be added dynamically -->
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelConfig">Cancel</button>
+          <button class="btn btn-primary" id="saveConfig">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection Status Indicator -->
+    <div class="connection-status connecting" id="connectionStatus">
+      <div class="connection-indicator"></div>
+      <span>Connecting...</span>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+      Settings saved successfully!
+    </div>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="./js/dashboard/classes/Device.js"></script>
+    <script src="./js/dashboard/socket.js"></script>
+    <script src="./js/dashboard/templates.js"></script>
+    <script src="./js/dashboard/index.js"></script>
+  </body>
+</html>

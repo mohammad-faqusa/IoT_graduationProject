@@ -65,6 +65,8 @@ dashboardSocket = async (socket) => {
 
       const selectedPDict = {};
       Object.entries(peripherals).forEach(([pName, pObj]) => {
+        // console.log(pObj);
+
         selectedPDict[pName] = pObj.method;
         componentsIds[deviceName][pName] = pObj.componentId;
       });
@@ -80,11 +82,20 @@ dashboardSocket = async (socket) => {
   socket.on("deviceCardControl", (device) => {
     console.log(device);
     pObj = {};
-    pObj[device.peripheral] = device.value;
+    const sendObj = {};
+    sendObj[device.peripheral] = {};
+    if (device.value) {
+      device.value = 1;
+    } else {
+      device.value = 0;
+    }
+    sendObj[device.peripheral][device.method] = device.value;
+    console.log(sendObj);
+    pObj[device.peripheral] = device.method;
 
     const deviceId = devices.find((dev) => dev.name === device.device).id;
 
-    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(pObj));
+    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObj));
   });
 
   socket.on("fetchDevices", (data, ackCallBack) => {

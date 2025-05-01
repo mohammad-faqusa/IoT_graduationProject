@@ -497,6 +497,22 @@
         },
         "purpose": "Turns the LED ON (sets the state to ON)"
       },
+      "switch": {
+        "type": "write",
+        "label": "Switch",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Switch the led ON or OFF, according to parameter value",
+        "parameters": [
+          {
+            "name": "status",
+            "dataType": "Boolean",
+            "default": false,
+            "purpose": "the status boolean value, true : led on, false : led off"
+          }
+        ]
+      },
       "off": {
         "type": "write",
         "label": "Turn OFF",
@@ -583,6 +599,22 @@
           "dataType": "void"
         },
         "purpose": "Turns the LED ON (sets the state to ON)"
+      },
+      "switch": {
+        "type": "write",
+        "label": "Switch",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Switch the led ON or OFF, according to parameter value",
+        "parameters": [
+          {
+            "name": "status",
+            "dataType": "Boolean",
+            "default": false,
+            "purpose": "the status boolean value, true : led on, false : led off"
+          }
+        ]
       },
       "off": {
         "type": "write",

@@ -27,37 +27,6 @@ async function initializeCode(peripherals_info) {
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
   return finalCode;
 }
-async function mqttCallbackCode(peripherals_info) {
-  const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
-  const arrCode = await Promise.all(
-    grouped_peripherals_info.map(async (group_p, index) => {
-      const prompt = generateMQTTCallbackPrompt(group_p);
-      const finalCode = await callClaude(prompt);
-
-      console.log(finalCode);
-      return await finalCode;
-    })
-  );
-  const function_header = `def callback(topic, msg, retained, properties=None):
-    print((topic.decode(), msg.decode(), retained))
-    msg = msg.decode()
-    msg = json.loads(msg)
-    output_dict = {}`;
-  arrCode[arrCode.length - 1] =
-    arrCode[arrCode.length - 1] +
-    "\n" +
-    "# Run the async sender from sync context\nasyncio.create_task(send_message(output_dict))";
-  const function_code =
-    function_header +
-    "\n" +
-    arrCode
-      .join("\n")
-      .split("\n")
-      .map((line) => "    " + line)
-      .join("\n");
-  // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), function_code);
-  return function_code;
-}
 
 async function testMethodsCode(peripherals_info) {
   const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
@@ -119,13 +88,20 @@ config['ssid'] = '${network_name}'  # Optional on ESP8266
 config['wifi_pw'] = '${network_pass}'
 config['server'] = '${server_id}'  # Change to suit e.g. 'iot.eclipse.org'
 
-async def conn_han(client):
-    await client.subscribe('esp32/${id}/receiver', 1)
+def callback(topic, msg, retained, properties=None):
+    asyncio.create_task(async_callback(topic, msg, retained))
 
-async def send_message(output_dict):
-    print(output_dict);
+async def async_callback(topic, msg, retained):
+    print((topic.decode(), msg.decode(), retained))
+    msg = msg.decode()
+    msg = json.loads(msg)
+    output_dict = {}
+    result = peripherals[msg['peripheral']][msg['method']][msg['param']]
     await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(output_dict)), qos = 1)
 
+async def conn_han(client):
+    await client.subscribe('esp32/${id}/receiver', 1)
+    
 async def main(client):
     await client.connect()
     n = 0
@@ -175,12 +151,7 @@ async function codeGeneration(id, selectedPeripherals, socket) {
     const init_code = (await initializeCode(peripherals_info)) + "\n";
     // const read_methods_code = (await generateLoopRead(peripherals_info)) + "\n";
 
-    const mqtt_code =
-      "\nimport json\n" +
-      (await mqttCallbackCode(peripherals_info)) +
-      "\n" +
-      mqtt_part2(id) +
-      "\n";
+    const mqtt_code = "\nimport json\n" + "\n" + mqtt_part2(id) + "\n";
 
     const main_code = init_code + mqtt_code;
     socket.emit("processSetup", {
@@ -218,5 +189,4 @@ async function codeGeneration(id, selectedPeripherals, socket) {
   }
 }
 
-// mqttCallbackCode(peripherals_info);
 module.exports = codeGeneration;
