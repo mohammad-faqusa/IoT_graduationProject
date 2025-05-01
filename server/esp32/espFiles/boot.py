@@ -9,3 +9,5 @@ while not wlan.isconnected():
     pass
 
 print("Connected to Wi-Fi:", wlan.ifconfig())
+
+  

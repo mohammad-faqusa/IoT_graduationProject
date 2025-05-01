@@ -138,7 +138,6 @@ async function copyCleanupScriptToMain(socket) {
 
 async function espSetup(id, plist, socket) {
   try {
-    console.log("this is the id of the device : ", id);
     await prepareESP32(socket);
     await copyCleanupScriptToMain(socket);
     await prepareESP32(socket);
@@ -163,5 +162,4 @@ async function espSetup(id, plist, socket) {
   }
 }
 
-// espSetup(0, ["acc"], "socket");
 module.exports = espSetup;

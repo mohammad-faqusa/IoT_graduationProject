@@ -75,18 +75,20 @@ async function generateLoopRead(peripherals_info) {
 }
 
 function mqtt_part2(
-  id = 0,
-  network_name = "clear",
-  network_pass = "13141516",
-  server_id = "192.168.137.1"
+  id,
+  network_config = {
+    ssid: "clear",
+    pass: "13141516",
+    serverId: "192.168.137.1",
+  }
 ) {
   return `from mqtt_as import MQTTClient, config
 import asyncio
 
 # Local configuration
-config['ssid'] = '${network_name}'  # Optional on ESP8266
-config['wifi_pw'] = '${network_pass}'
-config['server'] = '${server_id}'  # Change to suit e.g. 'iot.eclipse.org'
+config['ssid'] = '${network_config.ssid}'  # Optional on ESP8266
+config['wifi_pw'] = '${network_config.pass}'
+config['server'] = '${network_config.serverId}'  # Change to suit e.g. 'iot.eclipse.org'
 
 def callback(topic, msg, retained, properties=None):
     asyncio.create_task(async_callback(topic, msg, retained))
@@ -95,9 +97,17 @@ async def async_callback(topic, msg, retained):
     print((topic.decode(), msg.decode(), retained))
     msg = msg.decode()
     msg = json.loads(msg)
-    output_dict = {}
-    result = peripherals[msg['peripheral']][msg['method']][msg['param']]
-    await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(output_dict)), qos = 1)
+ 
+    value = peripherals[msg['peripheral']][msg['method']][msg['param']]
+    
+    result = {}
+    result['peripheral'] = msg['peripheral']
+    result['method'] = msg['method']
+    result['value'] = value
+    result['status'] = True
+    result['commandId'] = msg['commandId']
+
+    await client.publish('esp32/16/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
     await client.subscribe('esp32/${id}/receiver', 1)
@@ -129,7 +139,31 @@ finally:
     client.close()  # Prevent LmacRxBlk:1 errors`;
 }
 
-async function codeGeneration(id, selectedPeripherals, socket) {
+function bootCode(ssid = "clear", pass = "13141516") {
+  return `
+import network
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+wlan.connect("${ssid}", "${pass}")
+
+while not wlan.isconnected():
+    pass
+
+print("Connected to Wi-Fi:", wlan.ifconfig())
+
+  `;
+}
+async function codeGeneration(
+  id,
+  plist,
+  socket,
+  network_config = {
+    ssid: "clear",
+    pass: "13141516",
+    serverId: "192.168.137.1",
+  }
+) {
   try {
     socket.emit("processSetup", {
       status: "processing",
@@ -141,7 +175,7 @@ async function codeGeneration(id, selectedPeripherals, socket) {
     );
 
     const peripherals_info = allPeripherals.filter((p) =>
-      selectedPeripherals.includes(p.name)
+      plist.includes(p.name)
     );
 
     socket.emit("processSetup", {
@@ -168,12 +202,18 @@ async function codeGeneration(id, selectedPeripherals, socket) {
     });
 
     const main_path = path.join(__dirname, "espFiles/main.py");
+    const boot_path = path.join(__dirname, "espFiles/boot.py");
 
     // const test_methods_path = path.join(
     //   __dirname,
     //   "espFiles/test_all_methods.py"
     // );
     fs.writeFileSync(main_path, main_code);
+    fs.writeFileSync(
+      boot_path,
+      bootCode(network_config.ssid, network_config.pass)
+    );
+
     // fs.writeFileSync(test_methods_path, test_code);
 
     socket.emit("processSetup", {
