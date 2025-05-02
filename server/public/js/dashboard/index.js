@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         initializeCircleCanvas(component);
         break;
       case "chart":
-        initializeChart(component);
+        initializeChart(component, [1, 2, 3, 4, 5]);
         break;
       // Add other component initializations as needed
     }
@@ -754,13 +754,38 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (
       componentTemplates[componentType].allowed_method_types.includes(
         peripherals_interface_info[pName].methods[methodName].type
-      ) &&
-      componentTemplates[componentType].allowed_method_returns.includes(
-        peripherals_interface_info[pName].methods[methodName].returns.dataType
       )
-    )
-      return true;
-    return false;
+    ) {
+      if (
+        peripherals_interface_info[pName].methods[methodName].type == "read"
+      ) {
+        if (
+          componentTemplates[componentType].allowed_method_returns.includes(
+            peripherals_interface_info[pName].methods[methodName].returns
+              .dataType
+          )
+        )
+          return true;
+      }
+      if (
+        peripherals_interface_info[pName].methods[methodName].type == "write"
+      ) {
+        if (!peripherals_interface_info[pName].methods[methodName].parameters) {
+          if (componentType === "push-button") return true;
+          return false;
+        }
+        if (
+          componentTemplates[
+            componentType
+          ].allowed_method_parameter_type.includes(
+            peripherals_interface_info[pName].methods[methodName].parameters[0]
+              .dataType
+          )
+        )
+          return true;
+      }
+      return false;
+    }
   }
   function saveComponentConfig() {
     if (!currentComponent) return;

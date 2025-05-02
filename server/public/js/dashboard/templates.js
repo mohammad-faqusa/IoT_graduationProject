@@ -481,7 +481,7 @@ const componentTemplates = {
   "push-button": {
     title: "Push Button",
     allowed_method_types: ["write"],
-    allowed_method_parameter_type: ["Boolean"],
+    allowed_method_parameter_type: [],
     content: `
             <div class="control-item">
                 <span class="control-label">Button</span>
