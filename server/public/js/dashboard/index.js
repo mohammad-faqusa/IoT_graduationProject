@@ -694,10 +694,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     configDevice.addEventListener("change", () => {
       removeOptions(configP);
       currentDevice = devices[configDevice.selectedIndex];
-
       currentDevice.pList.forEach((p) => {
         const option = document.createElement("option");
-        option.text = p;
+        option.text = peripherals_interface_info[p].title;
+        option.value = p;
         configP.add(option);
       });
 
@@ -715,15 +715,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       removeOptions(configMethods);
 
       currentP = configP.value;
-
-      Object.entries(peripherals_methods[currentP]).forEach(([name, body]) => {
-        if (body.type === componentTemplates[componentType].type) {
-          const option = document.createElement("option");
-          option.text = body.label;
-          option.value = name;
-          configMethods.add(option);
+      Object.entries(peripherals_interface_info[currentP].methods).forEach(
+        ([name, body]) => {
+          if (isAppropriateMethod(currentP, name, componentType)) {
+            const option = document.createElement("option");
+            option.text = body.label;
+            option.value = name;
+            configMethods.add(option);
+          }
         }
-      });
+      );
 
       // Remove any extra parameter lines when source changes
       const existingExtraLines = configForm.querySelectorAll(
@@ -749,6 +750,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function isAppropriateMethod(pName, methodName, componentType) {
+    if (
+      componentTemplates[componentType].allowed_method_types.includes(
+        peripherals_interface_info[pName].methods[methodName].type
+      ) &&
+      componentTemplates[componentType].allowed_method_returns.includes(
+        peripherals_interface_info[pName].methods[methodName].returns.dataType
+      )
+    )
+      return true;
+    return false;
+  }
   function saveComponentConfig() {
     if (!currentComponent) return;
 
@@ -863,18 +876,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       component.querySelector(".card-content").innerHTML
     );
 
-    config.dataType = "Array";
-    config.arrayLength = 3;
-
-    if (config.dataType) display.setAttribute("data-source", config.source);
+    display.setAttribute("data-source", config.source);
     display.setAttribute("data-format", config.format);
 
-    // Update with current data if available
-    if (currentDeviceData && currentDeviceData[config.source] !== undefined) {
-      let value = currentDeviceData[config.source];
-      const formattedValue = config.format.replace("{value}", randomTemp);
-      display.textContent = formattedValue;
-    }
+    // // Update with current data if available
+    // if (currentDeviceData && currentDeviceData[config.source] !== undefined) {
+    //   let value = currentDeviceData[config.source];
+    //   const formattedValue = config.format.replace("{value}", randomTemp);
+    //   display.textContent = formattedValue;
+    // }
   }
 
   function updateOnOffIndicator(component, config) {

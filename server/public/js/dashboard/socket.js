@@ -1,15 +1,20 @@
 const socket = io("/dashboard");
 
 let devices = [];
-let peripherals_methods = {};
+const peripherals = {};
+let peripherals_interface_info = {};
 
 let components = {};
 
 socket.on("connect", async () => {
   console.log("connected to the server ");
   devices = await socket.emitWithAck("fetchDevices", "all");
-  peripherals_methods = await socket.emitWithAck("peripherals_methods", "all");
-  console.log(peripherals_methods);
+  peripherals_interface_info = await socket.emitWithAck(
+    "peripherals_interface_info",
+    "all"
+  );
+  console.log(peripherals_interface_info);
+
   devices = devices.map((device) => new Device(device));
   console.log(devices);
 });

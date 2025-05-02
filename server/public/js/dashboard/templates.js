@@ -7,7 +7,14 @@ setInterval(() => {
 
 const componentTemplates = {
   "text-display": {
-    type: "read",
+    allowed_method_types: ["read"],
+    allowed_method_returns: [
+      "Number",
+      "String",
+      "Array",
+      "Boolean",
+      "Character",
+    ],
     title: "Text Display",
     content: `
             <div class="text-display" data-source="temperature">
@@ -49,8 +56,9 @@ const componentTemplates = {
     ],
   },
   "circle-canvas": {
-    type: "read",
     title: "Circle Canvas",
+    allowed_method_types: ["read"],
+    allowed_method_returns: ["Number"],
     content: `
             <canvas class="circle-canvas" data-source="cpuUsage" data-min="0" data-max="100"></canvas>
         `,
@@ -100,8 +108,9 @@ const componentTemplates = {
     ],
   },
   "onoff-indicator": {
-    type: "read",
     title: "On/Off Indicator",
+    allowed_method_types: ["read"],
+    allowed_method_returns: ["Boolean"],
     content: `
             <div class="onoff-indicator off" data-source="power">
                 OFF
@@ -145,8 +154,9 @@ const componentTemplates = {
     ],
   },
   gauge: {
-    type: "read",
     title: "Gauge",
+    allowed_method_types: ["read"],
+    allowed_method_returns: ["Number"],
     content: `
             <div class="gauge-container">
                 <div class="gauge">
@@ -187,8 +197,9 @@ const componentTemplates = {
     ],
   },
   chart: {
-    type: "read",
     title: "Chart",
+    allowed_method_types: ["read"],
+    allowed_method_returns: ["Number", "Boolean"],
     content: `
             <div class="chart-container">
                 <canvas></canvas>
@@ -236,8 +247,15 @@ const componentTemplates = {
     ],
   },
   "text-input": {
-    type: "write",
     title: "Text Input",
+    allowed_method_types: ["write"],
+    allowed_method_parameter_type: [
+      "Number",
+      "String",
+      "Array",
+      "Boolean",
+      "Character",
+    ],
     content: `
             <div class="control-item">
                 <span class="control-label">Input</span>
@@ -286,7 +304,8 @@ const componentTemplates = {
     ],
   },
   "switch-button": {
-    type: "write",
+    allowed_method_types: ["write"],
+    allowed_method_parameter_type: ["Boolean"],
     title: "Switch Button",
     content: `
             <div class="control-item">
@@ -342,8 +361,9 @@ const componentTemplates = {
     ],
   },
   slider: {
-    type: "write",
     title: "Slider",
+    allowed_method_types: ["write"],
+    allowed_method_parameter_type: ["Number"],
     content: `
             <div class="control-item">
                 <span class="control-label">Slider</span>
@@ -394,8 +414,15 @@ const componentTemplates = {
     ],
   },
   "select-dropdown": {
-    type: "write",
     title: "Select Dropdown",
+    allowed_method_types: ["write"],
+    allowed_method_parameter_type: [
+      "Number",
+      "String",
+      "Array",
+      "Boolean",
+      "Character",
+    ],
     content: `
             <div class="control-item">
                 <span class="control-label">Select</span>
@@ -452,8 +479,9 @@ const componentTemplates = {
     ],
   },
   "push-button": {
-    type: "write",
     title: "Push Button",
+    allowed_method_types: ["write"],
+    allowed_method_parameter_type: ["Boolean"],
     content: `
             <div class="control-item">
                 <span class="control-label">Button</span>

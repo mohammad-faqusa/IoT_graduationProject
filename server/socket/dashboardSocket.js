@@ -4,13 +4,19 @@ const { getDevices } = require("./../data/devices");
 
 const fs = require("fs");
 const path = require("path");
+peripherals_interface_info = {};
+
 const peripherals_info = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
 );
 peripheral_methods = {};
-peripherals_info.forEach(
-  (peripheral) => (peripheral_methods[peripheral.name] = peripheral.methods)
-);
+
+peripherals_info.forEach((peripheral) => {
+  peripheral_methods[peripheral.name] = peripheral.methods;
+  peripherals_interface_info[peripheral.name] = {};
+  peripherals_interface_info[peripheral.name].title = peripheral.title;
+  peripherals_interface_info[peripheral.name].methods = peripheral.methods;
+});
 // console.log(peripheral_methods);
 const mqtt = require("mqtt");
 // brokerConnectStatus
@@ -104,8 +110,8 @@ dashboardSocket = async (socket) => {
     ackCallBack(selectedPeripheral);
   });
 
-  socket.on("peripherals_methods", (data, ackCallback) => {
-    ackCallback(peripheral_methods);
+  socket.on("peripherals_interface_info", (data, ackCallback) => {
+    ackCallback(peripherals_interface_info);
   });
 };
 
