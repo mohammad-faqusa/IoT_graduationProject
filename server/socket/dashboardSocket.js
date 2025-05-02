@@ -81,21 +81,18 @@ dashboardSocket = async (socket) => {
 
   socket.on("deviceCardControl", (device) => {
     console.log(device);
-    pObj = {};
-    const sendObj = {};
-    sendObj[device.peripheral] = {};
+
+    device.param = [device.value];
     if (device.value) {
       device.value = 1;
     } else {
       device.value = 0;
     }
-    sendObj[device.peripheral][device.method] = device.value;
-    console.log(sendObj);
-    pObj[device.peripheral] = device.method;
+    device.param = [device.value];
 
     const deviceId = devices.find((dev) => dev.name === device.device).id;
 
-    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObj));
+    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(device));
   });
 
   socket.on("fetchDevices", (data, ackCallBack) => {

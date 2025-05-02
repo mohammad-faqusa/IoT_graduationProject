@@ -780,6 +780,18 @@ input:checked + .slider:before {
   color: var(--text-color);
 }
 
+.config-form .full-line {
+  grid-column: 1 / -1; /* Span across all columns */
+  display: flex;
+  gap: 10px;
+}
+
+.config-form .full-line > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* label on top */
+}
+
 /* Drag and Drop */
 .draggable {
   cursor: move;
