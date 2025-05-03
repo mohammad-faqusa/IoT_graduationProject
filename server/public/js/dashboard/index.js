@@ -609,12 +609,40 @@ document.addEventListener("DOMContentLoaded", async function () {
           }
         }
       );
+
+      if (configMethods.value)
+        methodAutoFill(currentP, configMethods.value, componentType);
+    });
+
+    configMethods.addEventListener("change", () => {
+      methodAutoFill(currentP, configMethods.value, componentType);
     });
 
     // Show modal
     configModal.classList.add("show");
   }
 
+  function methodAutoFill(
+    selectedP,
+    selectedMethod,
+    componentType,
+    configModal = document.querySelector("#configModal")
+  ) {
+    const methodObject =
+      peripherals_interface_info[selectedP].methods[selectedMethod];
+
+    if (componentTemplates[componentType].bounded) {
+      let minValue = "";
+      let maxValue = "";
+      if (methodObject.returns.range) {
+        minValue = methodObject.returns.range.min;
+        maxValue = methodObject.returns.range.max;
+      }
+
+      configModal.querySelector("#config-min").value = minValue;
+      configModal.querySelector("#config-max").value = maxValue;
+    }
+  }
   function deviceAutoSelect(currentDevice, selectElements, componentType) {
     currentP = devices[0].pList[0];
     console.log("this is curren device : ", currentDevice);
@@ -636,6 +664,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       }
     );
+    if (selectElements.configMethods.value)
+      methodAutoFill(
+        currentP,
+        selectElements.configMethods.value,
+        componentType
+      );
   }
 
   function addOptions(selectElement, listData) {

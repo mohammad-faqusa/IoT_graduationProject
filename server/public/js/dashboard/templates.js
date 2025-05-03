@@ -59,6 +59,7 @@ const componentTemplates = {
     title: "Circle Canvas",
     allowed_method_types: ["read"],
     allowed_method_returns: ["Number"],
+    bounded: true,
     content: `
             <canvas class="circle-canvas" data-source="cpuUsage" data-min="0" data-max="100"></canvas>
         `,
@@ -157,6 +158,7 @@ const componentTemplates = {
     title: "Gauge",
     allowed_method_types: ["read"],
     allowed_method_returns: ["Number"],
+    bounded: true,
     content: `
             <div class="gauge-container">
                 <div class="gauge">
@@ -364,6 +366,7 @@ const componentTemplates = {
     title: "Slider",
     allowed_method_types: ["write"],
     allowed_method_parameter_type: ["Number"],
+    bounded: true,
     content: `
             <div class="control-item">
                 <span class="control-label">Slider</span>
