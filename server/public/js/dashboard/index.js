@@ -638,10 +638,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         minValue = methodObject.returns.range.min;
         maxValue = methodObject.returns.range.max;
       }
-      if (methodObject.parameters[0].range) {
-        minValue = methodObject.parameters[0].range.min;
-        maxValue = methodObject.parameters[0].range.max;
-      }
+      if (methodObject.parameters)
+        if (methodObject.parameters[0].range) {
+          minValue = methodObject.parameters[0].range.min;
+          maxValue = methodObject.parameters[0].range.max;
+        }
       configModal.querySelector("#config-min").value = minValue;
       configModal.querySelector("#config-max").value = maxValue;
     }
@@ -759,7 +760,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           formData[field.name] = input.value;
         }
       }
+      component.setAttribute(field.name, input.value);
     });
+
     console.log("this is form data ", formData);
     components[currentComponent.id].formData = formData;
 
@@ -1227,11 +1230,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     const sendButton = component.querySelector(".send-component");
     const input = controlItem.querySelector(".text-input");
     sendButton.addEventListener("click", () => {
-      socket.emit("deviceCardControl", {
-        device: config.device,
-        peripheral: config.source,
-        value: input.value,
-      });
+      component.setAttribute("returnValue", input.value);
+      sendWriteCommand(component);
+      //here is the function and acknowledge
+      input.value = "";
     });
     if (!controlItem) return;
 
@@ -1400,5 +1402,21 @@ document.addEventListener("DOMContentLoaded", async function () {
         button._hasListener = true;
       }
     }
+  }
+
+  async function sendWriteCommand(component) {
+    const device = component.getAttribute("device");
+    const source = component.getAttribute("source");
+    const method = component.getAttribute("method");
+    const returnValue = component.getAttribute("returnValue");
+
+    const result = await socket.emitWithAck("writeMethod", {
+      device,
+      source,
+      method,
+      returnValue,
+    });
+    console.log(result);
+    return await result;
   }
 });

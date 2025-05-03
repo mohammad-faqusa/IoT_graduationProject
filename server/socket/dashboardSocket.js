@@ -113,6 +113,11 @@ dashboardSocket = async (socket) => {
   socket.on("peripherals_interface_info", (data, ackCallback) => {
     ackCallback(peripherals_interface_info);
   });
+
+  socket.on("writeMethod", (data, ackCallBack) => {
+    console.log(data);
+    ackCallBack({ status: "ok" });
+  });
 };
 
 module.exports = dashboardSocket;
