@@ -114,7 +114,7 @@ dashboardSocket = async (socket) => {
     sendObject.device = data.device;
     sendObject.peripheral = data.source;
     sendObject.method = data.method;
-    if (data.methodType === "read") sendObject.param = [];
+    if (!data.parameterLength) sendObject.param = [];
     else sendObject.param = autoParse(data.returnValue);
     sendObject.commandId = generateCommandId();
 

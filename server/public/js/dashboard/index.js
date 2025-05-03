@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     connectStatus();
   }, 5000);
 
+  setInterval(() => {
+    Object.entries(readComponents).forEach(([key, componentsArr]) => {
+      componentsArr
+        .filter((component) => component.getAttribute("method-type") === "read")
+        .forEach((component) => sendImmediateCommand(component));
+    });
+  }, 3000);
+
   function connectStatus() {
     if (isConnected) {
       connectionStatus.className = "connection-status";
@@ -681,6 +689,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       component.setAttribute(field.name, input.value);
     });
 
+    const parameters =
+      peripherals_interface_info[formData.source].methods[formData.method]
+        .parameters;
+
+    console.log(peripherals_interface_info);
+    console.log("this is parameter", parameters);
+    component.setAttribute(
+      "parameter-length",
+      parameters ? parameters.length : 0
+    );
+
     if (methodType === "read") {
       if (readComponents[`${formData.device}-${formData.source}`])
         readComponents[`${formData.device}-${formData.source}`].push(component);
@@ -1309,12 +1328,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     const method = component.getAttribute("method");
     const returnValue = component.getAttribute("return-value");
     const methodType = component.getAttribute("method-type");
+    const parameterLength = autoParse(
+      component.getAttribute("parameter-length")
+    );
     const result = await socket.emitWithAck("immediateCommand", {
       device,
       source,
       method,
       methodType,
       returnValue,
+      parameterLength,
     });
 
     if (component.getAttribute("method-type") === "read") {
