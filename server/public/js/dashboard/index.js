@@ -796,7 +796,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         updateOnOffIndicator(component, formData);
         break;
       case "gauge":
-        updateGauge(component, formData, 0);
+        updateGauge(component, formData);
         break;
       case "chart":
         components[currentComponent.id].dataArray = [];
@@ -840,36 +840,34 @@ document.addEventListener("DOMContentLoaded", async function () {
   function updateTextDisplay(component, config) {
     const display = component.querySelector(".text-display");
     if (!display) return;
-    console.log("this is form data with method : ", config.method);
+
+    console.log("Form method:", config.method);
     console.log(
-      "this is component content",
-      component.querySelector(".card-content").innerHTML
+      "Component content:",
+      component.querySelector(".card-content")?.innerHTML
     );
 
-    display.setAttribute("data-source", config.source);
-    display.setAttribute("data-format", config.format);
+    display.dataset.source = config.source;
+    display.dataset.format = config.format;
 
-    // // Update with current data if available
-    // if (currentDeviceData && currentDeviceData[config.source] !== undefined) {
-    //   let value = currentDeviceData[config.source];
-    //   const formattedValue = config.format.replace("{value}", randomTemp);
-    //   display.textContent = formattedValue;
-    // }
+    const observer = new MutationObserver(() => {
+      const newValue = component.getAttribute("return-value");
+      display.textContent = newValue;
+    });
+
+    observer.observe(component, {
+      attributes: true,
+      attributeFilter: ["return-value"],
+    });
   }
 
   function updateOnOffIndicator(component, config) {
     const indicator = component.querySelector(".onoff-indicator");
     if (!indicator) return;
 
-    indicator.setAttribute("data-source", config.source);
-    indicator.setAttribute("data-on-text", config.onText);
-    indicator.setAttribute("data-off-text", config.offText);
-
-    // Update with current data if available
-    if (currentDeviceData && currentDeviceData[config.source] !== undefined) {
-      let value = currentDeviceData[config.source];
-
-      if (value) {
+    const observer = new MutationObserver(() => {
+      const newValue = autoParse(component.getAttribute("return-value"));
+      if (newValue) {
         indicator.classList.remove("off");
         indicator.classList.add("on");
         indicator.textContent = config.onText;
@@ -878,7 +876,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         indicator.classList.add("off");
         indicator.textContent = config.offText;
       }
-    }
+    });
+
+    observer.observe(component, {
+      attributes: true,
+      attributeFilter: ["return-value"],
+    });
+  }
+
+  function autoParse(value) {
+    if (value === "true") return true;
+    if (value === "false") return false;
+    if (!isNaN(value) && value.trim() !== "") return Number(value);
+    return value;
   }
 
   function updateDynamicComponents(data) {
@@ -1032,11 +1042,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    const source = canvas.getAttribute("data-source");
-    const min = parseInt(canvas.getAttribute("data-min") || 0);
-    const max = parseInt(canvas.getAttribute("data-max") || 100);
-    const colorMin = canvas.getAttribute("data-color-min") || "#4caf50";
-    const colorMax = canvas.getAttribute("data-color-max") || "#f44336";
+    const min = parseInt(component.getAttribute("min") || 0);
+    const max = parseInt(component.getAttribute("max") || 100);
+    const colorMin = component.getAttribute("colormin") || "#4caf50";
+    const colorMax = component.getAttribute("colormax") || "#f44336";
 
     // Set canvas dimensions
     canvas.width = 150;
@@ -1093,31 +1102,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     const canvas = component.querySelector("canvas");
     if (!canvas) return;
 
-    canvas.setAttribute("data-source", config.source);
-    canvas.setAttribute("data-min", config.min);
-    canvas.setAttribute("data-max", config.max);
-    canvas.setAttribute("data-color-min", config.colorMin);
-    canvas.setAttribute("data-color-max", config.colorMax);
-    canvas.setAttribute("data-device", config.device);
-
     // Reinitialize canvas
     initializeCircleCanvas(component);
 
-    // Update with current data if available
-    if (currentDeviceData && currentDeviceData[config.source] !== undefined) {
-      let value = currentDeviceData[config.source];
+    const observer = new MutationObserver(() => {
+      const newValue = component.getAttribute("return-value");
       drawCircleCanvas(
         canvas._ctx,
-        value,
+        newValue,
         canvas._min,
         canvas._max,
         canvas._colorMin,
         canvas._colorMax
       );
-    }
+    });
+
+    observer.observe(component, {
+      attributes: true,
+      attributeFilter: ["return-value"],
+    });
   }
   // Update gauge component
-  function updateGauge(component, config, value) {
+  function updateGauge(component, config) {
     const gauge = component.querySelector(".gauge");
     const gaugeFill = component.querySelector(".gauge-fill");
     const gaugeValue = component.querySelector(".gauge-value");
@@ -1132,13 +1138,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const min = parseInt(config.min);
     const max = parseInt(config.max);
-    const percentage = Math.min(
-      100,
-      Math.max(0, ((value - min) / (max - min)) * 100)
-    );
 
-    gaugeFill.style.height = percentage + "%";
-    gaugeValue.textContent = value;
+    const observer = new MutationObserver(() => {
+      const newValue = autoParse(component.getAttribute("return-value"));
+      const percentage = Math.min(
+        100,
+        Math.max(0, ((newValue - min) / (max - min)) * 100)
+      );
+      gaugeFill.style.height = percentage + "%";
+      gaugeValue.textContent = newValue;
+    });
+
+    observer.observe(component, {
+      attributes: true,
+      attributeFilter: ["return-value"],
+    });
   }
   // Initialize chart
   function initializeChart(component, dataArray) {
@@ -1230,7 +1244,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const sendButton = component.querySelector(".send-component");
     const input = controlItem.querySelector(".text-input");
     sendButton.addEventListener("click", () => {
-      component.setAttribute("returnValue", input.value);
+      component.setAttribute("return-value", input.value);
       sendWriteCommand(component);
       //here is the function and acknowledge
       input.value = "";
@@ -1264,7 +1278,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (!input._hasListener) {
         input.addEventListener("change", function () {
           // sendCommand(this.getAttribute('data-target'), { state: this.checked });
-          component.setAttribute("returnValue", input.checked);
+          component.setAttribute("return-value", input.checked);
           sendWriteCommand(component).then((result) => console.log(result));
           //here is the function and acknowledge
         });
@@ -1300,7 +1314,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
         slider.addEventListener("change", function () {
-          component.setAttribute("returnValue", this.value);
+          component.setAttribute("return-value", this.value);
           sendWriteCommand(component);
           //here is the function and acknowledge
         });
@@ -1340,7 +1354,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Add event listener if not already added
       if (!select._hasListener) {
         select.addEventListener("change", function () {
-          component.setAttribute("returnValue", this.value);
+          component.setAttribute("return-value", this.value);
           sendWriteCommand(component);
           //here is the function and acknowledge
         });
@@ -1382,7 +1396,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           } else {
             returnValue = "soft";
           }
-          component.setAttribute("returnValue", returnValue);
+          component.setAttribute("return-value", returnValue);
           sendWriteCommand(component);
           //here is the function and acknowledge
         });
@@ -1395,7 +1409,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const device = component.getAttribute("device");
     const source = component.getAttribute("source");
     const method = component.getAttribute("method");
-    const returnValue = component.getAttribute("returnValue");
+    const returnValue = component.getAttribute("return-value");
 
     const result = await socket.emitWithAck("writeMethod", {
       device,

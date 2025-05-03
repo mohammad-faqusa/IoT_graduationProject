@@ -232,11 +232,13 @@ header {
 
 .gauge-value {
   position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%; /* Move to center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Perfect centering */
   font-size: 24px;
   font-weight: bold;
+  color: white;
+  z-index: 30;
 }
 
 .gauge-label {
