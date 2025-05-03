@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   let prevConnected = false;
   let currentDeviceData = {};
   const devicesCards = {};
+  const readComponents = {};
+  const writeMethods = {};
 
   setInterval(async () => {
     isConnected = await socket.emitWithAck("brokerStatus", "");
@@ -39,79 +41,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         '<div class="connection-indicator"></div><span>Connecting...</span>';
     }
   }
-
-  // setInterval(async () => {
-  //   console.log(devicesCards);
-  //   if (Object.keys(components).length !== 0) {
-  //     const resDeviceCards = await socket.emitWithAck(
-  //       "devicesCards",
-  //       devicesCards
-  //     );
-
-  //     Object.entries(components).forEach(([componentId, component]) => {
-  //       const deviceName = component.formData.device;
-  //       const peripheralName = component.formData.source;
-  //       const peripheral = resDeviceCards[deviceName][peripheralName];
-  //       devicesCards[deviceName][peripheralName].sendValue = "";
-
-  //       const value = peripheral.value;
-  //       switch (component.componentType) {
-  //         case "text-display":
-  //           const outputDisplay = component.component.querySelector(
-  //             "." + component.componentType
-  //           );
-  //           outputDisplay.textContent = peripheral.value;
-  //           break;
-  //         case "circle-canvas":
-  //           const canvas = component.component.querySelector("canvas");
-  //           drawCircleCanvas(
-  //             canvas._ctx,
-  //             value,
-  //             canvas._min,
-  //             canvas._max,
-  //             canvas._colorMin,
-  //             canvas._colorMax
-  //           );
-  //           break;
-
-  //         case "onoff-indicator":
-  //           const indicator =
-  //             component.component.querySelector(".onoff-indicator");
-  //           if (!indicator) return;
-
-  //           config = component.formData;
-
-  //           indicator.setAttribute("data-source", config.source);
-  //           indicator.setAttribute("data-on-text", config.onText);
-  //           indicator.setAttribute("data-off-text", config.offText);
-  //           indicator.setAttribute("data-device", config.device);
-
-  //           if (value) {
-  //             indicator.classList.remove("off");
-  //             indicator.classList.add("on");
-  //             indicator.textContent = config.onText;
-  //           } else {
-  //             indicator.classList.remove("on");
-  //             indicator.classList.add("off");
-  //             indicator.textContent = config.offText;
-  //           }
-
-  //         case "gauge":
-  //           updateGauge(component.component, component.formData, value);
-  //           break;
-
-  //         case "chart":
-  //           component.dataArray.push(peripheral.value);
-  //           updateChart(
-  //             component.component,
-  //             component.formData,
-  //             component.dataArray
-  //           );
-  //           break;
-  //       }
-  //     });
-  //   }
-  // }, 3000);
 
   editModeBtn.addEventListener("click", function () {
     toggleEditMode();
@@ -649,7 +578,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   function deviceAutoSelect(currentDevice, selectElements, componentType) {
     currentP = devices[0].pList[0];
-    console.log("this is curren device : ", currentDevice);
 
     currentDevice.pList.forEach((p) => {
       const option = document.createElement("option");
@@ -733,21 +661,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   function saveComponentConfig() {
     if (!currentComponent) return;
 
-    let prevDeviceName = "";
-    let prevPeripheralName = "";
-
     const component = currentComponent.element;
     const componentType = currentComponent.type;
-
-    if (components[currentComponent.id]) {
-      prevDeviceName = components[currentComponent.id].formData.device;
-      prevPeripheralName = components[currentComponent.id].formData.source;
-      delete devicesCards[prevDeviceName][prevPeripheralName];
-    }
-
-    components[currentComponent.id] = {};
-    components[currentComponent.id].component = component;
-    components[currentComponent.id].componentType = componentType;
+    const methodType =
+      componentTemplates[componentType].allowed_method_types[0];
+    component.setAttribute("method-type", methodType);
 
     // Get form values
     const formData = {};
@@ -763,25 +681,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       component.setAttribute(field.name, input.value);
     });
 
-    console.log("this is form data ", formData);
-    components[currentComponent.id].formData = formData;
-
-    const deviceName = formData.device;
-
-    if (!devicesCards[deviceName]) devicesCards[deviceName] = {};
-
-    const sourceName = formData.source;
-    devicesCards[deviceName][sourceName] = {
-      componentId: currentComponent.id,
-      method: formData.method,
-      value: "",
-      sendValue: "",
-    };
-
-    // Update component title
-    const cardTitle = component.querySelector(".card-title");
-    if (cardTitle && formData.title) {
-      cardTitle.textContent = formData.title;
+    if (methodType === "read") {
+      if (readComponents[`${formData.device}-${formData.source}`])
+        readComponents[`${formData.device}-${formData.source}`].push(component);
+      else
+        readComponents[`${formData.device}-${formData.source}`] = [component];
     }
 
     // Update component content based on type
@@ -840,12 +744,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   function updateTextDisplay(component, config) {
     const display = component.querySelector(".text-display");
     if (!display) return;
-
-    console.log("Form method:", config.method);
-    console.log(
-      "Component content:",
-      component.querySelector(".card-content")?.innerHTML
-    );
 
     display.dataset.source = config.source;
     display.dataset.format = config.format;
@@ -1245,7 +1143,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const input = controlItem.querySelector(".text-input");
     sendButton.addEventListener("click", () => {
       component.setAttribute("return-value", input.value);
-      sendWriteCommand(component);
+      sendImmediateCommand(component);
       //here is the function and acknowledge
       input.value = "";
     });
@@ -1279,7 +1177,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         input.addEventListener("change", function () {
           // sendCommand(this.getAttribute('data-target'), { state: this.checked });
           component.setAttribute("return-value", input.checked);
-          sendWriteCommand(component).then((result) => console.log(result));
+          sendImmediateCommand(component);
           //here is the function and acknowledge
         });
         input._hasListener = true;
@@ -1315,7 +1213,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         slider.addEventListener("change", function () {
           component.setAttribute("return-value", this.value);
-          sendWriteCommand(component);
+          sendImmediateCommand(component);
           //here is the function and acknowledge
         });
 
@@ -1355,7 +1253,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (!select._hasListener) {
         select.addEventListener("change", function () {
           component.setAttribute("return-value", this.value);
-          sendWriteCommand(component);
+          sendImmediateCommand(component);
           //here is the function and acknowledge
         });
         select._hasListener = true;
@@ -1397,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             returnValue = "soft";
           }
           component.setAttribute("return-value", returnValue);
-          sendWriteCommand(component);
+          sendImmediateCommand(component);
           //here is the function and acknowledge
         });
         button._hasListener = true;
@@ -1405,18 +1303,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
-  async function sendWriteCommand(component) {
+  async function sendImmediateCommand(component) {
     const device = component.getAttribute("device");
     const source = component.getAttribute("source");
     const method = component.getAttribute("method");
     const returnValue = component.getAttribute("return-value");
-
-    const result = await socket.emitWithAck("writeMethod", {
+    const methodType = component.getAttribute("method-type");
+    const result = await socket.emitWithAck("immediateCommand", {
       device,
       source,
       method,
+      methodType,
       returnValue,
     });
+
+    if (component.getAttribute("method-type") === "read") {
+      component.setAttribute("return-value", result.value);
+    } else {
+      if (readComponents[`${device}-${source}`]) {
+        readComponents[`${device}-${source}`].forEach((component) => {
+          sendImmediateCommand(component);
+        });
+      }
+    }
     return await result;
   }
 });

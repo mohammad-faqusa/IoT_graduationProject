@@ -1,25 +1,64 @@
 from accelerometer import MPU6050
+from dht_sensor import DHTSensor
+from encoder import Encoder
+from gas_sensor import GasSensor
+from led import LED
 from led import InternalLED
+from motion_sensor import MotionSensor
+from push_button import PushButton
 from relay import Relay
+from servo_motor import Servo
+from slide_switch import SlideSwitch
 
-# Initialize peripherals_pins dictionary to store pin connections
-peripherals_pins = {
-    'accelerometer': {'scl': 22, 'sda': 21},  # Default I2C pins for ESP32
-    'internal_led': {'led_pin': 2},  # Default internal LED pin on most ESP32 boards
-    'relay': {'pin': 5}  # Example GPIO pin for relay
-}
+# Initialize pins dictionary
+peripherals_pins = {}
 
-# Initialize peripherals dictionary to store peripheral instances
+# Initialize peripherals dictionary
 peripherals = {}
 
 # Initialize accelerometer (MPU6050)
-peripherals['accelerometer'] = MPU6050(simulate=True)  # Using default values, simulation mode
+peripherals["accelerometer"] = MPU6050(simulate=True)
+peripherals_pins["accelerometer"] = {"sda": 21, "scl": 22}
+
+# Initialize DHT sensor
+peripherals["dht_sensor"] = DHTSensor(pin=4, sensor_type="DHT22", simulate=True)
+peripherals_pins["dht_sensor"] = {"data": 4}
+
+# Initialize encoder
+peripherals["encoder"] = Encoder(pin_a=12, pin_b=13, simulate=True)
+peripherals_pins["encoder"] = {"pin_a": 12, "pin_b": 13}
+
+# Initialize gas sensor
+peripherals["gas_sensor"] = GasSensor(pin=33, analog=True, simulate=True)
+peripherals_pins["gas_sensor"] = {"sensor": 33}
+
+# Initialize LED
+peripherals["led"] = LED(pin=27, active_high=True, simulate=True)
+peripherals_pins["led"] = {"control": 27}
 
 # Initialize internal LED
-peripherals['internal_led'] = InternalLED()  # Using default values (simulation=False)
+peripherals["internal_led"] = InternalLED(simulate=False)
+peripherals_pins["internal_led"] = {"built_in": 2}  # ESP32 typically uses GPIO2 for internal LED
+
+# Initialize motion sensor
+peripherals["motion_sensor"] = MotionSensor(pin=14, simulate=True)
+peripherals_pins["motion_sensor"] = {"pir": 14}
+
+# Initialize push button
+peripherals["push_button"] = PushButton(pin=15, simulate=True, debounce_ms=50)
+peripherals_pins["push_button"] = {"button": 15}
 
 # Initialize relay
-peripherals['relay'] = Relay(pin=peripherals_pins['relay']['pin'], active_high=True, simulate=True)
+peripherals["relay"] = Relay(pin=26, active_high=True, simulate=True)
+peripherals_pins["relay"] = {"control": 26}
+
+# Initialize servo motor
+peripherals["servo_motor"] = Servo(pin=25, freq=50, min_us=500, max_us=2500, angle_range=180)
+peripherals_pins["servo_motor"] = {"pwm": 25}
+
+# Initialize slide switch
+peripherals["slide_switch"] = SlideSwitch(pin=32, simulate=True)
+peripherals_pins["slide_switch"] = {"state": 32}
 
 import json
 
@@ -44,20 +83,21 @@ async def async_callback(topic, msg, retained):
     result = {}
     result['peripheral'] = msg['peripheral']
     result['method'] = msg['method']
+    
     result['value'] = value
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/16/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/2/receiver', 1)
+    await client.subscribe('esp32/3/receiver', 1)
     
 async def main(client):
     await client.connect()
     n = 0
     esp_status = {}
-    esp_status['id'] = 2
+    esp_status['id'] = 3
     while True:
         await asyncio.sleep(1)
         

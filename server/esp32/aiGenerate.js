@@ -98,12 +98,13 @@ async def async_callback(topic, msg, retained):
     msg = msg.decode()
     msg = json.loads(msg)
  
-    peripherals[msg['peripheral']][msg['method']][msg['param']]
+    value = peripherals[msg['peripheral']][msg['method']][msg['param']]
     
     result = {}
     result['peripheral'] = msg['peripheral']
     result['method'] = msg['method']
-    result['param'] = msg['param']
+    
+    result['value'] = value
     result['status'] = True
     result['commandId'] = msg['commandId']
 
