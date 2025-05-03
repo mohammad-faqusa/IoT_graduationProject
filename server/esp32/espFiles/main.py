@@ -1,24 +1,25 @@
-from dht_sensor import DHTSensor
-from gas_sensor import GasSensor
-from servo_motor import Servo
+from accelerometer import MPU6050
+from led import InternalLED
+from relay import Relay
 
-# Initialize peripherals_pins dictionary
-peripherals_pins = {}
+# Initialize peripherals_pins dictionary to store pin connections
+peripherals_pins = {
+    'accelerometer': {'scl': 22, 'sda': 21},  # Default I2C pins for ESP32
+    'internal_led': {'led_pin': 2},  # Default internal LED pin on most ESP32 boards
+    'relay': {'pin': 5}  # Example GPIO pin for relay
+}
 
-# Initialize peripherals dictionary
+# Initialize peripherals dictionary to store peripheral instances
 peripherals = {}
 
-# Initialize DHT sensor (using pin 4, type DHT22, simulation mode by default)
-peripherals['dht_sensor'] = DHTSensor(pin=4, sensor_type="DHT22", simulate=True)
-peripherals_pins['dht_sensor'] = {'pin': 4}
+# Initialize accelerometer (MPU6050)
+peripherals['accelerometer'] = MPU6050(simulate=True)  # Using default values, simulation mode
 
-# Initialize Gas sensor (using pin 36, analog mode, simulation mode by default)
-peripherals['gas_sensor'] = GasSensor(pin=36, analog=True, simulate=True)
-peripherals_pins['gas_sensor'] = {'pin': 36}
+# Initialize internal LED
+peripherals['internal_led'] = InternalLED()  # Using default values (simulation=False)
 
-# Initialize Servo motor (using pin 18, default parameters)
-peripherals['servo_motor'] = Servo(pin=18, freq=50, min_us=500, max_us=2500, angle_range=180)
-peripherals_pins['servo_motor'] = {'pin': 18}
+# Initialize relay
+peripherals['relay'] = Relay(pin=peripherals_pins['relay']['pin'], active_high=True, simulate=True)
 
 import json
 
@@ -50,13 +51,13 @@ async def async_callback(topic, msg, retained):
     await client.publish('esp32/16/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/1/receiver', 1)
+    await client.subscribe('esp32/2/receiver', 1)
     
 async def main(client):
     await client.connect()
     n = 0
     esp_status = {}
-    esp_status['id'] = 1
+    esp_status['id'] = 2
     while True:
         await asyncio.sleep(1)
         

@@ -1264,13 +1264,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (!input._hasListener) {
         input.addEventListener("change", function () {
           // sendCommand(this.getAttribute('data-target'), { state: this.checked });
-          console.log(config);
-          socket.emit("deviceCardControl", {
-            device: config.device,
-            peripheral: config.source,
-            method: config.method,
-            value: this.checked,
-          });
+          component.setAttribute("returnValue", input.checked);
+          sendWriteCommand(component);
+          //here is the function and acknowledge
         });
         input._hasListener = true;
       }
@@ -1304,11 +1300,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
         slider.addEventListener("change", function () {
-          socket.emit("deviceCardControl", {
-            device: config.device,
-            peripheral: config.source,
-            value: this.value,
-          });
+          component.setAttribute("returnValue", this.value);
+          sendWriteCommand(component);
+          //here is the function and acknowledge
         });
 
         slider._hasListener = true;
@@ -1346,11 +1340,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Add event listener if not already added
       if (!select._hasListener) {
         select.addEventListener("change", function () {
-          socket.emit("deviceCardControl", {
-            device: config.device,
-            peripheral: config.source,
-            value: this.value,
-          });
+          component.setAttribute("returnValue", this.value);
+          sendWriteCommand(component);
+          //here is the function and acknowledge
         });
         select._hasListener = true;
       }
@@ -1380,24 +1372,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         button.addEventListener("click", function () {
           const target = this.getAttribute("data-target");
           const requireConfirm = this.getAttribute("data-confirm") === "true";
-
+          let returnValue = "";
           if (requireConfirm) {
             if (
               confirm(`Are you sure you want to execute the ${target} command?`)
             ) {
-              socket.emit("deviceCardControl", {
-                device: config.device,
-                peripheral: config.source,
-                value: config.buttonText,
-              });
+              returnValue = "hard";
             }
           } else {
-            socket.emit("deviceCardControl", {
-              device: config.device,
-              peripheral: config.source,
-              value: this.value,
-            });
+            returnValue = "soft";
           }
+          component.setAttribute("returnValue", returnValue);
+          sendWriteCommand(component);
+          //here is the function and acknowledge
         });
         button._hasListener = true;
       }
