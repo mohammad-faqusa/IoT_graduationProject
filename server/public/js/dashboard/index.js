@@ -638,7 +638,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         minValue = methodObject.returns.range.min;
         maxValue = methodObject.returns.range.max;
       }
-
+      if (methodObject.parameters[0].range) {
+        minValue = methodObject.parameters[0].range.min;
+        maxValue = methodObject.parameters[0].range.max;
+      }
       configModal.querySelector("#config-min").value = minValue;
       configModal.querySelector("#config-max").value = maxValue;
     }

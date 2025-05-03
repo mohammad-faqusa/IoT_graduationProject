@@ -1,20 +1,24 @@
-from accelerometer import MPU6050
-from led import InternalLED
+from dht_sensor import DHTSensor
+from gas_sensor import GasSensor
+from servo_motor import Servo
 
-# Initialize peripherals_pins dictionary to store connection information
-peripherals_pins = {
-    'accelerometer': {'sda': 21, 'scl': 22},
-    'internal_led': {'pin': 2}  # ESP32 typically has internal LED on pin 2
-}
+# Initialize peripherals_pins dictionary
+peripherals_pins = {}
 
-# Initialize peripherals dictionary to store peripheral instances
+# Initialize peripherals dictionary
 peripherals = {}
 
-# Initialize accelerometer
-peripherals['accelerometer'] = MPU6050(simulate=True)
+# Initialize DHT sensor (using pin 4, type DHT22, simulation mode by default)
+peripherals['dht_sensor'] = DHTSensor(pin=4, sensor_type="DHT22", simulate=True)
+peripherals_pins['dht_sensor'] = {'pin': 4}
 
-# Initialize internal LED
-peripherals['internal_led'] = InternalLED(simulate=False)
+# Initialize Gas sensor (using pin 36, analog mode, simulation mode by default)
+peripherals['gas_sensor'] = GasSensor(pin=36, analog=True, simulate=True)
+peripherals_pins['gas_sensor'] = {'pin': 36}
+
+# Initialize Servo motor (using pin 18, default parameters)
+peripherals['servo_motor'] = Servo(pin=18, freq=50, min_us=500, max_us=2500, angle_range=180)
+peripherals_pins['servo_motor'] = {'pin': 18}
 
 import json
 
@@ -35,21 +39,24 @@ async def async_callback(topic, msg, retained):
     msg = json.loads(msg)
  
     value = peripherals[msg['peripheral']][msg['method']][msg['param']]
+    
     result = {}
     result['peripheral'] = msg['peripheral']
     result['method'] = msg['method']
     result['value'] = value
+    result['status'] = True
+    result['commandId'] = msg['commandId']
 
     await client.publish('esp32/16/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/16/receiver', 1)
+    await client.subscribe('esp32/1/receiver', 1)
     
 async def main(client):
     await client.connect()
     n = 0
     esp_status = {}
-    esp_status['id'] = 16
+    esp_status['id'] = 1
     while True:
         await asyncio.sleep(1)
         
