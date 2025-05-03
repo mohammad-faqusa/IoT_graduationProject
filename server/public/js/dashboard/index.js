@@ -561,154 +561,38 @@ document.addEventListener("DOMContentLoaded", async function () {
       configForm.appendChild(groupLine);
     }
 
-    let currentDevice = {};
+    let currentDevice = devices[0];
     let currentP = "";
 
     const configDevice = configModal.querySelector("#config-device");
     const configP = configModal.querySelector("#config-source");
     const configMethods = configModal.querySelector("#config-method");
 
-    // Function to create a field group
-    function createFieldGroup(name, label, type, options = null) {
-      const formGroup = document.createElement("div");
-      formGroup.style.marginBottom = "15px";
+    removeOptions(configDevice);
+    removeOptions(configP);
+    removeOptions(configMethods);
 
-      const fieldLabel = document.createElement("label");
-      fieldLabel.textContent = label;
-      fieldLabel.setAttribute("for", `param-${name}`);
+    devices.forEach((device) => {
+      const option = document.createElement("option");
+      option.text = device.name;
+      option.value = device.name;
+      configDevice.add(option);
+    });
 
-      let fieldInput;
-
-      switch (type) {
-        case "text":
-          fieldInput = document.createElement("input");
-          fieldInput.type = "text";
-          fieldInput.id = `param-${name}`;
-          fieldInput.name = `param-${name}`;
-          fieldInput.placeholder = `Enter ${label.toLowerCase()}`;
-          break;
-
-        case "number":
-          fieldInput = document.createElement("input");
-          fieldInput.type = "number";
-          fieldInput.id = `param-${name}`;
-          fieldInput.name = `param-${name}`;
-          fieldInput.min = "0";
-          fieldInput.step = "1";
-          fieldInput.value = "0";
-          break;
-
-        case "select":
-          fieldInput = document.createElement("select");
-          fieldInput.id = `param-${name}`;
-          fieldInput.name = `param-${name}`;
-
-          if (options) {
-            options.forEach((option) => {
-              const optionEl = document.createElement("option");
-              optionEl.value = option.value;
-              optionEl.textContent = option.label;
-              fieldInput.appendChild(optionEl);
-            });
-          }
-          break;
-
-        case "checkbox":
-          fieldInput = document.createElement("input");
-          fieldInput.type = "checkbox";
-          fieldInput.id = `param-${name}`;
-          fieldInput.name = `param-${name}`;
-          break;
-      }
-
-      formGroup.appendChild(fieldLabel);
-      formGroup.appendChild(fieldInput);
-      return formGroup;
-    }
-
-    // Function to create a new parameter group line with random fields
-    function createParameterGroupLine() {
-      // Remove any existing extra parameter lines
-      const existingExtraLines = configForm.querySelectorAll(
-        ".extra-parameter-line"
-      );
-      existingExtraLines.forEach((line) => configForm.removeChild(line));
-
-      // Create a new full-line group for parameters
-      const paramLine = document.createElement("div");
-      paramLine.className = "full-line extra-parameter-line";
-
-      // Create random fields based on the selected method
-      const selectedMethod = configMethods.value;
-
-      // Create different field combinations based on the selected method
-      if (selectedMethod) {
-        // Create 3 random fields for the parameter line
-        const fieldTypes = ["text", "number", "select", "checkbox"];
-        const fieldNames = [
-          "value",
-          "interval",
-          "enabled",
-          "mode",
-          "threshold",
-          "format",
-        ];
-
-        // Create 3 fields with different types
-        for (let i = 0; i < 3; i++) {
-          const fieldType = fieldTypes[i % fieldTypes.length];
-          const fieldName = `${fieldNames[i % fieldNames.length]}-${i}`;
-          const fieldLabel = `${
-            fieldNames[i % fieldNames.length].charAt(0).toUpperCase() +
-            fieldNames[i % fieldNames.length].slice(1)
-          }`;
-
-          let options = null;
-          if (fieldType === "select") {
-            options = [
-              { value: "option1", label: "Option 1" },
-              { value: "option2", label: "Option 2" },
-              { value: "option3", label: "Option 3" },
-            ];
-          }
-
-          const fieldGroup = createFieldGroup(
-            fieldName,
-            fieldLabel,
-            fieldType,
-            options
-          );
-          paramLine.appendChild(fieldGroup);
-        }
-      }
-
-      // Add the parameter line after the main group line
-      const mainGroupLine = configForm.querySelector(
-        ".full-line:not(.extra-parameter-line)"
-      );
-      if (mainGroupLine && paramLine.children.length > 0) {
-        configForm.insertBefore(paramLine, mainGroupLine.nextSibling);
-      }
-    }
+    deviceAutoSelect(
+      currentDevice,
+      { configDevice, configP, configMethods },
+      componentType
+    );
 
     configDevice.addEventListener("change", () => {
       removeOptions(configP);
       currentDevice = devices[configDevice.selectedIndex];
-      currentDevice.pList.forEach((p) => {
-        const option = document.createElement("option");
-        option.text = peripherals_interface_info[p].title;
-        option.value = p;
-        configP.add(option);
-      });
-
-      // Reset method dropdown when device changes
-      removeOptions(configMethods);
-
-      // Remove any extra parameter lines
-      const existingExtraLines = configForm.querySelectorAll(
-        ".extra-parameter-line"
+      deviceAutoSelect(
+        currentDevice,
+        { configDevice, configP, configMethods },
+        componentType
       );
-      existingExtraLines.forEach((line) => configForm.removeChild(line));
     });
 
     configP.addEventListener("change", () => {
@@ -725,21 +609,42 @@ document.addEventListener("DOMContentLoaded", async function () {
           }
         }
       );
-
-      // Remove any extra parameter lines when source changes
-      const existingExtraLines = configForm.querySelectorAll(
-        ".extra-parameter-line"
-      );
-      existingExtraLines.forEach((line) => configForm.removeChild(line));
-    });
-
-    // Add event listener to method select to create parameter line
-    configMethods.addEventListener("change", () => {
-      createParameterGroupLine();
     });
 
     // Show modal
     configModal.classList.add("show");
+  }
+
+  function deviceAutoSelect(currentDevice, selectElements, componentType) {
+    currentP = devices[0].pList[0];
+    console.log("this is curren device : ", currentDevice);
+
+    currentDevice.pList.forEach((p) => {
+      const option = document.createElement("option");
+      option.text = peripherals_interface_info[p].title;
+      option.value = p;
+      selectElements.configP.add(option);
+    });
+
+    Object.entries(peripherals_interface_info[currentP].methods).forEach(
+      ([name, body]) => {
+        if (isAppropriateMethod(currentP, name, componentType)) {
+          const option = document.createElement("option");
+          option.text = body.label;
+          option.value = name;
+          selectElements.configMethods.add(option);
+        }
+      }
+    );
+  }
+
+  function addOptions(selectElement, listData) {
+    listData.forEach((p) => {
+      const option = document.createElement("option");
+      option.text = peripherals_interface_info[p].title;
+      option.value = p;
+      selectElement.add(option);
+    });
   }
 
   function removeOptions(selectElement) {
