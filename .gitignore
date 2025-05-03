@@ -130,4 +130,4 @@ dist
 .pnp.*
 
 #execluded folders
-.test/
+/test/

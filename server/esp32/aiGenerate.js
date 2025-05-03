@@ -98,16 +98,16 @@ async def async_callback(topic, msg, retained):
     msg = msg.decode()
     msg = json.loads(msg)
  
-    value = peripherals[msg['peripheral']][msg['method']][msg['param']]
+    peripherals[msg['peripheral']][msg['method']][msg['param']]
     
     result = {}
     result['peripheral'] = msg['peripheral']
     result['method'] = msg['method']
-    result['value'] = value
+    result['param'] = msg['param']
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/16/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
     await client.subscribe('esp32/${id}/receiver', 1)

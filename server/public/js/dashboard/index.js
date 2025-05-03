@@ -1265,7 +1265,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         input.addEventListener("change", function () {
           // sendCommand(this.getAttribute('data-target'), { state: this.checked });
           component.setAttribute("returnValue", input.checked);
-          sendWriteCommand(component);
+          sendWriteCommand(component).then((result) => console.log(result));
           //here is the function and acknowledge
         });
         input._hasListener = true;
@@ -1403,7 +1403,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       method,
       returnValue,
     });
-    console.log(result);
     return await result;
   }
 });

@@ -17,38 +17,32 @@ peripherals_info.forEach((peripheral) => {
   peripherals_interface_info[peripheral.name].title = peripheral.title;
   peripherals_interface_info[peripheral.name].methods = peripheral.methods;
 });
-// console.log(peripheral_methods);
-const mqtt = require("mqtt");
-// brokerConnectStatus
 
-const dashboardVariables = {};
-const devicesCardsRes = {};
-const devicesIds = {};
-const subscribedDevices = [];
-const componentsIds = {};
+const mqtt = require("mqtt");
 
 dashboardSocket = async (socket) => {
+  const subscribedTopics = new Set();
+
   let devices = await getDevices();
+
+  const pendingCommands = new Map(); // commandId -> ackCallBack
 
   const client = mqtt.connect("mqtt:localhost");
   client.on("connect", () => console.log("connected to the broker"));
 
   client.on("message", (topic, message) => {
-    const topicArr = topic.split("/");
-    const messageObj = JSON.parse(message);
-    console.log(messageObj);
+    try {
+      console.log(message);
+      const response = JSON.parse(message.toString());
+      const commandId = response.commandId;
 
-    if (topicArr.at(2) === "sender") {
-      const deviceName = devices.find(
-        (device) => device.id === topicArr.at(1) * 1
-      ).name;
-      devicesCardsRes[deviceName] = {};
-      Object.entries(messageObj).forEach(([pName, pValue]) => {
-        devicesCardsRes[deviceName][pName] = {
-          value: JSON.stringify(pValue),
-          componentId: componentsIds[deviceName][pName],
-        };
-      });
+      if (pendingCommands.has(commandId)) {
+        const ack = pendingCommands.get(commandId);
+        ack(response); // Send response to front-end via WebSocket
+        pendingCommands.delete(commandId); // Clean up
+      }
+    } catch (err) {
+      console.error("Invalid MQTT message:", err);
     }
   });
 
@@ -115,9 +109,34 @@ dashboardSocket = async (socket) => {
   });
 
   socket.on("writeMethod", (data, ackCallBack) => {
-    console.log(data);
-    ackCallBack({ status: "ok" });
+    sendObject = {};
+    const deviceId = devices.find((dev) => dev.name === data.device).id;
+    sendObject.peripheral = data.source;
+    sendObject.method = data.method;
+    sendObject.param = autoParse(data.returnValue);
+    sendObject.commandId = generateCommandId();
+
+    const topic = `esp32/${deviceId}/sender`;
+
+    // Subscribe only once per topic
+    if (!subscribedTopics.has(topic)) {
+      client.subscribe(topic);
+      subscribedTopics.add(topic);
+    }
+
+    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
+    pendingCommands.set(sendObject.commandId, ackCallBack);
   });
 };
 
+function autoParse(value) {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (!isNaN(value) && value.trim() !== "") return Number(value);
+  return value;
+}
+
+function generateCommandId() {
+  return Date.now() + "-" + Math.random().toString(36).substring(2, 8);
+}
 module.exports = dashboardSocket;
