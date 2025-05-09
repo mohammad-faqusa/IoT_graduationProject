@@ -13,7 +13,7 @@ function initializePeripheralsPrompt(peripherals_info) {
   
   initialize the 'peripherals_pins' dict, that take the peripheral name as key, and it's connected pins as dict value, it will be used later to know pin connection.
   then initialize each peripheral class as following, and store it in peripherals dict 'peripherals' : 
-  
+
   ${peripherals_info
     .map(
       (p) =>

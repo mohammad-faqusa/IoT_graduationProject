@@ -689,7 +689,7 @@
       },
       "simulate": {
         "dataType": "Boolean",
-        "default": true,
+        "default": false,
         "values_meaning": {
           "true": "Simulation mode enabled (random motion detection)",
           "false": "Reads actual motion data from the connected sensor"

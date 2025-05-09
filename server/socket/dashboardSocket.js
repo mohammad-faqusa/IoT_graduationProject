@@ -129,7 +129,7 @@ dashboardSocket = async (socket) => {
     client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
     pendingCommands.set(sendObject.commandId, ackCallBack);
   });
-};
+};6
 
 function autoParse(value) {
   if (value === "true") return true;

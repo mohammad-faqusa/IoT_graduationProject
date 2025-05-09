@@ -594,6 +594,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       selectElements.configP.add(option);
     });
 
+    selectElements.configP.value = currentP;
+
     Object.entries(peripherals_interface_info[currentP].methods).forEach(
       ([name, body]) => {
         if (isAppropriateMethod(currentP, name, componentType)) {
@@ -603,6 +605,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           selectElements.configMethods.add(option);
         }
       }
+    );
+    selectElements.configMethods.value = Object.keys(
+      peripherals_interface_info[currentP].methods
     );
     if (selectElements.configMethods.value)
       methodAutoFill(
