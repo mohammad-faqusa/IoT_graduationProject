@@ -97,10 +97,19 @@ async def async_callback(topic, msg, retained):
     print((topic.decode(), msg.decode(), retained))
     msg = msg.decode()
     msg = json.loads(msg)
- 
+    result = {}
+
+    if(msg['pins']):
+        result['pins'] = peripherals_pins
+        result['status'] = True
+        result['commandId'] = msg['commandId']
+        await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(result)), qos = 1)
+        print("this is pins")
+        return  # ✅ Terminate early
+     
+    print("don't run here : "); 
     value = peripherals[msg['peripheral']][msg['method']][msg['param']]
     
-    result = {}
     result['peripheral'] = msg['peripheral']
     result['method'] = msg['method']
     

@@ -46,6 +46,7 @@ class DynamicDeviceModal extends Modal {
 
     this.device = null;
     this.fieldsValues = {};
+    this.socket = options.socket;
   }
 
   toTitleCase(str) {
@@ -57,28 +58,27 @@ class DynamicDeviceModal extends Modal {
       .join(" "); // Join words back into a single string
   }
 
-  async showConnections() {
+  async showConnections(
+    connectionstr = `
+        1- connect the vss of esp to volate pin of dht 
+        2- connect the pin 13 of esp32 to pin 2 of dht 
+        1- connect the vss of esp to volate pin of dht 
+        2- connect the pin 13 of esp32 to pin 2 of dht 
+        1- connect the vss of esp to volate pin of dht 
+        2- connect the pin 13 of esp32 to pin 2 of dht 
+        `
+  ) {
     this.update({ title: "Connection details" });
 
     const contentContainer = document.createElement("div");
 
     contentContainer.innerHTML = "";
 
-    const pages = [
-      { pin: 15, connected_to: 20 },
-      { pin: 12, connected_to: 2 },
-    ];
-
-    const connectionstr = `
-        1- connect the vss of esp to volate pin of dht 
-        2- connect the pin 13 of esp32 to pin 2 of dht 
-        1- connect the vss of esp to volate pin of dht 
-        2- connect the pin 13 of esp32 to pin 2 of dht 
-        1- connect the vss of esp to volate pin of dht 
-        2- connect the pin 13 of esp32 to pin 2 of dht 
-        `;
-
-    const fieldElement = this.renderField("pin_connection", connectionstr);
+    console.log(
+      "this is connectionstr from inside showConnections",
+      connectionstr
+    );
+    const fieldElement = this.renderField("pin_connection", connectionstr.data);
     if (fieldElement) {
       contentContainer.appendChild(fieldElement);
     }
@@ -88,9 +88,11 @@ class DynamicDeviceModal extends Modal {
     this.open();
   }
 
-  async showDevice(socket, deviceId) {
+  async showDevice(deviceId) {
     this.fieldsValues = {};
-    this.device = await socket.emitWithAck("deviceClick", deviceId);
+    if (!this.socket) return;
+
+    this.device = await this.socket.emitWithAck("deviceClick", deviceId);
     this.update({ title: this.device.name || "Device Details" });
 
     const contentContainer = document.createElement("div");
@@ -229,13 +231,17 @@ class DynamicDeviceModal extends Modal {
       .trim();
   }
 
-  controlDevice() {
+  async controlDevice() {
     if (!this.device) return;
 
     if (this.device.status) {
       console.log("here is the connected pins : ");
       const deviceModal = new DynamicDeviceModal({ no_update: true });
-      deviceModal.showConnections();
+
+      this.socket.emitWithAck("getConnections", this.device.id).then((data) => {
+        console.log(data);
+        deviceModal.showConnections(data);
+      });
     } else {
       alert(`Attempting to restart ${this.device.name}...`);
     }

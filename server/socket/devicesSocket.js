@@ -7,6 +7,8 @@ const displayDevicesSocket = async (socket) => {
   let onlineDevices = [];
   let statusLog = [];
   const onlineDevicesSet = new Set();
+  const pendingCommands = new Map(); // commandId -> ackCallBack
+  const subscribedTopics = new Set();
 
   let devices = await getDevices();
 
@@ -28,6 +30,19 @@ const displayDevicesSocket = async (socket) => {
       const deviceId = JSON.parse(message).id;
       console.log("this is device id : ", deviceId);
       onlineDevicesSet.add(deviceId);
+    } else {
+      try {
+        const response = JSON.parse(message.toString());
+        const commandId = response.commandId;
+
+        if (pendingCommands.has(commandId)) {
+          const ack = pendingCommands.get(commandId);
+          ack(response); // Send response to front-end via WebSocket
+          pendingCommands.delete(commandId); // Clean up
+        }
+      } catch (err) {
+        console.error("Invalid MQTT message:", err);
+      }
     }
   });
 
@@ -55,10 +70,48 @@ const displayDevicesSocket = async (socket) => {
     ackCallBack(device);
   });
 
+  socket.on("getConnections", (deviceId, ackCallBack) => {
+    // Do something with data...
+    // get device id
+    // console.log(deviceId);
+
+    // publish mqtt message to device
+
+    //client.publish(esp32/pins/receiver)
+    //message.on(esp32/pins/sender)
+    // the peripheral pins
+
+    // build the prompt
+    // call ai api
+    // get the text
+    // send the text
+    const topic = `esp32/${deviceId}/sender`;
+
+    if (!subscribedTopics.has(topic)) {
+      client.subscribe(topic);
+      subscribedTopics.add(topic);
+    }
+    const sendObject = {};
+    sendObject.commandId = generateCommandId();
+    sendObject.pins = 1;
+    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
+    pendingCommands.set(sendObject.commandId, ackCallBack);
+  });
+
   socket.on("disconnect", () => {
     clearInterval(onlineStatusInterval);
     client.end();
   });
 };
+function autoParse(value) {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (!isNaN(value) && value.trim() !== "") return Number(value);
+  return value;
+}
+
+function generateCommandId() {
+  return Date.now() + "-" + Math.random().toString(36).substring(2, 8);
+}
 
 module.exports = displayDevicesSocket;

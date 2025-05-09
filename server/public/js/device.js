@@ -45,13 +45,13 @@ function renderCards(devices) {
 
 function openOnClick(socket) {
   // Create a single instance of DynamicDeviceModal
-  const deviceModal = new DynamicDeviceModal();
+  const deviceModal = new DynamicDeviceModal({ socket });
   // Add click event to each device card
   const deviceCards = document.querySelectorAll(".device-card");
   deviceCards.forEach((card) => {
     card.addEventListener("click", async () => {
       const deviceId = card.id.toString().split("-")[2];
-      deviceModal.showDevice(socket, deviceId);
+      deviceModal.showDevice(deviceId);
     });
   });
 }
