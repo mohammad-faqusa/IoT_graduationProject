@@ -148,6 +148,44 @@ function generateLoopReadPrompt(peripherals_info) {
   `;
 }
 
+function generateDeviceWiringPrompt(deviceName, pinsConnection, pinProperties) {
+  const prettyJSON = (obj) => JSON.stringify(obj, null, 2);
+
+  return `
+You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"${deviceName}"**
+
+Partial pin connections for the device:
+\`\`\`json
+${prettyJSON({ [deviceName]: pinsConnection })}
+\`\`\`
+
+All known pin properties of the device:
+\`\`\`json
+${prettyJSON(pinProperties)}
+\`\`\`
+
+🔧 Your task:
+Generate a complete list of step-by-step instructions for wiring the **"${deviceName}"** to an ESP32-WROOM-32 board.
+
+📌 Rules & Tips:
+- **Preserve** all existing connections.
+- Use valid GPIO pins on the ESP32 (0–39). Avoid GPIOs 6–11 (used for flash) and GPIOs 34–39 (input-only).
+- Assign safe and common GPIO defaults to unassigned required pins.
+- Power pins (like VCC) should be connected to 3.3V unless specified otherwise.
+- Optional pins can be connected if helpful, or left unconnected with a brief explanation.
+- Do not include any JSON — just plain-text steps.
+
+✅ Output format (example):
+1. Connect VCC to 3.3V output of ESP32.
+2. Connect GND to GND pin on ESP32.
+3. Connect SDA to GPIO 21 (already assigned).
+4. Connect SCL to GPIO 22 (already assigned).
+5. Leave INT unconnected unless motion detection interrupt is needed.
+6. Pull AD0 to GND to select I2C address 0x68.
+
+Provide the steps in plain text format only.
+  `.trim();
+}
 // console.log(generateLoopRead());
 
 module.exports = {
@@ -155,4 +193,5 @@ module.exports = {
   methodsPrompt,
   generateMQTTCallbackPrompt,
   generateLoopReadPrompt,
+  generateDeviceWiringPrompt,
 };

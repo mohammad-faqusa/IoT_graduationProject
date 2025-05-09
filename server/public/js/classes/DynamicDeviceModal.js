@@ -59,7 +59,7 @@ class DynamicDeviceModal extends Modal {
   }
 
   async showConnections(
-    connectionstr = `
+    data = `
         1- connect the vss of esp to volate pin of dht 
         2- connect the pin 13 of esp32 to pin 2 of dht 
         1- connect the vss of esp to volate pin of dht 
@@ -74,11 +74,7 @@ class DynamicDeviceModal extends Modal {
 
     contentContainer.innerHTML = "";
 
-    console.log(
-      "this is connectionstr from inside showConnections",
-      connectionstr
-    );
-    const fieldElement = this.renderField("pin_connection", connectionstr.data);
+    const fieldElement = this.renderField("pin_connection", data);
     if (fieldElement) {
       contentContainer.appendChild(fieldElement);
     }
@@ -239,8 +235,10 @@ class DynamicDeviceModal extends Modal {
       const deviceModal = new DynamicDeviceModal({ no_update: true });
 
       this.socket.emitWithAck("getConnections", this.device.id).then((data) => {
+        console.log("this is the recieved data : ");
         console.log(data);
-        deviceModal.showConnections(data);
+
+        deviceModal.showConnections(data.join("\n"));
       });
     } else {
       alert(`Attempting to restart ${this.device.name}...`);

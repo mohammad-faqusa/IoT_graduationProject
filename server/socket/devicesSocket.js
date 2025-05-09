@@ -1,5 +1,11 @@
-const { getDevices } = require("./../data/devices");
+const path = require("path");
+const { getDevices } = require(path.join(__dirname, "./../data/devices"));
 const mqtt = require("mqtt");
+const fs = require("fs");
+const pinsConnectionsGuide = require(path.join(
+  __dirname,
+  "./../esp32/aiPinConnection"
+));
 
 const displayDevicesSocket = async (socket) => {
   let selectedDeviceId;
@@ -23,12 +29,12 @@ const displayDevicesSocket = async (socket) => {
   client.on("connect", () => console.log("connected to the broker"));
   client.subscribe("esp32/online");
   client.subscribe("esp32/status");
-  client.on("message", (topic, message) => {
+  client.on("message", async (topic, message) => {
     // console.log(JSON.parse(message));
     if (topic === "esp32/online") {
-      console.log(JSON.parse(message));
+      // console.log(JSON.parse(message));
       const deviceId = JSON.parse(message).id;
-      console.log("this is device id : ", deviceId);
+      // console.log("this is device id : ", deviceId);
       onlineDevicesSet.add(deviceId);
     } else {
       try {
@@ -37,7 +43,14 @@ const displayDevicesSocket = async (socket) => {
 
         if (pendingCommands.has(commandId)) {
           const ack = pendingCommands.get(commandId);
-          ack(response); // Send response to front-end via WebSocket
+          if (response.pins) {
+            const guideArr = await pinsConnectionsGuide(response.pins);
+            console.log("here is guide arr printed to file : ");
+            fs.writeFileSync("./output.txt", JSON.stringify(guideArr));
+            ack(guideArr); // Send response to front-end via WebSocket
+          } else {
+            ack(response); // Send response to front-end via WebSocket
+          }
           pendingCommands.delete(commandId); // Clean up
         }
       } catch (err) {
@@ -82,6 +95,7 @@ const displayDevicesSocket = async (socket) => {
     // the peripheral pins
 
     // build the prompt
+
     // call ai api
     // get the text
     // send the text

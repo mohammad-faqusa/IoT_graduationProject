@@ -134,6 +134,24 @@
           "purpose": "Enables simulation mode if set to true"
         }
       ]
+    },
+    "pin_properties": {
+      "vcc": {
+        "purpose": "Power supply pin for the MPU6050 sensor (typically 3.3V or 5V)",
+        "required": true
+      },
+      "gnd": {
+        "purpose": "Ground connection for the sensor",
+        "required": true
+      },
+      "scl": {
+        "purpose": "I2C clock line used to communicate with the sensor",
+        "required": true
+      },
+      "sda": {
+        "purpose": "I2C data line used to communicate with the sensor",
+        "required": true
+      }
     }
   },
   {
@@ -251,6 +269,20 @@
         "class": "DHTSensor",
         "purpose": "An instance of the DHTSensor class ready for measuring temperature and humidity"
       }
+    },
+    "pin_properties": {
+      "pin": {
+        "purpose": "GPIO pin number connected to the DHT sensor",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Power supply pin for the DHT sensor",
+        "required": true
+      },
+      "gnd": {
+        "purpose": "Ground pin for the DHT sensor",
+        "required": true
+      }
     }
   },
   {
@@ -358,6 +390,30 @@
         "class": "Encoder",
         "purpose": "An instance of the Encoder class used to track rotary position"
       }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the encoder module",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the encoder module (typically 3.3V or 5V)",
+        "required": true
+      },
+      "s1": {
+        "alias": "pin_a",
+        "purpose": "Encoder signal pin A (rotational signal channel A)",
+        "required": true
+      },
+      "s2": {
+        "alias": "pin_b",
+        "purpose": "Encoder signal pin B (rotational signal channel B)",
+        "required": true
+      },
+      "key": {
+        "purpose": "Push-button switch pin (optional)",
+        "required": false
+      }
     }
   },
   {
@@ -446,6 +502,32 @@
         "dataType": "Object",
         "class": "GasSensor",
         "purpose": "An instance of the GasSensor class ready for reading gas levels"
+      }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the gas sensor module",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the gas sensor (typically 5V or 3.3V depending on the sensor)",
+        "required": true
+      },
+      "aout": {
+        "alias": "pin",
+        "purpose": "Analog output pin that provides gas concentration level (used if analog=true)",
+        "required": true,
+        "conditional_on": {
+          "analog": true
+        }
+      },
+      "dout": {
+        "alias": "pin",
+        "purpose": "Digital output pin that goes HIGH/LOW based on gas threshold (used if analog=false)",
+        "required": true,
+        "conditional_on": {
+          "analog": false
+        }
       }
     }
   },
@@ -572,6 +654,17 @@
         "class": "LED",
         "purpose": "An instance of the LED class ready for digital output control"
       }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Connects to ground to complete the circuit for the LED",
+        "required": true
+      },
+      "vcc": {
+        "alias": "pin",
+        "purpose": "GPIO pin controlling the LED (acts as power source in active-high configuration)",
+        "required": true
+      }
     }
   },
   {
@@ -675,6 +768,13 @@
         "class": "InternalLED",
         "purpose": "An instance of InternalLED, ready to be turned on or off"
       }
+    },
+    "pin_properties": {
+      "internal": {
+        "purpose": "Uses the onboard LED (typically GPIO2) already wired inside the ESP32 board",
+        "note": "No physical wiring required; LED is connected internally",
+        "required": false
+      }
     }
   },
   {
@@ -768,6 +868,21 @@
         "dataType": "Object",
         "class": "MotionSensor",
         "purpose": "An instance of the MotionSensor class ready for detecting motion"
+      }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the motion sensor module",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the motion sensor (typically 5V or 3.3V depending on the sensor)",
+        "required": true
+      },
+      "pirq": {
+        "alias": "pin",
+        "purpose": "GPIO pin connected to the Motion sensor's output (PIR) which goes HIGH when motion is detected",
+        "required": true
       }
     }
   },
@@ -908,6 +1023,21 @@
         "class": "PushButton",
         "purpose": "An instance of the PushButton class ready for state reading and event handling"
       }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the push button module",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the push button (typically 5V or 3.3V depending on the sensor)",
+        "required": true
+      },
+      "button_pin": {
+        "alias": "pin",
+        "purpose": "GPIO pin connected to the push button input",
+        "required": true
+      }
     }
   },
   {
@@ -1017,6 +1147,21 @@
         "dataType": "Object",
         "class": "Relay",
         "purpose": "An instance of the Relay class ready to control relay operations"
+      }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the relay module",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the relay (typically 5V or 3.3V depending on the module)",
+        "required": true
+      },
+      "relay_pin": {
+        "alias": "pin",
+        "purpose": "GPIO pin connected to the relay control input",
+        "required": true
       }
     }
   },
@@ -1226,6 +1371,21 @@
         "class": "Servo",
         "purpose": "An instance of the Servo class ready for angle or pulse control"
       }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the servo motor",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the servo motor (typically 5V or 3.3V depending on the model)",
+        "required": true
+      },
+      "signal": {
+        "alias": "pin",
+        "purpose": "GPIO pin number connected to the servo signal wire",
+        "required": true
+      }
     }
   },
   {
@@ -1326,6 +1486,21 @@
         "dataType": "Object",
         "class": "SlideSwitch",
         "purpose": "An instance of the SlideSwitch class ready for use"
+      }
+    },
+    "pin_properties": {
+      "gnd": {
+        "purpose": "Ground connection for the slide switch",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "Voltage supply for the slide switch (typically 3.3V or 5V depending on the model)",
+        "required": true
+      },
+      "signal": {
+        "alias": "pin",
+        "purpose": "GPIO pin number connected to the slide switch",
+        "required": true
       }
     }
   }
