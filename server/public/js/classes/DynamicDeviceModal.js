@@ -1,6 +1,6 @@
 class DynamicDeviceModal extends Modal {
   constructor(options = {}) {
-    const buttons = [
+    let buttons = [
       // modal-close
       {
         text: "Close",
@@ -22,6 +22,18 @@ class DynamicDeviceModal extends Modal {
       },
     ];
 
+    if (options.no_update) {
+      buttons = buttons.filter(
+        (button) => button.text !== "Update" && button.text !== "Close"
+      );
+      const closeButton = {
+        text: "Close",
+        type: "primary",
+        id: "device-modal-close",
+        handler: () => this.close(),
+      };
+      buttons.push(closeButton);
+    }
     super({
       id: "dynamic-device-modal",
       title: options.title || "Device Details",
@@ -52,43 +64,23 @@ class DynamicDeviceModal extends Modal {
 
     contentContainer.innerHTML = "";
 
-    const pages = {
-      page1: `here is  the connection of page 1 : 
-            pins 1 
-            pin 2 
-            pin 3 
-            pin 4 `,
-      page2: `here is  the connection of page 2 : 
-            pins 1 
-            pin 2 
-            pin 3 
-            pin 4 `,
-    };
+    const pages = [
+      { pin: 15, connected_to: 20 },
+      { pin: 12, connected_to: 2 },
+    ];
 
-    for (const [key, value] of Object.entries(pages)) {
-      if (!["__v", "automatedFunctions", "_id"].includes(key)) {
-        if (key === "dictVariables") {
-          const connected_devices = [];
-          for (const [key2, value2] of Object.entries(
-            this.device.dictVariables
-          )) {
-            connected_devices.push(this.toTitleCase(key2));
-          }
-          const fieldElement = this.renderField(
-            "Connected Devices",
-            connected_devices.join(", ")
-          );
-          if (fieldElement) {
-            contentContainer.appendChild(fieldElement);
-          }
-        } else {
-          if (key === "dictList") continue;
-          const fieldElement = this.renderField(key, value);
-          if (fieldElement) {
-            contentContainer.appendChild(fieldElement);
-          }
-        }
-      }
+    const connectionstr = `
+        1- connect the vss of esp to volate pin of dht 
+        2- connect the pin 13 of esp32 to pin 2 of dht 
+        1- connect the vss of esp to volate pin of dht 
+        2- connect the pin 13 of esp32 to pin 2 of dht 
+        1- connect the vss of esp to volate pin of dht 
+        2- connect the pin 13 of esp32 to pin 2 of dht 
+        `;
+
+    const fieldElement = this.renderField("pin_connection", connectionstr);
+    if (fieldElement) {
+      contentContainer.appendChild(fieldElement);
     }
 
     this.setContent(contentContainer);
@@ -189,6 +181,34 @@ class DynamicDeviceModal extends Modal {
 
       valueElement.appendChild(statusIndicator);
       valueElement.appendChild(statusText);
+    } else if (key === "pin_connection") {
+      // Add pin-connection class to the field-item parent element
+      fieldElement.classList.add("pin-connection-field");
+
+      // Add pin-connection class to the label
+      label.classList.add("pin-connection-label");
+
+      // Add pin-connection class to the value element
+      valueElement.classList.add("pin-connection-value");
+
+      const textArea = document.createElement("textarea");
+      textArea.className = "pin-connection-textarea auto-expand";
+      textArea.value = typeof value === "string" ? value : "No connection data";
+      textArea.readOnly = true;
+
+      // Auto-resize function
+      const autoResize = () => {
+        textArea.style.height = "auto"; // Reset height
+        textArea.style.height = textArea.scrollHeight + "px"; // Set to scrollHeight
+      };
+
+      // Set initial height after content is loaded
+      setTimeout(autoResize, 0);
+
+      // Add the textarea to the DOM
+      valueElement.appendChild(textArea);
+      this.fieldsValues[key] = key + "-field-value";
+      valueElement.id = this.fieldsValues[key];
     } else {
       valueElement.textContent = value.toString();
       this.fieldsValues[key] = key + "-field-value";
@@ -214,7 +234,7 @@ class DynamicDeviceModal extends Modal {
 
     if (this.device.status) {
       console.log("here is the connected pins : ");
-      const deviceModal = new DynamicDeviceModal();
+      const deviceModal = new DynamicDeviceModal({ no_update: true });
       deviceModal.showConnections();
     } else {
       alert(`Attempting to restart ${this.device.name}...`);
