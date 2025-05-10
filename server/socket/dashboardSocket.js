@@ -23,7 +23,7 @@ const mqtt = require("mqtt");
 dashboardSocket = async (socket) => {
   const subscribedTopics = new Set();
 
-  let devices = await getDevices();
+  let devices = await getDevices(socket.user.id);
 
   const pendingCommands = new Map(); // commandId -> ackCallBack
 
@@ -48,35 +48,6 @@ dashboardSocket = async (socket) => {
 
   socket.on("brokerStatus", (data, ackCallBack) => {
     ackCallBack(client.connected);
-  });
-
-  socket.on("devicesCards", (devicesCards, ackCallBack) => {
-    Object.entries(devicesCards).forEach(async ([deviceName, peripherals]) => {
-      if (!devicesCardsRes[deviceName]) {
-        devicesCardsRes[deviceName] = {};
-        componentsIds[deviceName] = {};
-        devicesIds[deviceName] = devices.find(
-          (device) => device.name === deviceName
-        ).id;
-        client.subscribe(`esp32/${devicesIds[deviceName]}/sender`);
-        devicesCardsRes[deviceName] = peripherals;
-      }
-      const deviceId = devicesIds[deviceName];
-
-      const selectedPDict = {};
-      Object.entries(peripherals).forEach(([pName, pObj]) => {
-        // console.log(pObj);
-
-        selectedPDict[pName] = pObj.method;
-        componentsIds[deviceName][pName] = pObj.componentId;
-      });
-      client.publish(
-        `esp32/${deviceId}/receiver`,
-        JSON.stringify(selectedPDict)
-      );
-    });
-
-    ackCallBack(devicesCardsRes);
   });
 
   socket.on("deviceCardControl", (device) => {
@@ -129,7 +100,8 @@ dashboardSocket = async (socket) => {
     client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
     pendingCommands.set(sendObject.commandId, ackCallBack);
   });
-};6
+};
+6;
 
 function autoParse(value) {
   if (value === "true") return true;

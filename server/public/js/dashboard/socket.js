@@ -1,5 +1,7 @@
-const socket = io("/dashboard");
-
+const socket = io("http://localhost:3000/dashboard", {
+  transports: ["websocket"], // skip polling → go straight to WebSocket
+  withCredentials: true, // send cookies along with the handshake
+});
 let devices = [];
 const peripherals = {};
 let peripherals_interface_info = {};

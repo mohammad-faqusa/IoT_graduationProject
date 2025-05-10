@@ -2,41 +2,43 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-// Create a schema for the class
 const deviceSchema = new Schema(
   {
-    id: {
-      type: Number, // Assuming 'id' is a string, modify this if it's another type (e.g., Number, ObjectId)
-    },
+    id: Number,
     name: {
       type: String,
       required: true,
       unique: true,
     },
     location: {
-      type: String, // Assuming location is a string, modify if it's more complex (e.g., an object with coordinates)
+      type: String,
       required: true,
     },
     dictVariables: {
       type: Map,
-      of: Schema.Types.Mixed, // This allows for flexible key-value pairs
+      of: Schema.Types.Mixed,
       required: true,
     },
     image: {
       type: String,
-      default: "https://cdn-icons-png.flaticon.com/512/7083/7083924.png", // Default image URL
+      default: "https://cdn-icons-png.flaticon.com/512/7083/7083924.png",
     },
     status: {
       type: String,
       default: "offline",
     },
     automatedFunctions: {
-      type: [Schema.Types.Mixed], // Array of any type, can store functions or any objects
+      type: [Schema.Types.Mixed],
       default: [],
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User", // <-- references the User model
+      required: true,
     },
   },
   { timestamps: true }
-); // Adds createdAt and updatedAt fields
+);
 
 deviceSchema.pre("save", async function (next) {
   const docs = await mongoose.model("Device").find({}).sort("-id");

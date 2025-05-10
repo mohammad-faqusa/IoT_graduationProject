@@ -16,7 +16,7 @@ const displayDevicesSocket = async (socket) => {
   const pendingCommands = new Map(); // commandId -> ackCallBack
   const subscribedTopics = new Set();
 
-  let devices = await getDevices();
+  let devices = await getDevices(socket.user.id);
 
   devices.forEach(
     (device) =>
@@ -84,21 +84,6 @@ const displayDevicesSocket = async (socket) => {
   });
 
   socket.on("getConnections", (deviceId, ackCallBack) => {
-    // Do something with data...
-    // get device id
-    // console.log(deviceId);
-
-    // publish mqtt message to device
-
-    //client.publish(esp32/pins/receiver)
-    //message.on(esp32/pins/sender)
-    // the peripheral pins
-
-    // build the prompt
-
-    // call ai api
-    // get the text
-    // send the text
     const topic = `esp32/${deviceId}/sender`;
 
     if (!subscribedTopics.has(topic)) {

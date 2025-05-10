@@ -99,7 +99,7 @@ async def async_callback(topic, msg, retained):
     msg = json.loads(msg)
     result = {}
 
-    if(msg['pins']):
+    if(msg.get('pins')):
         result['pins'] = peripherals_pins
         result['status'] = True
         result['commandId'] = msg['commandId']

@@ -1,20 +1,23 @@
 from accelerometer import MPU6050
-from led import InternalLED
+from machine import I2C, Pin
 
-# Dictionary for peripheral pin connections
+# Initialize peripherals pins dictionary
 peripherals_pins = {
-    'accelerometer': {'scl': 22, 'sda': 21},  # Standard I2C pins for ESP32
-    'internal_led': {'pin': 2}  # Standard internal LED pin for ESP32
+    'accelerometer': {
+        'sda': 21,
+        'scl': 22
+    }
 }
 
-# Dictionary to store peripheral instances
+# Initialize peripherals dictionary
 peripherals = {}
 
-# Initialize accelerometer (MPU6050)
-peripherals['accelerometer'] = MPU6050(simulate=False)  # Using default addr=0x68, simulation off
+# Initialize I2C for accelerometer
+i2c = I2C(0, sda=Pin(peripherals_pins['accelerometer']['sda']), 
+          scl=Pin(peripherals_pins['accelerometer']['scl']), freq=400000)
 
-# Initialize internal LED
-peripherals['internal_led'] = InternalLED()  # Using default simulate=False
+# Initialize MPU6050 accelerometer
+peripherals['accelerometer'] = MPU6050(i2c=i2c, addr=0x68, simulate=False)
 
 import json
 
@@ -33,14 +36,19 @@ async def async_callback(topic, msg, retained):
     print((topic.decode(), msg.decode(), retained))
     msg = msg.decode()
     msg = json.loads(msg)
+    result = {}
 
     if(msg['pins']):
-        await client.publish('esp32/1/sender', '{}'.format(json.dumps(peripherals_pins)), qos = 1)
-        return
- 
+        result['pins'] = peripherals_pins
+        result['status'] = True
+        result['commandId'] = msg['commandId']
+        await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
+        print("this is pins")
+        return  # ✅ Terminate early
+     
+    print("don't run here : "); 
     value = peripherals[msg['peripheral']][msg['method']][msg['param']]
     
-    result = {}
     result['peripheral'] = msg['peripheral']
     result['method'] = msg['method']
     
@@ -48,16 +56,16 @@ async def async_callback(topic, msg, retained):
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/1/receiver', 1)
+    await client.subscribe('esp32/3/receiver', 1)
     
 async def main(client):
     await client.connect()
     n = 0
     esp_status = {}
-    esp_status['id'] = 1
+    esp_status['id'] = 3
     while True:
         await asyncio.sleep(1)
         
