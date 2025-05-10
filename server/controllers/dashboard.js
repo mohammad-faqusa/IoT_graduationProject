@@ -1,5 +1,5 @@
 const path = require("path");
 
 exports.displayDashboard = (req, res) => {
-  res.sendFile(path.resolve("public/refinedDashboard.html"));
+  res.sendFile(path.join(__dirname, "../public/refinedDashboard.html"));
 };

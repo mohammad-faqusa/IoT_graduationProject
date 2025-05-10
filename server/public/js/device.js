@@ -1,5 +1,7 @@
-const socket = io();
-
+const socket = io("http://localhost:3000", {
+  transports: ["websocket"], // skip polling → go straight to WebSocket
+  withCredentials: true, // send cookies along with the handshake
+});
 let devices = {};
 
 let onlineDevices = [];
@@ -14,6 +16,10 @@ socket.on("connect", async () => {
   renderCards(devices);
 
   openOnClick(socket);
+});
+
+socket.on("connect_error", (err) => {
+  console.error("Socket.IO connect failed:", err.message);
 });
 
 socket.on("onlineDevices", (onlineDevices) => {
