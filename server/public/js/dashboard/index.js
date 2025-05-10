@@ -583,6 +583,92 @@ document.addEventListener("DOMContentLoaded", async function () {
       configModal.querySelector("#config-min").value = minValue;
       configModal.querySelector("#config-max").value = maxValue;
     }
+    if (componentType === "automation-rule") {
+      // Check if the additional selectors already exist to avoid duplicates
+      const existingAdditionalLine = configModal.querySelector(
+        "#automation-condition-line"
+      );
+      if (existingAdditionalLine) {
+        existingAdditionalLine.remove();
+      }
+
+      // Add the additional line to the form
+      const configForm = configModal.querySelector("#configForm");
+      const initialGroup = configModal.querySelector(".full-line");
+
+      createConditionLine(configForm, initialGroup, methodObject);
+    }
+  }
+
+  // Modified createConditionLine function with threshold input instead of action selector
+  function createConditionLine(configForm, initialGroup, methodObject) {
+    // Create a new group line for condition selector and threshold input
+    const conditionLine = document.createElement("div");
+    conditionLine.id = "automation-condition-line";
+    conditionLine.className = "full-line";
+
+    // Create condition selector
+    const conditionGroup = document.createElement("div");
+    conditionGroup.style.marginBottom = "15px";
+
+    const conditionLabel = document.createElement("label");
+    conditionLabel.textContent = "Condition";
+    conditionLabel.setAttribute("for", "config-condition");
+
+    const conditionSelect = document.createElement("select");
+    conditionSelect.id = "config-condition";
+    conditionSelect.name = "condition";
+    conditionSelect.className = "condition";
+
+    // Add condition options
+    const options = [
+      { value: "gt", label: "Greater Than" },
+      { value: "lt", label: "Less Than" },
+      { value: "eq", label: "Equal To" },
+    ];
+
+    options.forEach((option) => {
+      const optionEl = document.createElement("option");
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      conditionSelect.appendChild(optionEl);
+    });
+
+    conditionGroup.appendChild(conditionLabel);
+    conditionGroup.appendChild(conditionSelect);
+    conditionLine.appendChild(conditionGroup);
+
+    // Create threshold input field instead of action selector
+    const thresholdGroup = document.createElement("div");
+    thresholdGroup.style.marginBottom = "15px";
+
+    const thresholdLabel = document.createElement("label");
+    thresholdLabel.textContent = "Threshold";
+    thresholdLabel.setAttribute("for", "config-threshold");
+
+    const thresholdInput = document.createElement("input");
+    thresholdInput.type = "number";
+    thresholdInput.id = "config-threshold";
+    thresholdInput.name = "threshold";
+    thresholdInput.className = "threshold";
+    thresholdInput.value = "80";
+
+    // If the method has a range, set min/max attributes
+    if (methodObject && methodObject.returns && methodObject.returns.range) {
+      thresholdInput.min = methodObject.returns.range.min;
+      thresholdInput.max = methodObject.returns.range.max;
+    }
+
+    thresholdGroup.appendChild(thresholdLabel);
+    thresholdGroup.appendChild(thresholdInput);
+    conditionLine.appendChild(thresholdGroup);
+
+    // Add the condition line to the form
+    if (initialGroup) {
+      configForm.insertBefore(conditionLine, initialGroup.nextSibling);
+    } else {
+      configForm.appendChild(conditionLine);
+    }
   }
   function deviceAutoSelect(currentDevice, selectElements, componentType) {
     currentP = devices[0].pList[0];

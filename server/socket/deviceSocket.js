@@ -49,8 +49,7 @@ deviceSocket = (socket) => {
   });
 
   socket.on("setupDevice", async (deviceId) => {
-    await checkDeviceOwnership(socket, deviceId);
-    const device = await Device.findById(deviceId);
+    const device = await checkDeviceOwnership(socket, deviceId);
     console.log("this is device : ", device);
     try {
       const pList = Array.from(device.dictVariables.keys());
@@ -71,8 +70,7 @@ deviceSocket = (socket) => {
 
   socket.on("deleteDevice", async (deviceId, ackCallBack) => {
     try {
-      await checkDeviceOwnership(socket, deviceId);
-      const device = await Device.findByIdAndDelete(deviceId);
+      const device = await checkDeviceOwnership(socket, deviceId);
 
       ackCallBack(`the device: ${device._id} is deleted successfully`);
     } catch (err) {

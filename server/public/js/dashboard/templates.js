@@ -576,18 +576,9 @@ const componentTemplates = {
                 <button class="delete-rule">×</button>
             </div>
         `,
+    allowed_method_types: ["read"],
+    allowed_method_returns: ["Number", "Boolean"],
     config: [
-      {
-        name: "inputDevice",
-        type: "select",
-        label: "Input Device",
-        options: [
-          { value: "temperature", label: "Temperature" },
-          { value: "cpuUsage", label: "CPU Usage" },
-          { value: "memoryUsage", label: "Memory Usage" },
-        ],
-        default: "cpuUsage",
-      },
       {
         name: "device",
         type: "select",
@@ -601,36 +592,15 @@ const componentTemplates = {
         type: "select",
         label: "Data Source",
         options: [],
-        default: "temperature",
+        default: "cpuUsage",
       },
       {
-        name: "condition",
+        name: "method",
         type: "select",
-        label: "Condition",
-        options: [
-          { value: "gt", label: "Greater Than" },
-          { value: "lt", label: "Less Than" },
-          { value: "eq", label: "Equal To" },
-        ],
-        default: "gt",
-      },
-      { name: "threshold", type: "number", label: "Threshold", default: 80 },
-      {
-        name: "outputAction",
-        type: "select",
-        label: "Output Action",
-        options: [
-          { value: "power", label: "Toggle Power" },
-          { value: "fanSpeed", label: "Set Fan Speed" },
-          { value: "mode", label: "Change Mode" },
-        ],
-        default: "fanSpeed",
-      },
-      {
-        name: "actionValue",
-        type: "text",
-        label: "Action Value",
-        default: "100",
+        label: "Method",
+        dynamic: true,
+        options: [],
+        default: "",
       },
     ],
   },
