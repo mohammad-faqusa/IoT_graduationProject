@@ -1,3 +1,5 @@
+const { createElement } = require("react");
+
 document.addEventListener("DOMContentLoaded", async function () {
   const editModeBtn = document.getElementById("editModeBtn");
   const eventLog = document.getElementById("eventLog");
@@ -88,6 +90,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.querySelectorAll(".component-item").forEach((item) => {
     item.addEventListener("click", function () {
       const componentType = this.getAttribute("data-component");
+      console.log("this is component type : ", componentType);
+
       addComponent(componentType);
     });
   });
@@ -323,8 +327,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Generate unique ID
     const componentId = `component-${Date.now()}`;
+
+    console.log(
+      "this is component type before checking if automation : ",
+      componentType
+    );
+    if (componentType === "automation-rule") {
+      console.log("this is automation rule component type : ", componentType);
+      createAutomationRule(componentId);
+    }
     // Create card
-    createCard(componentType, componentId);
+    else createCard(componentType, componentId);
     // Open configuration modal
     openComponentConfig(componentId);
 
@@ -333,6 +346,33 @@ document.addEventListener("DOMContentLoaded", async function () {
       `Added new ${componentTemplates[componentType].title} component`,
       "info"
     );
+  }
+
+  function createAutomationRule(componentId) {
+    console.log("this is automation rule ");
+    const automationLine = document.createElement("div");
+    automationLine.setAttribute("data-component-id", componentId);
+    automationLine.setAttribute("data-component-type", "automation-rule");
+    automationLine.classList.add("automation-rule");
+    automationLine.innerHTML = `
+
+          <label for="automation-info" class="automation-label"
+            >Automation 1</label
+          >
+
+          <button class="stop-start-button btn-start" data-state="stopped">
+            Start
+          </button>
+        <div class="action-buttons">
+            <button class="btn btn-secondary edit-component">⚙️</button>
+            <button class="btn btn-secondary delete-component">×</button>
+        </div>
+    `;
+
+    const automationContainer = document.getElementById("automation-list");
+
+    console.log("this is automation container : ", automationContainer);
+    automationContainer.appendChild(automationLine);
   }
 
   function initializeComponent(component) {
@@ -354,6 +394,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       `[data-component-id="${componentId}"]`
     );
 
+    console.log("this is component :", component);
+
     if (!component) return;
 
     const componentType = component.getAttribute("data-component-type");
@@ -371,6 +413,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Clear form
     configForm.innerHTML = "";
+
+    if (componentType === "automation-rule") {
+    }
 
     // Create a container for device, source, and method fields
     const groupLine = document.createElement("div");
@@ -1008,8 +1053,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.log(input);
         if (input) {
           formData[fieldName] = input.value;
+          component.setAttribute(fieldName, input.value);
         }
-        component.setAttribute(fieldName, input.value);
       });
     } else {
       componentTemplates[componentType].config.forEach((field) => {
@@ -1023,24 +1068,24 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         component.setAttribute(field.name, input.value);
       });
-    }
 
-    const parameters =
-      peripherals_interface_info[formData.source].methods[formData.method]
-        .parameters;
+      const parameters =
+        peripherals_interface_info[formData.source].methods[formData.method]
+          .parameters;
 
-    console.log(peripherals_interface_info);
-    console.log("this is parameter", parameters);
-    component.setAttribute(
-      "parameter-length",
-      parameters ? parameters.length : 0
-    );
+      component.setAttribute(
+        "parameter-length",
+        parameters ? parameters.length : 0
+      );
 
-    if (methodType === "read") {
-      if (readComponents[`${formData.device}-${formData.source}`])
-        readComponents[`${formData.device}-${formData.source}`].push(component);
-      else
-        readComponents[`${formData.device}-${formData.source}`] = [component];
+      if (methodType === "read") {
+        if (readComponents[`${formData.device}-${formData.source}`])
+          readComponents[`${formData.device}-${formData.source}`].push(
+            component
+          );
+        else
+          readComponents[`${formData.device}-${formData.source}`] = [component];
+      }
     }
 
     // Update component content based on type
