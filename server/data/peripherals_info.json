@@ -615,7 +615,11 @@
         "type": "read",
         "label": "Check if ON",
         "returns": {
-          "dataType": "Boolean"
+          "dataType": "Boolean",
+          "values_meaning": {
+            "true": "LED On",
+            "false": "LED Off"
+          }
         },
         "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
       }
@@ -729,7 +733,11 @@
         "type": "read",
         "label": "Check if ON",
         "returns": {
-          "dataType": "Boolean"
+          "dataType": "Boolean",
+          "values_meaning": {
+            "true": "LED On",
+            "false": "LED Off"
+          }
         },
         "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
       }
@@ -1108,7 +1116,11 @@
         "type": "read",
         "label": "Check Relay State",
         "returns": {
-          "dataType": "Boolean"
+          "dataType": "Boolean",
+          "values_meaning": {
+            "true": "Relay On",
+            "false": "Relay Off"
+          }
         },
         "purpose": "Returns the current state of the relay (True if ON, False if OFF)"
       }

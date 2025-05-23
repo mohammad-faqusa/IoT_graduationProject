@@ -1,28 +1,34 @@
+from accelerometer import MPU6050
 from dht_sensor import DHTSensor
 from led import InternalLED
+from motion_sensor import MotionSensor
 from servo_motor import Servo
 
-# Initialize peripherals_pins dictionary
+# Define pin connections for each peripheral
 peripherals_pins = {
+    'accelerometer': {'sda': 21, 'scl': 22},  # Default I2C pins for ESP32
     'dht_sensor': {'pin': 4},
-    'internal_led': {'pin': 2},  # Internal LED pin is typically 2 on ESP32
+    'internal_led': {'pin': 2},  # ESP32 onboard LED is usually on pin 2
+    'motion_sensor': {'pin': 5},
     'servo_motor': {'pin': 13}
 }
 
-# Initialize peripherals dictionary
+# Initialize peripherals
 peripherals = {}
 
-# Initialize each peripheral
-peripherals['dht_sensor'] = DHTSensor(
-    pin=peripherals_pins['dht_sensor']['pin'],
-    sensor_type="DHT22",
-    simulate=True
-)
+# Initialize MPU6050 accelerometer
+peripherals['accelerometer'] = MPU6050(simulate=True)
 
-peripherals['internal_led'] = InternalLED(
-    simulate=False
-)
+# Initialize DHT sensor
+peripherals['dht_sensor'] = DHTSensor(pin=peripherals_pins['dht_sensor']['pin'], sensor_type="DHT22", simulate=True)
 
+# Initialize internal LED
+peripherals['internal_led'] = InternalLED(simulate=False)
+
+# Initialize motion sensor
+peripherals['motion_sensor'] = MotionSensor(pin=peripherals_pins['motion_sensor']['pin'], simulate=True)
+
+# Initialize servo motor
 peripherals['servo_motor'] = Servo(
     pin_id=peripherals_pins['servo_motor']['pin'],
     min_us=544,
@@ -55,7 +61,7 @@ async def async_callback(topic, msg, retained):
         result['pins'] = peripherals_pins
         result['status'] = True
         result['commandId'] = msg['commandId']
-        await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
+        await client.publish('esp32/2/sender', '{}'.format(json.dumps(result)), qos = 1)
         print("this is pins")
         return  # ✅ Terminate early
      
@@ -69,16 +75,16 @@ async def async_callback(topic, msg, retained):
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/2/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/1/receiver', 1)
+    await client.subscribe('esp32/2/receiver', 1)
     
 async def main(client):
     await client.connect()
     n = 0
     esp_status = {}
-    esp_status['id'] = 1
+    esp_status['id'] = 2
     while True:
         await asyncio.sleep(1)
         

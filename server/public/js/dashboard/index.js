@@ -596,13 +596,161 @@ document.addEventListener("DOMContentLoaded", async function () {
       const configForm = configModal.querySelector("#configForm");
       const initialGroup = configModal.querySelector(".full-line");
 
-      createConditionLine(configForm, initialGroup, methodObject);
+      const considtionSelect = createConditionLine(
+        configForm,
+        initialGroup,
+        methodObject
+      );
+
+      considtionSelect.addEventListener("change", () => {
+        console.log(considtionSelect.value);
+        if (configModal.querySelector("#automation-output-line"))
+          configModal.querySelector("#automation-output-line").remove();
+        createAutomationOutputLine(configForm);
+      });
     }
   }
 
+  function createAutomationOutputLine(configForm) {
+    const outputLine = document.createElement("div");
+    outputLine.id = "automation-output-line";
+    outputLine.className = "full-line";
+
+    const outputDeviceField = createFieldSelect(
+      "Device Output",
+      "device-output",
+      devices.map((d) => [d.name, d.name])
+    );
+    outputLine.appendChild(outputDeviceField);
+
+    const deviceSelect = outputDeviceField.querySelector("select");
+
+    const outputPeripheralField = createFieldSelect(
+      "Source Output",
+      "source-output",
+      Object.keys(devices[0].dictVariables).map((d) => [
+        peripherals_interface_info[d].title,
+        d,
+      ])
+    );
+    outputLine.appendChild(outputPeripheralField);
+
+    console.log(
+      "this is first method of first device : ",
+      Object.keys(
+        peripherals_interface_info[Object.keys(devices[0].dictVariables)[0]]
+          .methods
+      )
+    );
+    const methodField = createFieldSelect(
+      "Method Output",
+      "method-output",
+      Object.entries(
+        peripherals_interface_info[Object.keys(devices[0].dictVariables)[0]]
+          .methods
+      ).map(([key, body]) => [body.label, key])
+    );
+
+    outputLine.appendChild(methodField);
+
+    const pSelect = outputPeripheralField.querySelector("select");
+    const methodSelect = methodField.querySelector("select");
+
+    deviceSelect.addEventListener("change", () => {
+      removeOptions(pSelect);
+      addOptions(
+        pSelect,
+        Object.keys(
+          devices.find((d) => d.name === deviceSelect.value).dictVariables
+        ).map((p) => [peripherals_interface_info[p].title, p])
+      );
+      console.log("here is the method select options ", methodSelect.options);
+      removeOptions(methodSelect);
+      console.log("this is method select : ", methodSelect);
+      addOptions(methodSelect, filterOutputMethod(pSelect.value));
+    });
+    pSelect.addEventListener("change", () => {
+      console.log("here is the method select options ", methodSelect.options);
+      removeOptions(methodSelect);
+      console.log("this is method select : ", methodSelect);
+      addOptions(methodSelect, filterOutputMethod(pSelect.value));
+    });
+
+    configForm.appendChild(outputLine);
+
+    methodSelect.addEventListener("change", () => {
+      console.log(methodSelect.value);
+      createAutomationResultLine(pSelect.value, methodSelect.value);
+    });
+  }
+
+  function createAutomationResultLine(pName, methodName) {
+    const configModal = document.querySelector("#configModal");
+    const configForm = configModal.querySelector("#configForm");
+
+    if (configModal.querySelector("#automation-result-line"))
+      configModal.querySelector("#automation-result-line").remove();
+
+    const line = document.createElement("div");
+    line.id = "automation-result-line";
+    line.className = "full-line";
+
+    methodObject = peripherals_interface_info[pName].methods[methodName];
+    if (methodObject.parameters)
+      switch (methodObject.parameters[0].dataType) {
+        case "Boolean":
+          console.log("this is boolean");
+          const selectField = createFieldSelect(
+            "Value",
+            "automation-result-value",
+            [
+              ["True", true],
+              ["False", false],
+            ]
+          );
+          line.appendChild(selectField);
+
+          break;
+        case "Number":
+          console.log("this is number");
+          const thresholdField = createThresholdField(pName, methodName);
+          line.appendChild(thresholdField);
+          break;
+      }
+
+    configForm.appendChild(line);
+  }
+
+  function createFieldSelect(title, name, dataArr) {
+    const fieldGroup = document.createElement("div");
+    fieldGroup.style.marginBottom = "15px";
+
+    const fieldLabel = document.createElement("label");
+    fieldLabel.textContent = title;
+    fieldLabel.setAttribute("for", `config-${name}`);
+
+    const fieldSelect = document.createElement("select");
+    fieldSelect.id = `config-${name}`;
+    fieldSelect.name = name;
+    fieldSelect.className = `${name}-class`;
+
+    const options = dataArr;
+
+    console.log("this is dataArr : ", dataArr);
+
+    // removeOptions(fieldSelect);
+
+    addOptions(fieldSelect, dataArr);
+
+    fieldGroup.appendChild(fieldLabel);
+    fieldGroup.appendChild(fieldSelect);
+
+    return fieldGroup;
+  }
   // Modified createConditionLine function with threshold input instead of action selector
   function createConditionLine(configForm, initialGroup, methodObject) {
     // Create a new group line for condition selector and threshold input
+    console.log(methodObject);
     const conditionLine = document.createElement("div");
     conditionLine.id = "automation-condition-line";
     conditionLine.className = "full-line";
@@ -620,55 +768,83 @@ document.addEventListener("DOMContentLoaded", async function () {
     conditionSelect.name = "condition";
     conditionSelect.className = "condition";
 
-    // Add condition options
-    const options = [
-      { value: "gt", label: "Greater Than" },
-      { value: "lt", label: "Less Than" },
-      { value: "eq", label: "Equal To" },
-    ];
+    let options = [];
+    switch (methodObject.returns.dataType) {
+      case "Boolean":
+        options = [
+          { value: true, label: methodObject.returns.values_meaning[true] },
+          { value: false, label: methodObject.returns.values_meaning[false] },
+        ];
 
-    options.forEach((option) => {
-      const optionEl = document.createElement("option");
-      optionEl.value = option.value;
-      optionEl.textContent = option.label;
-      conditionSelect.appendChild(optionEl);
-    });
+        options.forEach((option) => {
+          const optionEl = document.createElement("option");
+          optionEl.value = option.value;
+          optionEl.textContent = option.label;
+          conditionSelect.appendChild(optionEl);
+        });
 
-    conditionGroup.appendChild(conditionLabel);
-    conditionGroup.appendChild(conditionSelect);
-    conditionLine.appendChild(conditionGroup);
+        conditionGroup.appendChild(conditionLabel);
+        conditionGroup.appendChild(conditionSelect);
+        conditionLine.appendChild(conditionGroup);
+        break;
+      case "Number":
+        options = [
+          { value: "gt", label: "Greater Than" },
+          { value: "lt", label: "Less Than" },
+          { value: "eq", label: "Equal To" },
+        ];
 
-    // Create threshold input field instead of action selector
-    const thresholdGroup = document.createElement("div");
-    thresholdGroup.style.marginBottom = "15px";
+        // Add condition options
 
-    const thresholdLabel = document.createElement("label");
-    thresholdLabel.textContent = "Threshold";
-    thresholdLabel.setAttribute("for", "config-threshold");
+        options.forEach((option) => {
+          const optionEl = document.createElement("option");
+          optionEl.value = option.value;
+          optionEl.textContent = option.label;
+          conditionSelect.appendChild(optionEl);
+        });
 
-    const thresholdInput = document.createElement("input");
-    thresholdInput.type = "number";
-    thresholdInput.id = "config-threshold";
-    thresholdInput.name = "threshold";
-    thresholdInput.className = "threshold";
-    thresholdInput.value = "80";
+        conditionGroup.appendChild(conditionLabel);
+        conditionGroup.appendChild(conditionSelect);
+        conditionLine.appendChild(conditionGroup);
 
-    // If the method has a range, set min/max attributes
-    if (methodObject && methodObject.returns && methodObject.returns.range) {
-      thresholdInput.min = methodObject.returns.range.min;
-      thresholdInput.max = methodObject.returns.range.max;
+        // Create threshold input field instead of action selector
+        const thresholdGroup = document.createElement("div");
+        thresholdGroup.style.marginBottom = "15px";
+
+        const thresholdLabel = document.createElement("label");
+        thresholdLabel.textContent = "Threshold";
+        thresholdLabel.setAttribute("for", "config-threshold");
+
+        const thresholdInput = document.createElement("input");
+        thresholdInput.type = "number";
+        thresholdInput.id = "config-threshold";
+        thresholdInput.name = "threshold";
+        thresholdInput.className = "threshold";
+        thresholdInput.value = "80";
+
+        // If the method has a range, set min/max attributes
+        if (
+          methodObject &&
+          methodObject.returns &&
+          methodObject.returns.range
+        ) {
+          thresholdInput.min = methodObject.returns.range.min;
+          thresholdInput.max = methodObject.returns.range.max;
+        }
+
+        thresholdGroup.appendChild(thresholdLabel);
+        thresholdGroup.appendChild(thresholdInput);
+        conditionLine.appendChild(thresholdGroup);
+        break;
     }
-
-    thresholdGroup.appendChild(thresholdLabel);
-    thresholdGroup.appendChild(thresholdInput);
-    conditionLine.appendChild(thresholdGroup);
-
     // Add the condition line to the form
     if (initialGroup) {
       configForm.insertBefore(conditionLine, initialGroup.nextSibling);
     } else {
       configForm.appendChild(conditionLine);
     }
+
+    return conditionSelect;
   }
   function deviceAutoSelect(currentDevice, selectElements, componentType) {
     currentP = devices[0].pList[0];
@@ -703,21 +879,68 @@ document.addEventListener("DOMContentLoaded", async function () {
       );
   }
 
+  function createThresholdField(pName, methodName) {
+    // Create threshold input field instead of action selector
+    const thresholdGroup = document.createElement("div");
+    thresholdGroup.style.marginBottom = "15px";
+
+    const thresholdLabel = document.createElement("label");
+    thresholdLabel.textContent = "Value";
+    thresholdLabel.setAttribute("for", "config-threshold");
+
+    const thresholdInput = document.createElement("input");
+    thresholdInput.type = "number";
+    thresholdInput.id = "config-automation-result-value";
+    thresholdInput.name = "threshold";
+    thresholdInput.className = "threshold";
+    thresholdInput.value = "80";
+
+    const methodObject = peripherals_interface_info[pName].methods[methodName];
+
+    // If the method has a range, set min/max attributes
+    if (
+      methodObject.parameters &&
+      methodObject.parameters[0] &&
+      methodObject.parameters.range
+    ) {
+      thresholdInput.min = methodObject.parameters.range.min;
+      thresholdInput.max = methodObject.parameters.range.max;
+    }
+
+    thresholdGroup.appendChild(thresholdLabel);
+    thresholdGroup.appendChild(thresholdInput);
+
+    return thresholdGroup;
+  }
+
   function addOptions(selectElement, listData) {
     listData.forEach((p) => {
       const option = document.createElement("option");
-      option.text = peripherals_interface_info[p].title;
-      option.value = p;
+      option.text = p[0];
+      option.value = p[1];
       selectElement.add(option);
     });
   }
 
   function removeOptions(selectElement) {
-    var i,
-      L = selectElement.options.length - 1;
+    console.log("here is remove option");
+    var i;
+    L = selectElement.options.length - 1;
     for (i = L; i >= 0; i--) {
       selectElement.remove(i);
     }
+  }
+
+  function filterOutputMethod(pName) {
+    const methodsDict = peripherals_interface_info[pName].methods;
+    const outputMethods = Object.keys(methodsDict).filter(
+      (method) => methodsDict[method].type === "write"
+    );
+    const outputMethodsOptions = outputMethods.map((method) => [
+      methodsDict[method].label,
+      method,
+    ]);
+    return outputMethodsOptions;
   }
 
   function isAppropriateMethod(pName, methodName, componentType) {
@@ -768,17 +991,39 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Get form values
     const formData = {};
-    componentTemplates[componentType].config.forEach((field) => {
-      const input = document.getElementById(`config-${field.name}`);
-      if (input) {
-        if (field.type === "checkbox") {
-          formData[field.name] = input.checked;
-        } else {
-          formData[field.name] = input.value;
+    if (componentType == "automation-rule") {
+      const fieldsNames = [
+        "device",
+        "source",
+        "method",
+        "condition",
+        "threshold",
+        "device-output",
+        "source-output",
+        "method-output",
+        "automation-result-value",
+      ];
+      fieldsNames.forEach((fieldName) => {
+        const input = document.getElementById(`config-${fieldName}`);
+        console.log(input);
+        if (input) {
+          formData[fieldName] = input.value;
         }
-      }
-      component.setAttribute(field.name, input.value);
-    });
+        component.setAttribute(fieldName, input.value);
+      });
+    } else {
+      componentTemplates[componentType].config.forEach((field) => {
+        const input = document.getElementById(`config-${field.name}`);
+        if (input) {
+          if (field.type === "checkbox") {
+            formData[field.name] = input.checked;
+          } else {
+            formData[field.name] = input.value;
+          }
+        }
+        component.setAttribute(field.name, input.value);
+      });
+    }
 
     const parameters =
       peripherals_interface_info[formData.source].methods[formData.method]
