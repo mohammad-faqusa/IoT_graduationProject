@@ -669,37 +669,67 @@ input:checked + .slider:before {
   word-break: break-word;
 }
 
-/* Automation Panel */
+/* Automation Rule Styles */
 .automation-rule {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 10px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.automation-rule select,
-.automation-rule input {
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: var(--card-bg);
-  color: var(--text-color);
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
 }
 
-.delete-rule {
-  background-color: var(--danger-color);
-  color: white;
+.automation-rule:last-child {
+  margin-bottom: 0;
+}
+
+.automation-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-color);
+  padding-right: 16px;
+}
+
+.stop-start-button {
+  padding: 6px 14px;
   border: none;
   border-radius: 4px;
-  width: 30px;
-  height: 30px;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  margin-right: 16px;
+}
+
+.btn-start {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.btn-start:hover {
+  background-color: var(--success-color);
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.btn-stop {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-stop:hover {
+  background-color: var(--danger-color);
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.action-buttons {
   display: flex;
-  justify-content: center;
+  gap: 8px;
   align-items: center;
 }
 
