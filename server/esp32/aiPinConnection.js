@@ -12,7 +12,9 @@ const peripherals_info = JSON.parse(
 );
 
 async function pinsConnectionsGuide(pins_dict) {
-  selectedPeripheralsInfo = {};
+  const selectedPeripheralsInfo = {};
+
+  console.log("here is dict pin : ", pins_dict);
   Object.keys(pins_dict).forEach(
     (peripheral_name) =>
       (selectedPeripheralsInfo[peripheral_name] = peripherals_info.find(

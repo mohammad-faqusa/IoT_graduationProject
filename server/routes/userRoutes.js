@@ -51,6 +51,28 @@ router.post("/login", (req, res, next) => {
   })(req, res, next);
 });
 
+router.post("/api/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      return res.status(401).json({ success: false, message: info.message });
+    }
+
+    // No browser redirect — just issue JWT and return JSON
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: { id: user._id, email: user.email }, // Optional
+    });
+  })(req, res, next);
+});
+
 // Auth middleware
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();

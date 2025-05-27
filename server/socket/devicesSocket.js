@@ -1,11 +1,12 @@
 const path = require("path");
 const { getDevices } = require(path.join(__dirname, "./../data/devices"));
-const mqtt = require("mqtt");
+// const mqtt = require("mqtt");
 const fs = require("fs");
 const pinsConnectionsGuide = require(path.join(
   __dirname,
   "./../esp32/aiPinConnection"
 ));
+const mqtt = require("mqtt");
 
 const displayDevicesSocket = async (socket) => {
   let selectedDeviceId;
@@ -24,8 +25,8 @@ const displayDevicesSocket = async (socket) => {
         ([key, val]) => key
       ))
   );
+  // const client = mqtt.connect("mqtt:localhost");
   const client = mqtt.connect("mqtt:localhost");
-
   client.on("connect", () => console.log("connected to the broker"));
   client.subscribe("esp32/online");
   client.subscribe("esp32/status");
@@ -36,10 +37,13 @@ const displayDevicesSocket = async (socket) => {
       const deviceId = JSON.parse(message).id;
       // console.log("this is device id : ", deviceId);
       onlineDevicesSet.add(deviceId);
+      console.log("online esp32 : ", deviceId);
     } else {
       try {
         const response = JSON.parse(message.toString());
         const commandId = response.commandId;
+
+        console.log("here is the response : ", response);
 
         if (pendingCommands.has(commandId)) {
           const ack = pendingCommands.get(commandId);

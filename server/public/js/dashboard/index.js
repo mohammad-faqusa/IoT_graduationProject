@@ -1,5 +1,3 @@
-const { createElement } = require("react");
-
 document.addEventListener("DOMContentLoaded", async function () {
   const editModeBtn = document.getElementById("editModeBtn");
   const eventLog = document.getElementById("eventLog");
