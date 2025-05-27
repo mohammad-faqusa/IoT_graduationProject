@@ -5,8 +5,11 @@ const pinsConnectionsGuide = require(path.join(
   __dirname,
   "./../esp32/aiPinConnection"
 ));
+
 const Device = require("../models/Device.js");
 const User = require("../models/User.js");
+
+const espSetup = require("../esp32/espSetup");
 
 module.exports = async (socket) => {
   console.log("✅ Electron socket fully authenticated:", socket.user);
@@ -129,7 +132,50 @@ module.exports = async (socket) => {
     }
   });
 
+  socket.on("hi", (data) => {
+    console.log("hi from electron");
+  });
+
+  socket.on("setupDevice", async (deviceId) => {
+    console.log("here is setup device : ", deviceId);
+    socket.emit("hi-server", "hi from server ");
+    const device = await checkDeviceOwnership(socket, deviceId);
+    console.log("this is device : ", device);
+    try {
+      const pList = Array.from(device.dictVariables.keys());
+      console.log("this is pList : ", pList);
+      await espSetup(device.id, pList, socket);
+    } catch (err) {
+      await Device.findByIdAndDelete(device._id);
+      socket.emit("errorSetup", {
+        status: "error",
+        data: `❌failed:", ${err.stderr || err.message}`,
+      });
+      socket.emit("errorSetup", {
+        status: "finished",
+        data: `the device is deleted from the database`,
+      });
+    }
+  });
+
   // Your Electron app event handlers here
+
+  const checkDeviceOwnership = async (socket, deviceId) => {
+    if (!socket.user || !socket.user.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const device = await Device.findById(deviceId);
+    if (!device) {
+      throw new Error("Device not found");
+    }
+
+    if (device.user.toString() !== socket.user.id.toString()) {
+      throw new Error("Unauthorized: You do not own this device");
+    }
+
+    return device; // optionally return device for reuse
+  };
 };
 
 function generateCommandId() {
