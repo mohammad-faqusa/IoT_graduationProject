@@ -67,6 +67,10 @@ module.exports = async (socket) => {
     socket.emit("pong");
   });
 
+  socket.on("disconnect", () => {
+    client.end();
+  });
+
   // ✅ Register event immediately, handle async data later
   socket.on("fetchDevices", async (data, ackCallback) => {
     try {
@@ -141,10 +145,8 @@ module.exports = async (socket) => {
   });
 
   socket.on("setupDevice", async (deviceId) => {
-    console.log("here is setup device : ", deviceId);
-    socket.emit("hi-server", "hi from server ");
     const device = await checkDeviceOwnership(socket, deviceId);
-    console.log("this is device : ", device);
+    socket.emit("deviceIndex", device.id);
     try {
       const pList = Array.from(device.dictVariables.keys());
       console.log("this is pList : ", pList);

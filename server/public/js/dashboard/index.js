@@ -1701,6 +1701,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function updateAutomationRule(component, formData) {
+    console.log("this is form data : ", formData);
+    console.log("this is component : ", component);
+
+    socket.emit("addAutomationRule", formData);
+  }
+
   async function sendImmediateCommand(component) {
     const device = component.getAttribute("device");
     const source = component.getAttribute("source");

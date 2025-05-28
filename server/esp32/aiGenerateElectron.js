@@ -99,6 +99,12 @@ async def async_callback(topic, msg, retained):
     msg = json.loads(msg)
     result = {}
 
+    if(msg.get('automation')):
+        automation = {}
+        automation = msg.copy();
+        automations.append(automation)
+        return
+
     if(msg.get('pins')):
         result['pins'] = peripherals_pins
         result['status'] = True
@@ -124,9 +130,14 @@ async def conn_han(client):
     
 async def main(client):
     await client.connect()
+
+    # Start the automation loop in background
+    asyncio.create_task(automation_loop())
+
     n = 0
     esp_status = {}
     esp_status['id'] = ${id}
+
     while True:
         await asyncio.sleep(1)
         
@@ -137,6 +148,41 @@ async def main(client):
         await asyncio.sleep(1)
         await client.publish('esp32/online', json.dumps(esp_status), qos = 1)
         n += 1
+
+async def automation_loop():
+    while True:
+        await asyncio.sleep(1)  # Check every 1 second
+        for automation in automations:
+            try:
+                await runAutomation(automation)
+            except Exception as e:
+                print("Automation error:", e)
+                
+
+async def runAutomation(automation):
+    outputMsg = {}
+    outputMsg['peripheral'] = automation['source-output']
+    outputMsg['method'] = automation['method-output']
+    outputMsg['param'] = automation['outputParams']
+    outputMsg['commandId'] = 1
+    
+    outputDeviceId = automation['outputDeviceId']
+
+    if(automation['threshold']):
+        selectedPeripheral = automation['source']
+        selectedMethod = automation['method']
+        inputParams = automation['inputParams']
+        threshold = automation['threshold'] 
+        if(automation['condition'] == 'gt'):
+            if(peripherals[selectedPeripheral][selectedMethod][inputParams] > threshold):
+                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+        if(automation['condition'] == 'lt'):
+            if(peripherals[selectedPeripheral][selectedMethod][inputParams] < threshold):
+                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+        if(automation['condition'] == 'eq'):
+            if(peripherals[selectedPeripheral][selectedMethod][inputParams] == threshold):
+                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+    print(outputMsg)
 
 config['subs_cb'] = callback
 config['connect_coro'] = conn_han
@@ -243,6 +289,7 @@ async function codeGeneration(
     socket.emit("processSetup", {
       status: "processing",
       data: "✅ Code generation complete!",
+      final: true,
     });
 
     // return final_code; // Optional, in case caller needs it

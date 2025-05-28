@@ -1,20 +1,39 @@
 from accelerometer import MPU6050
 from dht_sensor import DHTSensor
+from encoder import Encoder
+from led import InternalLED
+from push_button import PushButton
 
-# Initialize peripherals_pins dictionary to store pin connections
+# Dictionary to store peripheral pin connections
 peripherals_pins = {
-    'accelerometer': {'sda': 21, 'scl': 22},  # Typical I2C pins for ESP32
-    'dht_sensor': {'data': 4}  # DHT sensor data pin
+    'accelerometer': {'i2c': 'default I2C bus'},
+    'dht_sensor': {'pin': 4},
+    'encoder': {'pin_a': 25, 'pin_b': 26},
+    'internal_led': {'pin': 2},  # ESP32 internal LED is typically on GPIO2
+    'push_button': {'pin': 0}    # ESP32 BOOT button is typically on GPIO0
 }
 
-# Initialize peripherals dictionary to store instances
+# Dictionary to store peripheral instances
 peripherals = {}
 
-# Initialize accelerometer
-peripherals['accelerometer'] = MPU6050(simulate=True)  # Using default address (0x68) and simulation mode
+# Initialize accelerometer (MPU6050)
+peripherals['accelerometer'] = MPU6050(simulate=True)
 
 # Initialize DHT sensor
-peripherals['dht_sensor'] = DHTSensor(pin=4, sensor_type="DHT22", simulate=True)  # Using pin 4, DHT22 type, and simulation mode
+peripherals['dht_sensor'] = DHTSensor(pin=peripherals_pins['dht_sensor']['pin'], sensor_type="DHT22", simulate=True)
+
+# Initialize encoder
+peripherals['encoder'] = Encoder(pin_a=peripherals_pins['encoder']['pin_a'], 
+                                pin_b=peripherals_pins['encoder']['pin_b'], 
+                                simulate=True)
+
+# Initialize internal LED
+peripherals['internal_led'] = InternalLED(simulate=False)
+
+# Initialize push button
+peripherals['push_button'] = PushButton(pin=peripherals_pins['push_button']['pin'], 
+                                       simulate=True, 
+                                       debounce_ms=50)
 
 import json
 
@@ -39,7 +58,7 @@ async def async_callback(topic, msg, retained):
         result['pins'] = peripherals_pins
         result['status'] = True
         result['commandId'] = msg['commandId']
-        await client.publish('esp32/2/sender', '{}'.format(json.dumps(result)), qos = 1)
+        await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
         print("this is pins")
         return  # ✅ Terminate early
      
@@ -53,16 +72,16 @@ async def async_callback(topic, msg, retained):
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/2/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/2/receiver', 1)
+    await client.subscribe('esp32/3/receiver', 1)
     
 async def main(client):
     await client.connect()
     n = 0
     esp_status = {}
-    esp_status['id'] = 2
+    esp_status['id'] = 3
     while True:
         await asyncio.sleep(1)
         

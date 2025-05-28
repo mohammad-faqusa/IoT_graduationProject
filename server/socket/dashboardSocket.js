@@ -100,8 +100,33 @@ dashboardSocket = async (socket) => {
     client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
     pendingCommands.set(sendObject.commandId, ackCallBack);
   });
+
+  socket.on("addAutomationRule", (data) => {
+    // get dev1 id
+    // send the formdata to dev1
+    console.log(data);
+    data.automation = 1;
+
+    const inputDevice = devices.find((dev) => dev.name === data.device);
+    const outputDevice = devices.find(
+      (dev) => dev.name === data["device-output"]
+    );
+
+    console.log("this is output device : ", outputDevice);
+
+    data.outputDeviceId = Number(outputDevice.id);
+    data.outputParams = [];
+    data.inputParams = [];
+
+    if (data.threshold) {
+      data.threshold = Number(data.threshold);
+    }
+
+    // console.log("this is the founded device : ", inputDevice);
+
+    client.publish(`esp32/${inputDevice.id}/receiver`, JSON.stringify(data));
+  });
 };
-6;
 
 function autoParse(value) {
   if (value === "true") return true;
