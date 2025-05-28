@@ -1,42 +1,20 @@
 from accelerometer import MPU6050
 from dht_sensor import DHTSensor
-from led import InternalLED
-from motion_sensor import MotionSensor
-from servo_motor import Servo
 
-# Define pin connections for each peripheral
+# Initialize peripherals_pins dictionary to store pin connections
 peripherals_pins = {
-    'accelerometer': {'sda': 21, 'scl': 22},  # Default I2C pins for ESP32
-    'dht_sensor': {'pin': 4},
-    'internal_led': {'pin': 2},  # ESP32 onboard LED is usually on pin 2
-    'motion_sensor': {'pin': 5},
-    'servo_motor': {'pin': 13}
+    'accelerometer': {'sda': 21, 'scl': 22},  # Typical I2C pins for ESP32
+    'dht_sensor': {'data': 4}  # DHT sensor data pin
 }
 
-# Initialize peripherals
+# Initialize peripherals dictionary to store instances
 peripherals = {}
 
-# Initialize MPU6050 accelerometer
-peripherals['accelerometer'] = MPU6050(simulate=True)
+# Initialize accelerometer
+peripherals['accelerometer'] = MPU6050(simulate=True)  # Using default address (0x68) and simulation mode
 
 # Initialize DHT sensor
-peripherals['dht_sensor'] = DHTSensor(pin=peripherals_pins['dht_sensor']['pin'], sensor_type="DHT22", simulate=True)
-
-# Initialize internal LED
-peripherals['internal_led'] = InternalLED(simulate=False)
-
-# Initialize motion sensor
-peripherals['motion_sensor'] = MotionSensor(pin=peripherals_pins['motion_sensor']['pin'], simulate=True)
-
-# Initialize servo motor
-peripherals['servo_motor'] = Servo(
-    pin_id=peripherals_pins['servo_motor']['pin'],
-    min_us=544,
-    max_us=2400,
-    min_deg=0,
-    max_deg=180,
-    freq=50
-)
+peripherals['dht_sensor'] = DHTSensor(pin=4, sensor_type="DHT22", simulate=True)  # Using pin 4, DHT22 type, and simulation mode
 
 import json
 

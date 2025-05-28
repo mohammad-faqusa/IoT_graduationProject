@@ -1,15 +1,19 @@
 const path = require("path");
 const { getDevices } = require(path.join(__dirname, "./../data/devices"));
 const mqtt = require("mqtt");
+const fs = require("fs");
 const pinsConnectionsGuide = require(path.join(
   __dirname,
   "./../esp32/aiPinConnection"
 ));
+const pList = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
+).map((p) => p.name);
 
 const Device = require("../models/Device.js");
 const User = require("../models/User.js");
 
-const espSetup = require("../esp32/espSetup");
+const espSetup = require("../esp32/espSetupElectron");
 
 module.exports = async (socket) => {
   console.log("✅ Electron socket fully authenticated:", socket.user);
@@ -176,6 +180,12 @@ module.exports = async (socket) => {
 
     return device; // optionally return device for reuse
   };
+
+  socket.on("addDevice_pList", async (data, ackCallBack) => {
+    // const pList = (await Peripheral.find()).map(p => p.name);
+    console.log("this is plist : ", pList);
+    ackCallBack(pList);
+  });
 };
 
 function generateCommandId() {
