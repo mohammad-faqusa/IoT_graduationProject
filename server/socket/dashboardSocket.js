@@ -118,8 +118,11 @@ dashboardSocket = async (socket) => {
     data.outputParams = [];
     data.inputParams = [];
 
+    if (data["automation-result-value"]) {
+      data.outputParams.push(autoParse(data["automation-result-value"]));
+    }
     if (data.threshold) {
-      data.threshold = Number(data.threshold);
+      data.threshold = autoParse(data.threshold);
     }
 
     // console.log("this is the founded device : ", inputDevice);
