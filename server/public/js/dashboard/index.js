@@ -1727,7 +1727,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     if (component.getAttribute("method-type") === "read") {
-      component.setAttribute("return-value", result.value);
+      if (
+        typeof result === "object" &&
+        !Array.isArray(result) &&
+        result !== null
+      )
+        component.setAttribute("return-value", JSON.stringify(result.value));
+      else component.setAttribute("return-value", result.value);
     } else {
       if (readComponents[`${device}-${source}`]) {
         readComponents[`${device}-${source}`].forEach((component) => {

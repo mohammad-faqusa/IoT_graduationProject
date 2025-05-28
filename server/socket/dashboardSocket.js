@@ -125,8 +125,6 @@ dashboardSocket = async (socket) => {
       data.threshold = autoParse(data.threshold);
     }
 
-    // console.log("this is the founded device : ", inputDevice);
-
     client.publish(`esp32/${inputDevice.id}/receiver`, JSON.stringify(data));
   });
 };
@@ -134,7 +132,7 @@ dashboardSocket = async (socket) => {
 function autoParse(value) {
   if (value === "true") return true;
   if (value === "false") return false;
-  if (!isNaN(value) && value.trim() !== "") return Number(value);
+  if (!isNaN(value) && value?.trim() !== "") return Number(value);
   return value;
 }
 

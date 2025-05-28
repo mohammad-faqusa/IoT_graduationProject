@@ -14,6 +14,7 @@ const componentTemplates = {
       "Array",
       "Boolean",
       "Character",
+      "Object",
     ],
     title: "Text Display",
     content: `

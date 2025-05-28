@@ -4,6 +4,234 @@
     "title": "Accelerometer",
     "library_name": "accelerometer",
     "class_name": "MPU6050",
+
+    "attributes": {
+      "addr": {
+        "dataType": "Number",
+        "format": "hex",
+        "default": 104,
+        "purpose": "7-bit I²C address of the sensor (0x68 default)"
+      },
+      "_accel_range": {
+        "dataType": "Number",
+        "unit": "g",
+        "access": "read-only",
+        "allowed": [2, 4, 8, 16],
+        "purpose": "Current ±g full-scale range selected for the accelerometer"
+      },
+      "_gyro_range": {
+        "dataType": "Number",
+        "unit": "°/s",
+        "access": "read-only",
+        "allowed": [250, 500, 1000, 2000],
+        "purpose": "Current ±deg/s full-scale range selected for the gyroscope"
+      },
+      "_failCount": {
+        "dataType": "Number",
+        "access": "read-only",
+        "purpose": "Running counter of non-fatal I²C read failures"
+      },
+      "_terminatingFailCount": {
+        "dataType": "Number",
+        "access": "read-only",
+        "purpose": "Counter of I²C failures that returned NaN data"
+      }
+    },
+
+    "methods": {
+      "read_temperature": {
+        "type": "read",
+        "label": "Read Temperature",
+        "returns": { "dataType": "Number", "unit": "°C" },
+        "purpose": "Reads and converts the on-chip thermistor value"
+      },
+
+      "set_accel_range": {
+        "type": "write",
+        "label": "Set Accelerometer Range",
+        "parameters": [
+          {
+            "name": "accel_range",
+            "dataType": "Number",
+            "allowed": [0, 8, 16, 24],
+            "map": { "0": "±2 g", "8": "±4 g", "16": "±8 g", "24": "±16 g" },
+            "purpose": "Raw register value to select ±2/4/8/16 g"
+          }
+        ],
+        "returns": { "dataType": "null" },
+        "purpose": "Writes ACCEL_CONFIG to change full-scale range"
+      },
+
+      "get_accel_range": {
+        "type": "read",
+        "label": "Get Accelerometer Range",
+        "parameters": [
+          {
+            "name": "raw",
+            "dataType": "Boolean",
+            "optional": true,
+            "default": false
+          }
+        ],
+        "returns": { "dataType": "Number", "unit": "g OR raw byte" },
+        "purpose": "Fetches current ±g range (human value or raw register)"
+      },
+
+      "read_accel_data": {
+        "type": "read",
+        "label": "Read Accelerometer (XYZ)",
+        "parameters": [
+          {
+            "name": "g",
+            "dataType": "Boolean",
+            "optional": true,
+            "default": false
+          }
+        ],
+        "returns": {
+          "dataType": "Object",
+          "properties": {
+            "x": { "dataType": "Number" },
+            "y": { "dataType": "Number" },
+            "z": { "dataType": "Number" }
+          },
+          "unit": { "false": "m/s²", "true": "g" }
+        },
+        "purpose": "Reads three-axis acceleration, optionally in g units"
+      },
+
+      "read_accel_abs": {
+        "type": "read",
+        "label": "Read Acceleration Magnitude",
+        "parameters": [
+          {
+            "name": "g",
+            "dataType": "Boolean",
+            "optional": true,
+            "default": false
+          }
+        ],
+        "returns": { "dataType": "Number", "unit": "m/s² OR g" },
+        "purpose": "Scalar |a| calculated from XYZ acceleration"
+      },
+
+      "set_gyro_range": {
+        "type": "write",
+        "label": "Set Gyroscope Range",
+        "parameters": [
+          {
+            "name": "gyro_range",
+            "dataType": "Number",
+            "allowed": [0, 8, 16, 24],
+            "map": {
+              "0": "±250 °/s",
+              "8": "±500 °/s",
+              "16": "±1000 °/s",
+              "24": "±2000 °/s"
+            },
+            "purpose": "Raw register value to select full-scale range"
+          }
+        ],
+        "returns": { "dataType": "null" },
+        "purpose": "Writes GYRO_CONFIG to change gyroscope scale"
+      },
+
+      "get_gyro_range": {
+        "type": "read",
+        "label": "Get Gyroscope Range",
+        "parameters": [
+          {
+            "name": "raw",
+            "dataType": "Boolean",
+            "optional": true,
+            "default": false
+          }
+        ],
+        "returns": { "dataType": "Number", "unit": "°/s OR raw byte" },
+        "purpose": "Fetches current gyroscope range"
+      },
+
+      "read_gyro_data": {
+        "type": "read",
+        "label": "Read Gyroscope (XYZ)",
+        "returns": {
+          "dataType": "Object",
+          "properties": {
+            "x": { "dataType": "Number", "unit": "°/s" },
+            "y": { "dataType": "Number", "unit": "°/s" },
+            "z": { "dataType": "Number", "unit": "°/s" }
+          }
+        },
+        "purpose": "Reads angular-velocity about X, Y, Z axes"
+      },
+
+      "read_angle": {
+        "type": "read",
+        "label": "Estimate Tilt Angle",
+        "returns": {
+          "dataType": "Object",
+          "properties": {
+            "x": { "dataType": "Number", "unit": "rad" },
+            "y": { "dataType": "Number", "unit": "rad" }
+          }
+        },
+        "purpose": "Quick roll/pitch estimate from accelerometer (radians)"
+      }
+    },
+
+    "constructor": {
+      "parameters": [
+        {
+          "name": "bus",
+          "dataType": "Object",
+          "optional": true,
+          "purpose": "Pre-configured I²C bus (ignored on ESP32 preset pins)"
+        },
+        {
+          "name": "freq",
+          "dataType": "Number",
+          "optional": true,
+          "unit": "Hz",
+          "purpose": "I²C frequency if a custom bus is supplied"
+        },
+        {
+          "name": "sda",
+          "dataType": "Pin",
+          "optional": true,
+          "purpose": "Alternative SDA pin (default GPIO21 on ESP32)"
+        },
+        {
+          "name": "scl",
+          "dataType": "Pin",
+          "optional": true,
+          "purpose": "Alternative SCL pin (default GPIO22 on ESP32)"
+        },
+        {
+          "name": "addr",
+          "dataType": "Number",
+          "format": "hex",
+          "default": 104,
+          "purpose": "I²C address (0x68 or 0x69 when AD0 is high)"
+        }
+      ]
+    },
+
+    "pin_properties": {
+      "vcc": { "purpose": "3 V3 / 5 V supply", "required": true },
+      "gnd": { "purpose": "Ground", "required": true },
+      "scl": { "purpose": "I²C clock line", "required": true },
+      "sda": { "purpose": "I²C data line", "required": true },
+      "int": {
+        "purpose": "Interrupt output (optional for motion/overflow)",
+        "required": false
+      }
+    }
+  },
+  {
+    "name": "accelerometer_simulated",
+    "title": "Accelerometer Simulated",
+    "library_name": "accelerometer_simulated",
+    "class_name": "MPU6050",
     "attributes": {
       "simulate": {
         "dataType": "Boolean",

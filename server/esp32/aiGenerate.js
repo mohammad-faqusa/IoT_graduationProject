@@ -85,6 +85,8 @@ function mqtt_part2(
   return `from mqtt_as import MQTTClient, config
 import asyncio
 
+automations = []
+
 # Local configuration
 config['ssid'] = '${network_config.ssid}'  # Optional on ESP8266
 config['wifi_pw'] = '${network_config.pass}'

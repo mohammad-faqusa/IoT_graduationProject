@@ -1,44 +1,27 @@
-from accelerometer import MPU6050
-from dht_sensor import DHTSensor
-from encoder import Encoder
-from led import InternalLED
-from push_button import PushButton
+from mpu6050_real import MPU6050
+from machine import Pin, I2C
 
-# Dictionary to store peripheral pin connections
+# Initialize peripherals_pins dictionary
 peripherals_pins = {
-    'accelerometer': {'i2c': 'default I2C bus'},
-    'dht_sensor': {'pin': 4},
-    'encoder': {'pin_a': 25, 'pin_b': 26},
-    'internal_led': {'pin': 2},  # ESP32 internal LED is typically on GPIO2
-    'push_button': {'pin': 0}    # ESP32 BOOT button is typically on GPIO0
+    'accelerometer': {'sda': 21, 'scl': 22, 'addr': 0x68}
 }
 
-# Dictionary to store peripheral instances
+# Initialize peripherals dictionary
 peripherals = {}
 
-# Initialize accelerometer (MPU6050)
-peripherals['accelerometer'] = MPU6050(simulate=True)
-
-# Initialize DHT sensor
-peripherals['dht_sensor'] = DHTSensor(pin=peripherals_pins['dht_sensor']['pin'], sensor_type="DHT22", simulate=True)
-
-# Initialize encoder
-peripherals['encoder'] = Encoder(pin_a=peripherals_pins['encoder']['pin_a'], 
-                                pin_b=peripherals_pins['encoder']['pin_b'], 
-                                simulate=True)
-
-# Initialize internal LED
-peripherals['internal_led'] = InternalLED(simulate=False)
-
-# Initialize push button
-peripherals['push_button'] = PushButton(pin=peripherals_pins['push_button']['pin'], 
-                                       simulate=True, 
-                                       debounce_ms=50)
+# Initialize MPU6050 (accelerometer)
+peripherals['accelerometer'] = MPU6050(
+    sda=Pin(peripherals_pins['accelerometer']['sda']),
+    scl=Pin(peripherals_pins['accelerometer']['scl']),
+    addr=peripherals_pins['accelerometer']['addr']
+)
 
 import json
 
 from mqtt_as import MQTTClient, config
 import asyncio
+
+automations = []
 
 # Local configuration
 config['ssid'] = 'clear'  # Optional on ESP8266
@@ -54,11 +37,17 @@ async def async_callback(topic, msg, retained):
     msg = json.loads(msg)
     result = {}
 
+    if(msg.get('automation')):
+        automation = {}
+        automation = msg.copy();
+        automations.append(automation)
+        return
+
     if(msg.get('pins')):
         result['pins'] = peripherals_pins
         result['status'] = True
         result['commandId'] = msg['commandId']
-        await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
+        await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
         print("this is pins")
         return  # ✅ Terminate early
      
@@ -72,16 +61,21 @@ async def async_callback(topic, msg, retained):
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/3/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/3/receiver', 1)
+    await client.subscribe('esp32/1/receiver', 1)
     
 async def main(client):
     await client.connect()
+
+    # Start the automation loop in background
+    asyncio.create_task(automation_loop())
+
     n = 0
     esp_status = {}
-    esp_status['id'] = 3
+    esp_status['id'] = 1
+
     while True:
         await asyncio.sleep(1)
         
@@ -92,6 +86,41 @@ async def main(client):
         await asyncio.sleep(1)
         await client.publish('esp32/online', json.dumps(esp_status), qos = 1)
         n += 1
+
+async def automation_loop():
+    while True:
+        await asyncio.sleep(1)  # Check every 1 second
+        for automation in automations:
+            try:
+                await runAutomation(automation)
+            except Exception as e:
+                print("Automation error:", e)
+                
+
+async def runAutomation(automation):
+    outputMsg = {}
+    outputMsg['peripheral'] = automation['source-output']
+    outputMsg['method'] = automation['method-output']
+    outputMsg['param'] = automation['outputParams']
+    outputMsg['commandId'] = 1
+    
+    outputDeviceId = automation['outputDeviceId']
+
+    if(automation['threshold']):
+        selectedPeripheral = automation['source']
+        selectedMethod = automation['method']
+        inputParams = automation['inputParams']
+        threshold = automation['threshold'] 
+        if(automation['condition'] == 'gt'):
+            if(peripherals[selectedPeripheral][selectedMethod][inputParams] > threshold):
+                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+        if(automation['condition'] == 'lt'):
+            if(peripherals[selectedPeripheral][selectedMethod][inputParams] < threshold):
+                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+        if(automation['condition'] == 'eq'):
+            if(peripherals[selectedPeripheral][selectedMethod][inputParams] == threshold):
+                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+    print(outputMsg)
 
 config['subs_cb'] = callback
 config['connect_coro'] = conn_han
