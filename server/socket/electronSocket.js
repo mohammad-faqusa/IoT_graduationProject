@@ -46,14 +46,9 @@ module.exports = async (socket) => {
           const ack = pendingCommands.get(commandId);
 
           console.log("this is reponse pins : ", response.pins);
-          if (response.pins) {
-            const guideArr = await pinsConnectionsGuide(response.pins);
 
-            console.log("this is guide arr ", guideArr);
-            ack(guideArr); // Send response to front-end via WebSocket
-          } else {
-            ack(response); // Send response to front-end via WebSocket
-          }
+          ack(response); // Send response to front-end via WebSocket
+
           pendingCommands.delete(commandId); // Clean up
         }
       } catch (err) {
@@ -96,18 +91,14 @@ module.exports = async (socket) => {
     ackCallBack(mapAsObject);
   });
 
-  socket.on("getConnections", (deviceId, ackCallBack) => {
-    const topic = `esp32/${deviceId}/sender`;
+  socket.on("getConnections", async (deviceId, ackCallBack) => {
+    console.log(deviceId);
+    const device = await Device.findOne({ id: deviceId }).lean();
+    const connectionPins = device.connectionPins;
+    console.log(connectionPins);
 
-    if (!subscribedTopics.has(topic)) {
-      client.subscribe(topic);
-      subscribedTopics.add(topic);
-    }
-    const sendObject = {};
-    sendObject.commandId = generateCommandId();
-    sendObject.pins = 1;
-    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
-    pendingCommands.set(sendObject.commandId, ackCallBack);
+    const arrGuide = await pinsConnectionsGuide(connectionPins);
+    ackCallBack(arrGuide);
   });
 
   socket.on("addDevice", async (data, ackCallBack) => {

@@ -1,0 +1,147 @@
+You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"internal_led"**
+
+Partial pin connections for the device:
+```json
+{
+  "internal_led": {}
+}
+```
+
+All known pin properties of the device:
+```json
+{
+  "name": "internal_led",
+  "title": "Internal Led",
+  "library_name": "led",
+  "class_name": "InternalLED",
+  "inherited_from": "LED",
+  "attributes": {
+    "simulate": {
+      "dataType": "Boolean",
+      "default": false,
+      "values_meaning": {
+        "true": "Simulation mode enabled (LED behavior simulated)",
+        "false": "Controls an actual internal LED on GPIO2"
+      },
+      "purpose": "Controls whether the internal LED operates in simulation or real mode"
+    }
+  },
+  "methods": {
+    "on": {
+      "type": "write",
+      "label": "Turn ON",
+      "returns": {
+        "dataType": "void"
+      },
+      "purpose": "Turns the LED ON (sets the state to ON)"
+    },
+    "switch": {
+      "type": "write",
+      "label": "Switch",
+      "returns": {
+        "dataType": "void"
+      },
+      "purpose": "Switch the led ON or OFF, according to parameter value",
+      "parameters": [
+        {
+          "name": "status",
+          "dataType": "Boolean",
+          "default": false,
+          "purpose": "the status boolean value, true : led on, false : led off"
+        }
+      ]
+    },
+    "off": {
+      "type": "write",
+      "label": "Turn OFF",
+      "returns": {
+        "dataType": "void"
+      },
+      "purpose": "Turns the LED OFF (sets the state to OFF)"
+    },
+    "toggle": {
+      "type": "write",
+      "label": "Toggle",
+      "returns": {
+        "dataType": "void"
+      },
+      "purpose": "Toggles the state of the LED (ON if OFF, OFF if ON)"
+    },
+    "is_on": {
+      "type": "read",
+      "label": "Check if ON",
+      "returns": {
+        "dataType": "Boolean",
+        "values_meaning": {
+          "true": "LED On",
+          "false": "LED Off"
+        }
+      },
+      "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
+    }
+  },
+  "constructor": {
+    "purpose": "Initializes the internal LED, typically connected to GPIO2 on ESP32 boards. Inherits behavior from the LED base class.",
+    "parameters": [
+      {
+        "name": "simulate",
+        "dataType": "Boolean",
+        "default": false,
+        "values_meaning": {
+          "true": "LED behavior will be simulated with print statements instead of real hardware interaction",
+          "false": "Controls the actual onboard LED"
+        },
+        "purpose": "Determines whether the internal LED runs in simulation mode or hardware mode"
+      }
+    ],
+    "inherits_from": "LED",
+    "inherited_parameters": [
+      {
+        "name": "pin",
+        "dataType": "Number",
+        "default": 2,
+        "purpose": "GPIO pin number for the internal LED (fixed to 2 for ESP32)"
+      },
+      {
+        "name": "active_high",
+        "dataType": "Boolean",
+        "default": true,
+        "purpose": "Indicates if the LED turns on with a HIGH signal"
+      }
+    ],
+    "returns": {
+      "dataType": "Object",
+      "class": "InternalLED",
+      "purpose": "An instance of InternalLED, ready to be turned on or off"
+    }
+  },
+  "pin_properties": {
+    "internal": {
+      "purpose": "Uses the onboard LED (typically GPIO2) already wired inside the ESP32 board",
+      "note": "No physical wiring required; LED is connected internally",
+      "required": false
+    }
+  }
+}
+```
+
+🔧 Your task:
+Generate a complete list of step-by-step instructions for wiring the **"internal_led"** to an ESP32-WROOM-32 board.
+
+📌 Rules & Tips:
+- **Preserve** all existing connections.
+- Use valid GPIO pins on the ESP32 (0–39). Avoid GPIOs 6–11 (used for flash) and GPIOs 34–39 (input-only).
+- Assign safe and common GPIO defaults to unassigned required pins.
+- Power pins (like VCC) should be connected to 3.3V unless specified otherwise.
+- Optional pins can be connected if helpful, or left unconnected with a brief explanation.
+- Do not include any JSON — just plain-text steps.
+
+✅ Output format (example):
+1. Connect VCC to 3.3V output of ESP32.
+2. Connect GND to GND pin on ESP32.
+3. Connect SDA to GPIO 21 (already assigned).
+4. Connect SCL to GPIO 22 (already assigned).
+5. Leave INT unconnected unless motion detection interrupt is needed.
+6. Pull AD0 to GND to select I2C address 0x68.
+
+Provide the steps in plain text format only.
