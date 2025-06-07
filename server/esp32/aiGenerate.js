@@ -23,6 +23,8 @@ const peripherals_info = JSON.parse(
 
 async function initializeCode(peripherals_info) {
   const prompt = initializePeripheralsPrompt(peripherals_info);
+
+  fs.writeFileSync(path.join(__dirname, "prompt.txt"), prompt);
   const finalCode = await callClaude(prompt);
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
   return finalCode;
@@ -240,7 +242,9 @@ async function codeGeneration(
       status: "processing",
       data: "⚙️ Generating initialization code...",
     });
+
     const init_code = (await initializeCode(peripherals_info)) + "\n";
+
     // const read_methods_code = (await generateLoopRead(peripherals_info)) + "\n";
 
     const mqtt_code = "\nimport json\n" + "\n" + mqtt_part2(id) + "\n";

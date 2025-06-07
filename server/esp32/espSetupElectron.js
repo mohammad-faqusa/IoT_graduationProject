@@ -136,13 +136,13 @@ async function copyCleanupScriptToMain(socket) {
   }
 }
 
-async function espSetup(id, plist, socket) {
+async function espSetup(id, plist, socket, network_config) {
   try {
     // await prepareESP32(socket);
     // await copyCleanupScriptToMain(socket);
     // await prepareESP32(socket);
     // await installLibraries(plist, socket);
-    await codeGeneration(id, plist, socket);
+    await codeGeneration(id, plist, socket, network_config);
     // await copyFilesToESP32(["main.py", "boot.py"], socket);
     // socket.emit("processSetup", {
     //   status: "finished",

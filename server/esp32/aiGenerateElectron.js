@@ -1,25 +1,14 @@
 const fs = require("fs");
 const path = require("path");
-const {
-  initializePeripheralsPrompt,
-  methodsPrompt,
-  generateMQTTCallbackPrompt,
-  generateLoopReadPrompt,
-} = require(path.join(__dirname, "generatePrompts"));
+
+const Device = require(path.join(__dirname, "./../models/Device"));
+
+const { initializePeripheralsPrompt, seperatePinsPrompt } = require(path.join(
+  __dirname,
+  "generatePrompts"
+));
 
 const callClaude = require(path.join(__dirname, "claude_console/lib/index"));
-
-function groupArrayElements(arr, groupSize) {
-  const result = [];
-  for (let i = 0; i < arr.length; i += groupSize) {
-    result.push(arr.slice(i, i + groupSize));
-  }
-  return result;
-}
-
-const peripherals_info = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
-);
 
 async function initializeCode(peripherals_info) {
   const prompt = initializePeripheralsPrompt(peripherals_info);
@@ -28,50 +17,11 @@ async function initializeCode(peripherals_info) {
   return finalCode;
 }
 
-async function testMethodsCode(peripherals_info) {
-  const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
-  const arrCode = await Promise.all(
-    grouped_peripherals_info.map(async (group_p, index) => {
-      const prompt = methodsPrompt(group_p);
-      const finalBody = await callClaude(prompt);
-      const finalCode = finalBody
-        .split("\n")
-        .map((line) => "    " + line)
-        .join("\n");
-      // console.log(finalCode);
-      return await finalCode;
-    })
-  );
-  const finalBody = arrCode.join("\n");
-  const function_code = `
-def run_all_methods(peripherals):\n${finalBody}`;
+async function seperatePins(pythonCode) {
+  const prompt = seperatePinsPrompt(pythonCode);
+  const pinsObject = await callClaude(prompt);
 
-  // fs.writeFileSync("test_all_methods.py", function_code);
-
-  return function_code;
-}
-async function generateLoopRead(peripherals_info) {
-  const grouped_peripherals_info = groupArrayElements(peripherals_info, 3);
-  const arrCode = await Promise.all(
-    grouped_peripherals_info.map(async (group_p, index) => {
-      const prompt = generateLoopReadPrompt(group_p);
-      const finalBody = await callClaude(prompt);
-      const finalCode = finalBody
-        .split("\n")
-        .map((line) => "    " + "    " + line)
-        .join("\n");
-      // console.log(finalCode);
-      return await finalCode;
-    })
-  );
-  const finalBody = arrCode.join("\n");
-  const function_code = `def read_methods(peripherals):
-    result = {}
-    for peripheral_name, peripheral_obj in peripherals.items():\n${finalBody}\n${"    "}return result`;
-
-  fs.writeFileSync("read_methods.py", function_code);
-
-  return function_code;
+  return await pinsObject;
 }
 
 function mqtt_part2(
@@ -212,6 +162,7 @@ print("Connected to Wi-Fi:", wlan.ifconfig())
 
   `;
 }
+
 async function codeGeneration(
   id,
   plist,
@@ -241,38 +192,28 @@ async function codeGeneration(
       data: "⚙️ Generating initialization code...",
     });
     const init_code = (await initializeCode(peripherals_info)) + "\n";
-    // const read_methods_code = (await generateLoopRead(peripherals_info)) + "\n";
+
+    const pinsString = await seperatePins(init_code);
+
+    const connectionPins = JSON.parse(pinsString);
+
+    const query = { id };
+    await Device.findOneAndUpdate(query, {
+      connectionPins,
+    });
 
     const mqtt_code = "\nimport json\n" + "\n" + mqtt_part2(id) + "\n";
 
-    const main_code = init_code + mqtt_code;
+    const main_code = init_code.pythonBlock + mqtt_code;
     socket.emit("processSetup", {
       status: "processing",
       data: "🧪 Generating methods/testing code...",
     });
-    // const test_code = await testMethodsCode(peripherals_info);
-
-    // const final_code = init_code + "\n" + test_code;
 
     socket.emit("processSetup", {
       status: "processing",
       data: "💾 Writing main.py to espFiles...",
     });
-
-    // const main_path = path.join(__dirname, "espFiles/main.py");
-    // const boot_path = path.join(__dirname, "espFiles/boot.py");
-
-    // const test_methods_path = path.join(
-    //   __dirname,
-    //   "espFiles/test_all_methods.py"
-    // );
-    // fs.writeFileSync(main_path, main_code);
-    // fs.writeFileSync(
-    //   boot_path,
-    //   bootCode(network_config.ssid, network_config.pass)
-    // );
-
-    // fs.writeFileSync(test_methods_path, test_code);
 
     socket.emit("processSetup", {
       status: "processing",
@@ -293,8 +234,6 @@ async function codeGeneration(
       data: "✅ Code generation complete!",
       final: true,
     });
-
-    // return final_code; // Optional, in case caller needs it
   } catch (err) {
     // No socket or console output, just rethrow
     console.log(err);

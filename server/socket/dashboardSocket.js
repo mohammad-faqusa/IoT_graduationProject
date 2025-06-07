@@ -125,6 +125,9 @@ dashboardSocket = async (socket) => {
       data.threshold = autoParse(data.threshold);
     }
 
+    console.log("send data to esp32 : ");
+    console.log(data);
+
     client.publish(`esp32/${inputDevice.id}/receiver`, JSON.stringify(data));
   });
 };

@@ -36,6 +36,11 @@ const deviceSchema = new Schema(
       ref: "User", // <-- references the User model
       required: true,
     },
+    connectionPins: {
+      type: Map,
+      of: Object, // <── each entry can be {}, { pin: 5 }, { pin_id: 15 }, etc.
+      default: {}, // start empty
+    },
   },
   { timestamps: true }
 );

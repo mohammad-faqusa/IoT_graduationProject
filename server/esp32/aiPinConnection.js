@@ -28,6 +28,8 @@ async function pinsConnectionsGuide(pins_dict) {
         pins,
         selectedPeripheralsInfo[peripheral_name]
       );
+
+      fs.writeFileSync(path.join(__dirname, "pinPrompt.txt"), prompt);
       const finalBody = await callClaude(prompt);
       return await finalBody;
     })

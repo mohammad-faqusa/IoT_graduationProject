@@ -3,6 +3,7 @@ const path = require("path");
 const User = require(path.join(__dirname, "./../models/User"));
 
 exports.userRegister = async (req, res) => {
+  console.log(req.body);
   const { username, email, password } = req.body;
 
   const hashedPassword = await bcrypt.hash(password, 10);

@@ -1,19 +1,27 @@
-from mpu6050_real import MPU6050
-from machine import Pin, I2C
+from led import InternalLED
+from relay import Relay
+from servo_motor import Servo
 
-# Initialize peripherals_pins dictionary
+# Initialize pins dictionary
 peripherals_pins = {
-    'accelerometer': {'sda': 21, 'scl': 22, 'addr': 0x68}
+    "internal_led": {},
+    "relay": {"pin": 5},
+    "servo_motor": {"pin_id": 15}
 }
 
 # Initialize peripherals dictionary
 peripherals = {}
 
-# Initialize MPU6050 (accelerometer)
-peripherals['accelerometer'] = MPU6050(
-    sda=Pin(peripherals_pins['accelerometer']['sda']),
-    scl=Pin(peripherals_pins['accelerometer']['scl']),
-    addr=peripherals_pins['accelerometer']['addr']
+# Initialize each peripheral
+peripherals["internal_led"] = InternalLED(simulate=False)
+peripherals["relay"] = Relay(pin=peripherals_pins["relay"]["pin"], active_high=True, simulate=True)
+peripherals["servo_motor"] = Servo(
+    pin_id=peripherals_pins["servo_motor"]["pin_id"],
+    min_us=544,
+    max_us=2400,
+    min_deg=0,
+    max_deg=180,
+    freq=50
 )
 
 import json
@@ -47,7 +55,7 @@ async def async_callback(topic, msg, retained):
         result['pins'] = peripherals_pins
         result['status'] = True
         result['commandId'] = msg['commandId']
-        await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
+        await client.publish('esp32/5/sender', '{}'.format(json.dumps(result)), qos = 1)
         print("this is pins")
         return  # ✅ Terminate early
      
@@ -61,10 +69,10 @@ async def async_callback(topic, msg, retained):
     result['status'] = True
     result['commandId'] = msg['commandId']
 
-    await client.publish('esp32/1/sender', '{}'.format(json.dumps(result)), qos = 1)
+    await client.publish('esp32/5/sender', '{}'.format(json.dumps(result)), qos = 1)
 
 async def conn_han(client):
-    await client.subscribe('esp32/1/receiver', 1)
+    await client.subscribe('esp32/5/receiver', 1)
     
 async def main(client):
     await client.connect()
@@ -74,7 +82,7 @@ async def main(client):
 
     n = 0
     esp_status = {}
-    esp_status['id'] = 1
+    esp_status['id'] = 5
 
     while True:
         await asyncio.sleep(1)

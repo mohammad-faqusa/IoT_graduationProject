@@ -144,13 +144,18 @@ module.exports = async (socket) => {
     console.log("hi from electron");
   });
 
-  socket.on("setupDevice", async (deviceId) => {
+  socket.on("setupDevice", async (data) => {
+    console.log("recieved setupDevice data: ");
+    console.log(data);
+    const { network_config, deviceId } = data;
+    network_config.serverId = "192.168.137.1";
+
     const device = await checkDeviceOwnership(socket, deviceId);
     socket.emit("deviceIndex", device.id);
     try {
       const pList = Array.from(device.dictVariables.keys());
       console.log("this is pList : ", pList);
-      await espSetup(device.id, pList, socket);
+      await espSetup(device.id, pList, socket, network_config);
     } catch (err) {
       await Device.findByIdAndDelete(device._id);
       socket.emit("errorSetup", {
