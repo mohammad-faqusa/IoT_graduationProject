@@ -204,7 +204,7 @@ async function codeGeneration(
 
     const mqtt_code = "\nimport json\n" + "\n" + mqtt_part2(id) + "\n";
 
-    const main_code = init_code.pythonBlock + mqtt_code;
+    const main_code = init_code + "\n" + mqtt_code;
     socket.emit("processSetup", {
       status: "processing",
       data: "🧪 Generating methods/testing code...",

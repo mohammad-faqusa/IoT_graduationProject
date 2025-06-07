@@ -18,8 +18,6 @@ const espSetup = require("../esp32/espSetupElectron");
 module.exports = async (socket) => {
   console.log("✅ Electron socket fully authenticated:", socket.user);
   const onlineDevices = new Map();
-  const subscribedTopics = new Set();
-  const pendingCommands = new Map(); // commandId -> ackCallBack
 
   const client = mqtt.connect("mqtt:localhost");
   client.subscribe("esp32/online");
@@ -34,26 +32,6 @@ module.exports = async (socket) => {
 
       const now = Date.now();
       onlineDevices.set(deviceId, now);
-    } else {
-      try {
-        const response = JSON.parse(message.toString());
-
-        console.log("this is the response : ", response);
-        const commandId = response.commandId;
-
-        console.log(pendingCommands);
-        if (pendingCommands.has(commandId)) {
-          const ack = pendingCommands.get(commandId);
-
-          console.log("this is reponse pins : ", response.pins);
-
-          ack(response); // Send response to front-end via WebSocket
-
-          pendingCommands.delete(commandId); // Clean up
-        }
-      } catch (err) {
-        console.error("Invalid MQTT message:", err);
-      }
     }
   });
 
@@ -185,7 +163,3 @@ module.exports = async (socket) => {
     ackCallBack(pList);
   });
 };
-
-function generateCommandId() {
-  return Date.now() + "-" + Math.random().toString(36).substring(2, 8);
-}
