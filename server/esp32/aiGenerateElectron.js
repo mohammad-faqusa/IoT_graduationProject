@@ -10,8 +10,8 @@ const { initializePeripheralsPrompt, seperatePinsPrompt } = require(path.join(
 
 const callClaude = require(path.join(__dirname, "claude_console/lib/index"));
 
-async function initializeCode(peripherals_info) {
-  const prompt = initializePeripheralsPrompt(peripherals_info);
+async function initializeCode(peripherals_dict) {
+  const prompt = initializePeripheralsPrompt(peripherals_dict);
   const finalCode = await callClaude(prompt);
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
   return finalCode;
@@ -165,7 +165,7 @@ print("Connected to Wi-Fi:", wlan.ifconfig())
 
 async function codeGeneration(
   id,
-  plist,
+  pDict,
   socket,
   network_config = {
     ssid: "clear",
@@ -179,19 +179,15 @@ async function codeGeneration(
       data: "📥 Reading peripherals_info.json...",
     });
 
-    const allPeripherals = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
-    );
-
-    const peripherals_info = allPeripherals.filter((p) =>
-      plist.includes(p.name)
-    );
+    // const allPeripherals = JSON.parse(
+    //   fs.readFileSync(path.join(__dirname, "../data/peripherals_info.json"))
+    // );
 
     socket.emit("processSetup", {
       status: "processing",
       data: "⚙️ Generating initialization code...",
     });
-    const init_code = (await initializeCode(peripherals_info)) + "\n";
+    const init_code = (await initializeCode(pDict)) + "\n";
 
     const pinsString = await seperatePins(init_code);
 

@@ -383,9 +383,9 @@
     }
   },
   {
-    "name": "dht_sensor",
-    "title": "DHT Sensor",
-    "library_name": "dht_sensor",
+    "name": "dht_sensor_simulated",
+    "title": "DHT Sensor Simulated",
+    "library_name": "dht_sensor_simulated",
     "class_name": "DHTSensor",
     "attributes": {
       "pin": {
@@ -513,6 +513,84 @@
       }
     }
   },
+  {
+    "name": "dht_sensor",
+    "title": "DHT Sensor",
+    "library_name": "dht_sensor",
+    "class_name": "DHTSensor",
+    "attributes": {
+      "pin": {
+        "dataType": "Number",
+        "purpose": "GPIO pin connected to the sensor data line"
+      }
+    },
+    "methods": {
+      "measure": {
+        "type": "write",
+        "label": "Trigger Measurement",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Initiates a new reading cycle and refreshes the internal buffer"
+      },
+      "temperature": {
+        "type": "read",
+        "label": "Read Temperature",
+        "returns": {
+          "dataType": "Number",
+          "unit": "°C",
+          "range": {
+            "min": -40,
+            "max": 80
+          }
+        },
+        "purpose": "Returns the latest temperature reading in degrees Celsius"
+      },
+      "humidity": {
+        "type": "read",
+        "label": "Read Humidity",
+        "returns": {
+          "dataType": "Number",
+          "unit": "%",
+          "range": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        "purpose": "Returns the latest relative-humidity reading as a percentage"
+      }
+    },
+    "constructor": {
+      "purpose": "Creates a DHTSensor instance bound to the specified GPIO pin",
+      "parameters": [
+        {
+          "name": "pin",
+          "dataType": "Number",
+          "purpose": "GPIO pin number (or Pin object) where the sensor’s data line is connected"
+        }
+      ],
+      "returns": {
+        "dataType": "Object",
+        "class": "DHTSensor",
+        "purpose": "A ready-to-use DHTSensor object capable of measuring temperature and humidity"
+      }
+    },
+    "pin_properties": {
+      "pin": {
+        "purpose": "GPIO pin connected to the sensor data line",
+        "required": true
+      },
+      "vcc": {
+        "purpose": "3.3 V or 5 V supply for the sensor",
+        "required": true
+      },
+      "gnd": {
+        "purpose": "Ground connection for the sensor",
+        "required": true
+      }
+    }
+  },
+
   {
     "name": "encoder",
     "title": "Encoder",

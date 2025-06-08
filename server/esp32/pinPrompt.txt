@@ -1,132 +1,19 @@
-You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"internal_led"**
+You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"dht"**
 
 Partial pin connections for the device:
 ```json
 {
-  "internal_led": {}
+  "dht": {}
 }
 ```
 
 All known pin properties of the device:
 ```json
-{
-  "name": "internal_led",
-  "title": "Internal Led",
-  "library_name": "led",
-  "class_name": "InternalLED",
-  "inherited_from": "LED",
-  "attributes": {
-    "simulate": {
-      "dataType": "Boolean",
-      "default": false,
-      "values_meaning": {
-        "true": "Simulation mode enabled (LED behavior simulated)",
-        "false": "Controls an actual internal LED on GPIO2"
-      },
-      "purpose": "Controls whether the internal LED operates in simulation or real mode"
-    }
-  },
-  "methods": {
-    "on": {
-      "type": "write",
-      "label": "Turn ON",
-      "returns": {
-        "dataType": "void"
-      },
-      "purpose": "Turns the LED ON (sets the state to ON)"
-    },
-    "switch": {
-      "type": "write",
-      "label": "Switch",
-      "returns": {
-        "dataType": "void"
-      },
-      "purpose": "Switch the led ON or OFF, according to parameter value",
-      "parameters": [
-        {
-          "name": "status",
-          "dataType": "Boolean",
-          "default": false,
-          "purpose": "the status boolean value, true : led on, false : led off"
-        }
-      ]
-    },
-    "off": {
-      "type": "write",
-      "label": "Turn OFF",
-      "returns": {
-        "dataType": "void"
-      },
-      "purpose": "Turns the LED OFF (sets the state to OFF)"
-    },
-    "toggle": {
-      "type": "write",
-      "label": "Toggle",
-      "returns": {
-        "dataType": "void"
-      },
-      "purpose": "Toggles the state of the LED (ON if OFF, OFF if ON)"
-    },
-    "is_on": {
-      "type": "read",
-      "label": "Check if ON",
-      "returns": {
-        "dataType": "Boolean",
-        "values_meaning": {
-          "true": "LED On",
-          "false": "LED Off"
-        }
-      },
-      "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
-    }
-  },
-  "constructor": {
-    "purpose": "Initializes the internal LED, typically connected to GPIO2 on ESP32 boards. Inherits behavior from the LED base class.",
-    "parameters": [
-      {
-        "name": "simulate",
-        "dataType": "Boolean",
-        "default": false,
-        "values_meaning": {
-          "true": "LED behavior will be simulated with print statements instead of real hardware interaction",
-          "false": "Controls the actual onboard LED"
-        },
-        "purpose": "Determines whether the internal LED runs in simulation mode or hardware mode"
-      }
-    ],
-    "inherits_from": "LED",
-    "inherited_parameters": [
-      {
-        "name": "pin",
-        "dataType": "Number",
-        "default": 2,
-        "purpose": "GPIO pin number for the internal LED (fixed to 2 for ESP32)"
-      },
-      {
-        "name": "active_high",
-        "dataType": "Boolean",
-        "default": true,
-        "purpose": "Indicates if the LED turns on with a HIGH signal"
-      }
-    ],
-    "returns": {
-      "dataType": "Object",
-      "class": "InternalLED",
-      "purpose": "An instance of InternalLED, ready to be turned on or off"
-    }
-  },
-  "pin_properties": {
-    "internal": {
-      "purpose": "Uses the onboard LED (typically GPIO2) already wired inside the ESP32 board",
-      "note": "No physical wiring required; LED is connected internally",
-      "required": false
-    }
-  }
-}
+undefined
 ```
 
 🔧 Your task:
-Generate a complete list of step-by-step instructions for wiring the **"internal_led"** to an ESP32-WROOM-32 board.
+Generate a complete list of step-by-step instructions for wiring the **"dht"** to an ESP32-WROOM-32 board.
 
 📌 Rules & Tips:
 - **Preserve** all existing connections.

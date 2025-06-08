@@ -88,10 +88,8 @@ module.exports = async (socket) => {
       const user = await User.findOne({ email: userEmail });
       if (!user) throw new Error("User not found");
 
-      const peripherals = {};
-      data.peripherals.forEach((p) => {
-        peripherals[p] = `value of ${p}`;
-      });
+      const peripherals = { ...data.peripherals };
+      console.log(peripherals);
 
       const doc = new Device({
         name: data.name,
@@ -122,7 +120,7 @@ module.exports = async (socket) => {
     const device = await checkDeviceOwnership(socket, deviceId);
     socket.emit("deviceIndex", device.id);
     try {
-      const pList = Array.from(device.dictVariables.keys());
+      const pList = device.dictVariables;
       console.log("this is pList : ", pList);
       await espSetup(device.id, pList, socket, network_config);
     } catch (err) {
@@ -145,7 +143,7 @@ module.exports = async (socket) => {
       throw new Error("User not authenticated");
     }
 
-    const device = await Device.findById(deviceId);
+    const device = await Device.findById(deviceId).lean();
     if (!device) {
       throw new Error("Device not found");
     }
