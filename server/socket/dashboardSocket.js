@@ -80,6 +80,7 @@ dashboardSocket = async (socket) => {
   });
 
   socket.on("immediateCommand", (data, ackCallBack) => {
+    console.log(data);
     sendObject = {};
     const deviceId = devices.find((dev) => dev.name === data.device).id;
     const sourceArr = data.source.split(",");
@@ -89,17 +90,25 @@ dashboardSocket = async (socket) => {
     sendObject.device = data.device;
     sendObject.peripheral = source;
     sendObject.method = data.method;
+
     const params =
       peripherals_interface_info[sourceType].methods[data.method].parameters;
 
-    console.log(params);
+    if (params) console.log("this is params 0: ", params[0]);
+    console.log("this is send object param 1: ", sendObject.param);
     if (!params || !data.parameterLength) sendObject.param = [];
     else if (
-      typeof params[0].default !== "undefined" ||
-      params[0].default !== null
+      typeof params[0].default === "undefined" ||
+      params[0].default === null
     ) {
+      console.log(typeof params[0].default);
+      console.log("this is send object param 2: ", sendObject.param);
+      console.log(sendObject.param);
       sendObject.param = [];
-    } else sendObject.param = autoParse(data.returnValue);
+      console.log("this is send object param 3: ", sendObject.param);
+    } else sendObject.param = [autoParse(data.returnValue)];
+
+    console.log("this is send object : ", sendObject);
     sendObject.commandId = generateCommandId();
 
     const topic = `esp32/${deviceId}/sender`;
@@ -121,6 +130,7 @@ dashboardSocket = async (socket) => {
     data.automation = 1;
 
     data.source = data.source.split(",")[0];
+    data["source-output"] = data["source-output"].split(",")[0];
 
     const inputDevice = devices.find((dev) => dev.name === data.device);
     const outputDevice = devices.find(

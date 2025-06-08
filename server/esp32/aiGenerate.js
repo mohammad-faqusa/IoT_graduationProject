@@ -163,7 +163,10 @@ async def automation_loop():
                 print("Automation error:", e)
                 
 
-async def runAutomation(automation):
+async def publishMqtt(outputDeviceId,outputMsg):
+    await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+
+async def runInternalAutomation(automation):
     outputMsg = {}
     outputMsg['peripheral'] = automation['source-output']
     outputMsg['method'] = automation['method-output']
@@ -179,13 +182,13 @@ async def runAutomation(automation):
         threshold = automation['threshold'] 
         if(automation['condition'] == 'gt'):
             if(peripherals[selectedPeripheral][selectedMethod][inputParams] > threshold):
-                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+                await publishMqtt(outputDeviceId,outputMsg)
         if(automation['condition'] == 'lt'):
             if(peripherals[selectedPeripheral][selectedMethod][inputParams] < threshold):
-                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+                await publishMqtt(outputDeviceId,outputMsg)
         if(automation['condition'] == 'eq'):
             if(peripherals[selectedPeripheral][selectedMethod][inputParams] == threshold):
-                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+                await publishMqtt(outputDeviceId,outputMsg)
     print(outputMsg)
 
 config['subs_cb'] = callback

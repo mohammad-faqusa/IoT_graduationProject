@@ -1,9 +1,9 @@
-You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"dht"**
+You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"internal"**
 
 Partial pin connections for the device:
 ```json
 {
-  "dht": {}
+  "internal": {}
 }
 ```
 
@@ -13,7 +13,7 @@ undefined
 ```
 
 🔧 Your task:
-Generate a complete list of step-by-step instructions for wiring the **"dht"** to an ESP32-WROOM-32 board.
+Generate a complete list of step-by-step instructions for wiring the **"internal"** to an ESP32-WROOM-32 board.
 
 📌 Rules & Tips:
 - **Preserve** all existing connections.
