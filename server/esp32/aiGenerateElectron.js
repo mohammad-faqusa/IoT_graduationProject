@@ -34,7 +34,9 @@ function mqtt_part2(
 ) {
   return `from mqtt_as import MQTTClient, config
 import asyncio
+from comparator import Comparator
 
+cmp = Comparator()
 automations = []
 
 # Local configuration
@@ -111,6 +113,8 @@ async def automation_loop():
                 print("Automation error:", e)
                 
 
+async def publishMqttAutomation(outputDeviceId, outputMsg):
+    await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
 async def runAutomation(automation):
     outputMsg = {}
     outputMsg['peripheral'] = automation['source-output']
@@ -119,21 +123,22 @@ async def runAutomation(automation):
     outputMsg['commandId'] = 1
     
     outputDeviceId = automation['outputDeviceId']
+    
+    selectedPeripheral = automation['source']
+    selectedMethod = automation['method']
+    inputParams = automation['inputParams']
 
-    if(automation['threshold']):
-        selectedPeripheral = automation['source']
-        selectedMethod = automation['method']
-        inputParams = automation['inputParams']
+    if(automation['returnType'] == 'Number'):
+        
         threshold = automation['threshold'] 
-        if(automation['condition'] == 'gt'):
-            if(peripherals[selectedPeripheral][selectedMethod][inputParams] > threshold):
-                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
-        if(automation['condition'] == 'lt'):
-            if(peripherals[selectedPeripheral][selectedMethod][inputParams] < threshold):
-                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
-        if(automation['condition'] == 'eq'):
-            if(peripherals[selectedPeripheral][selectedMethod][inputParams] == threshold):
-                await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
+        if(cmp[automation['condition']][peripherals[selectedPeripheral][selectedMethod][inputParams], threshold]):
+            await publishMqttAutomation(outputDeviceId, outputMsg)
+    elif (automation['returnType'] == 'Boolean'):
+        print('published message to device 1')
+        if(cmp['eq'][peripherals[selectedPeripheral][selectedMethod][inputParams], automation['condition']]):
+            print('published message to device 1')
+            await publishMqttAutomation(outputDeviceId, outputMsg)
+        
     print(outputMsg)
 
 config['subs_cb'] = callback

@@ -86,6 +86,7 @@ dashboardSocket = async (socket) => {
     const sourceArr = data.source.split(",");
     const source = sourceArr[0];
     const sourceType = sourceArr[1];
+
     console.log(data);
     sendObject.device = data.device;
     sendObject.peripheral = source;
@@ -102,10 +103,8 @@ dashboardSocket = async (socket) => {
       params[0].default === null
     ) {
       console.log(typeof params[0].default);
-      console.log("this is send object param 2: ", sendObject.param);
       console.log(sendObject.param);
       sendObject.param = [];
-      console.log("this is send object param 3: ", sendObject.param);
     } else sendObject.param = [autoParse(data.returnValue)];
 
     console.log("this is send object : ", sendObject);
@@ -124,15 +123,23 @@ dashboardSocket = async (socket) => {
   });
 
   socket.on("addAutomationRule", (data) => {
-    // get dev1 id
-    // send the formdata to dev1
-    console.log(data);
     data.automation = 1;
+    const sourceType = data.source.split(",")[1];
+    const returnType =
+      peripherals_interface_info[sourceType].methods[data.method].returns
+        ?.dataType;
+
+    if (returnType) data.returnType = returnType;
+
+    console.log("this is return type : ", returnType);
 
     data.source = data.source.split(",")[0];
+    data.condition = autoParse(data.condition);
+
     data["source-output"] = data["source-output"].split(",")[0];
 
     const inputDevice = devices.find((dev) => dev.name === data.device);
+
     const outputDevice = devices.find(
       (dev) => dev.name === data["device-output"]
     );
