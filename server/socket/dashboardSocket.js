@@ -120,6 +120,8 @@ dashboardSocket = async (socket) => {
     console.log(data);
     data.automation = 1;
 
+    data.source = data.source.split(",")[0];
+
     const inputDevice = devices.find((dev) => dev.name === data.device);
     const outputDevice = devices.find(
       (dev) => dev.name === data["device-output"]

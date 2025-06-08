@@ -674,7 +674,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const outputPeripheralField = createFieldSelect(
       "Source Output",
       "source-output",
-      Object.keys(devices[0].dictVariables).map((d) => [
+      Object.values(devices[0].dictVariables).map((d) => [
         peripherals_interface_info[d].title,
         d,
       ])
@@ -684,7 +684,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     console.log(
       "this is first method of first device : ",
       Object.keys(
-        peripherals_interface_info[Object.keys(devices[0].dictVariables)[0]]
+        peripherals_interface_info[Object.values(devices[0].dictVariables)[0]]
           .methods
       )
     );
@@ -692,7 +692,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       "Method Output",
       "method-output",
       Object.entries(
-        peripherals_interface_info[Object.keys(devices[0].dictVariables)[0]]
+        peripherals_interface_info[Object.values(devices[0].dictVariables)[0]]
           .methods
       ).map(([key, body]) => [body.label, key])
     );
@@ -704,22 +704,27 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     deviceSelect.addEventListener("change", () => {
       removeOptions(pSelect);
-      addOptions(
-        pSelect,
-        Object.keys(
-          devices.find((d) => d.name === deviceSelect.value).dictVariables
-        ).map((p) => [peripherals_interface_info[p].title, p])
-      );
+
+      devices
+        .find((d) => d.name === deviceSelect.value)
+        .pList.forEach((p) => {
+          const option = document.createElement("option");
+          option.text = p[0];
+          option.value = p;
+          pSelect.add(option);
+        });
+
       console.log("here is the method select options ", methodSelect.options);
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
-      addOptions(methodSelect, filterOutputMethod(pSelect.value[1]));
+      addOptions(methodSelect, filterOutputMethod(pSelect.value.split(",")[1]));
     });
+
     pSelect.addEventListener("change", () => {
       console.log("here is the method select options ", methodSelect.options);
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
-      addOptions(methodSelect, filterOutputMethod(pSelect.value[1]));
+      addOptions(methodSelect, filterOutputMethod(pSelect.value.split(",")[1]));
     });
 
     configForm.appendChild(outputLine);
@@ -978,6 +983,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function filterOutputMethod(pName) {
+    console.log(pName);
     const methodsDict = peripherals_interface_info[pName].methods;
     const outputMethods = Object.keys(methodsDict).filter(
       (method) => methodsDict[method].type === "write"
