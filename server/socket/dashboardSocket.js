@@ -82,12 +82,15 @@ dashboardSocket = async (socket) => {
   socket.on("immediateCommand", (data, ackCallBack) => {
     sendObject = {};
     const deviceId = devices.find((dev) => dev.name === data.device).id;
+    const sourceArr = data.source.split(",");
+    const source = sourceArr[0];
+    const sourceType = sourceArr[1];
     console.log(data);
     sendObject.device = data.device;
-    sendObject.peripheral = data.source;
+    sendObject.peripheral = source;
     sendObject.method = data.method;
     const params =
-      peripherals_interface_info[data.source].methods[data.method].parameters;
+      peripherals_interface_info[sourceType].methods[data.method].parameters;
 
     console.log(params);
     if (!params || !data.parameterLength) sendObject.param = [];

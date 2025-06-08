@@ -436,15 +436,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         field.default = devices[0];
       }
       if (field.dynamic && field.name === "source") {
-        field.options = devices[0].pList.map((p) => ({
-          value: p,
-          label: p,
+        field.options = devices[0].pList.map(([key, value]) => ({
+          value: [key, value],
+          label: key,
         }));
       }
       if (field.dynamic && field.name === "method") {
-        field.options = devices[0].pList.map((p) => ({
-          value: p,
-          label: p,
+        field.options = devices[0].pList.map(([key, value]) => ({
+          value: [key, value],
+          label: key,
         }));
       }
 
@@ -578,10 +578,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     configP.addEventListener("change", () => {
       removeOptions(configMethods);
 
-      currentP = configP.value;
-      Object.entries(peripherals_interface_info[currentP].methods).forEach(
+      currentP = configP.value.split(",");
+
+      console.log(currentP[1]);
+      console.log(peripherals_interface_info[currentP[1]]);
+      Object.entries(peripherals_interface_info[currentP[1]].methods).forEach(
         ([name, body]) => {
-          if (isAppropriateMethod(currentP, name, componentType)) {
+          if (isAppropriateMethod(currentP[1], name, componentType)) {
             const option = document.createElement("option");
             option.text = body.label;
             option.value = name;
@@ -591,11 +594,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       );
 
       if (configMethods.value)
-        methodAutoFill(currentP, configMethods.value, componentType);
+        methodAutoFill(currentP[1], configMethods.value, componentType);
     });
 
     configMethods.addEventListener("change", () => {
-      methodAutoFill(currentP, configMethods.value, componentType);
+      methodAutoFill(currentP[1], configMethods.value, componentType);
     });
 
     // Show modal
@@ -710,20 +713,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.log("here is the method select options ", methodSelect.options);
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
-      addOptions(methodSelect, filterOutputMethod(pSelect.value));
+      addOptions(methodSelect, filterOutputMethod(pSelect.value[1]));
     });
     pSelect.addEventListener("change", () => {
       console.log("here is the method select options ", methodSelect.options);
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
-      addOptions(methodSelect, filterOutputMethod(pSelect.value));
+      addOptions(methodSelect, filterOutputMethod(pSelect.value[1]));
     });
 
     configForm.appendChild(outputLine);
 
     methodSelect.addEventListener("change", () => {
       console.log(methodSelect.value);
-      createAutomationResultLine(pSelect.value, methodSelect.value);
+      createAutomationResultLine(pSelect.value[1], methodSelect.value);
     });
   }
 
@@ -894,16 +897,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     currentDevice.pList.forEach((p) => {
       const option = document.createElement("option");
-      option.text = peripherals_interface_info[p].title;
+      option.text = p[0];
       option.value = p;
       selectElements.configP.add(option);
     });
 
-    selectElements.configP.value = currentP;
+    selectElements.configP.value = currentP[0];
 
-    Object.entries(peripherals_interface_info[currentP].methods).forEach(
+    Object.entries(peripherals_interface_info[currentP[1]].methods).forEach(
       ([name, body]) => {
-        if (isAppropriateMethod(currentP, name, componentType)) {
+        if (isAppropriateMethod(currentP[1], name, componentType)) {
           const option = document.createElement("option");
           option.text = body.label;
           option.value = name;
@@ -912,11 +915,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     );
     selectElements.configMethods.value = Object.keys(
-      peripherals_interface_info[currentP].methods
+      peripherals_interface_info[currentP[1]].methods
     );
     if (selectElements.configMethods.value)
       methodAutoFill(
-        currentP,
+        currentP[1],
         selectElements.configMethods.value,
         componentType
       );
@@ -1048,6 +1051,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       ];
       fieldsNames.forEach((fieldName) => {
         const input = document.getElementById(`config-${fieldName}`);
+
         console.log(input);
         if (input) {
           formData[fieldName] = input.value;
@@ -1067,9 +1071,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         component.setAttribute(field.name, input.value);
       });
 
+      console.log(formData.source);
+      formData.sourceArr = formData.source.split(",");
+      console.log(formData.sourceArr);
+      formData.source = formData.sourceArr[1];
+
       const parameters =
-        peripherals_interface_info[formData.source].methods[formData.method]
-          .parameters;
+        peripherals_interface_info[formData.sourceArr[1]].methods[
+          formData.method
+        ].parameters;
 
       component.setAttribute(
         "parameter-length",

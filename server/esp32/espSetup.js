@@ -33,7 +33,6 @@ async function prepareESP32(socket) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (error) {
     console.log(`❌ Reset failed:", ${error.stderr || error.message}`);
-
     throw error;
   }
 }
