@@ -1,0 +1,19 @@
+{
+  
+  "source": "push button",
+  "method": "set_callback",
+  "condition": true,
+  "device-output": "output led device",
+}
+
+{
+  "source-output": "led",
+  "method-output": "on",
+  "outputParams": [],
+  "outputDeviceId": 2,
+  "automation": 1,
+  "interrupt": true,
+  "returnType": "Void",
+}
+
+"device": "motion",

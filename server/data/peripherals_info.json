@@ -1175,6 +1175,7 @@
     },
     "methods": {
       "set_callback": {
+        "interrupt": true,
         "type": "read",
         "label": "Register Button Callback",
         "parameters": [

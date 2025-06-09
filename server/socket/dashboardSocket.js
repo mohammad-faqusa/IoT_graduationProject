@@ -94,7 +94,7 @@ dashboardSocket = async (socket) => {
       peripherals_interface_info[sourceType].methods[data.method];
     const params = methodInfo.parameters;
 
-    if (methodInfo.type === "write")
+    if (methodInfo.type === "write" && methodInfo.parameters)
       sendObject.param = [autoParse(data.returnValue)];
     else {
       if (!params || !data.parameterLength) sendObject.param = [];
@@ -125,16 +125,18 @@ dashboardSocket = async (socket) => {
     try {
       data.automation = 1;
       const sourceType = data.source.split(",")[1];
-      const returnType =
-        peripherals_interface_info[sourceType].methods[data.method].returns
-          ?.dataType;
+      const methodInfo =
+        peripherals_interface_info[sourceType].methods[data.method];
+      const returnType = methodInfo.returns?.dataType;
 
+      if (methodInfo.interrupt) data.interrupt = true;
       if (returnType) data.returnType = returnType;
 
       console.log(data);
 
       data.source = data.source.split(",")[0];
-      data.condition = autoParse(data.condition);
+      data["method-output"] = data["method-output"].split(",")[1];
+      if (data.condition) data.condition = autoParse(data.condition);
 
       data["source-output"] = data["source-output"].split(",")[0];
 

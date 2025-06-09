@@ -644,23 +644,23 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Add the additional line to the form
       const configForm = configModal.querySelector("#configForm");
       const initialGroup = configModal.querySelector(".full-line");
-      if (
-        componentType === "automation-rule" &&
-        methodObject.returns.dataType === "Void"
-      ) {
-        const existingAdditionalLine = document.getElementById(
-          "automation-output-line"
-        );
-        console.log(
-          "this is old automation output line : ",
-          existingAdditionalLine
-        );
-        if (existingAdditionalLine) {
-          existingAdditionalLine.remove();
-        }
-        createAutomationOutputLine(configForm);
-        return;
-      }
+      // if (
+      //   componentType === "automation-rule" &&
+      //   methodObject.returns.dataType === "Void"
+      // ) {
+      //   const existingAdditionalLine = document.getElementById(
+      //     "automation-output-line"
+      //   );
+      //   console.log(
+      //     "this is old automation output line : ",
+      //     existingAdditionalLine
+      //   );
+      //   if (existingAdditionalLine) {
+      //     existingAdditionalLine.remove();
+      //   }
+      //   createAutomationOutputLine(configForm);
+      //   return;
+      // }
       const considtionSelect = createConditionLine(
         configForm,
         initialGroup,
@@ -847,74 +847,91 @@ document.addEventListener("DOMContentLoaded", async function () {
     conditionSelect.className = "condition";
 
     let options = [];
-    switch (methodObject.returns.dataType) {
-      case "Boolean":
-        options = [
-          { value: true, label: methodObject.returns.values_meaning[true] },
-          { value: false, label: methodObject.returns.values_meaning[false] },
-        ];
+    if (methodObject.interrupt) {
+      options = [
+        { value: true, label: "Rasing" },
+        { value: false, label: "Failing" },
+      ];
 
-        options.forEach((option) => {
-          const optionEl = document.createElement("option");
-          optionEl.value = option.value;
-          optionEl.textContent = option.label;
-          conditionSelect.appendChild(optionEl);
-        });
+      options.forEach((option) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = option.value;
+        optionEl.textContent = option.label;
+        conditionSelect.appendChild(optionEl);
+      });
 
-        conditionGroup.appendChild(conditionLabel);
-        conditionGroup.appendChild(conditionSelect);
-        conditionLine.appendChild(conditionGroup);
-        break;
-      case "Number":
-        options = [
-          { value: "gt", label: "Greater Than" },
-          { value: "lt", label: "Less Than" },
-          { value: "eq", label: "Equal To" },
-        ];
+      conditionGroup.appendChild(conditionLabel);
+      conditionGroup.appendChild(conditionSelect);
+      conditionLine.appendChild(conditionGroup);
+    } else
+      switch (methodObject.returns.dataType) {
+        case "Boolean":
+          options = [
+            { value: true, label: methodObject.returns.values_meaning[true] },
+            { value: false, label: methodObject.returns.values_meaning[false] },
+          ];
 
-        // Add condition options
+          options.forEach((option) => {
+            const optionEl = document.createElement("option");
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            conditionSelect.appendChild(optionEl);
+          });
 
-        options.forEach((option) => {
-          const optionEl = document.createElement("option");
-          optionEl.value = option.value;
-          optionEl.textContent = option.label;
-          conditionSelect.appendChild(optionEl);
-        });
+          conditionGroup.appendChild(conditionLabel);
+          conditionGroup.appendChild(conditionSelect);
+          conditionLine.appendChild(conditionGroup);
+          break;
+        case "Number":
+          options = [
+            { value: "gt", label: "Greater Than" },
+            { value: "lt", label: "Less Than" },
+            { value: "eq", label: "Equal To" },
+          ];
 
-        conditionGroup.appendChild(conditionLabel);
-        conditionGroup.appendChild(conditionSelect);
-        conditionLine.appendChild(conditionGroup);
+          // Add condition options
 
-        // Create threshold input field instead of action selector
-        const thresholdGroup = document.createElement("div");
-        thresholdGroup.style.marginBottom = "15px";
+          options.forEach((option) => {
+            const optionEl = document.createElement("option");
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            conditionSelect.appendChild(optionEl);
+          });
 
-        const thresholdLabel = document.createElement("label");
-        thresholdLabel.textContent = "Threshold";
-        thresholdLabel.setAttribute("for", "config-threshold");
+          conditionGroup.appendChild(conditionLabel);
+          conditionGroup.appendChild(conditionSelect);
+          conditionLine.appendChild(conditionGroup);
 
-        const thresholdInput = document.createElement("input");
-        thresholdInput.type = "number";
-        thresholdInput.id = "config-threshold";
-        thresholdInput.name = "threshold";
-        thresholdInput.className = "threshold";
-        thresholdInput.value = "80";
+          // Create threshold input field instead of action selector
+          const thresholdGroup = document.createElement("div");
+          thresholdGroup.style.marginBottom = "15px";
 
-        // If the method has a range, set min/max attributes
-        if (
-          methodObject &&
-          methodObject.returns &&
-          methodObject.returns.range
-        ) {
-          thresholdInput.min = methodObject.returns.range.min;
-          thresholdInput.max = methodObject.returns.range.max;
-        }
+          const thresholdLabel = document.createElement("label");
+          thresholdLabel.textContent = "Threshold";
+          thresholdLabel.setAttribute("for", "config-threshold");
 
-        thresholdGroup.appendChild(thresholdLabel);
-        thresholdGroup.appendChild(thresholdInput);
-        conditionLine.appendChild(thresholdGroup);
-        break;
-    }
+          const thresholdInput = document.createElement("input");
+          thresholdInput.type = "number";
+          thresholdInput.id = "config-threshold";
+          thresholdInput.name = "threshold";
+          thresholdInput.className = "threshold";
+          thresholdInput.value = "80";
+
+          // If the method has a range, set min/max attributes
+          if (
+            methodObject &&
+            methodObject.returns &&
+            methodObject.returns.range
+          ) {
+            thresholdInput.min = methodObject.returns.range.min;
+            thresholdInput.max = methodObject.returns.range.max;
+          }
+
+          thresholdGroup.appendChild(thresholdLabel);
+          thresholdGroup.appendChild(thresholdInput);
+          conditionLine.appendChild(thresholdGroup);
+          break;
+      }
     // Add the condition line to the form
     if (initialGroup) {
       configForm.insertBefore(conditionLine, initialGroup.nextSibling);
@@ -1747,7 +1764,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           } else {
             returnValue = "soft";
           }
-          component.setAttribute("return-value", returnValue);
+          // component.setAttribute("return-value", "");
           sendImmediateCommand(component);
           //here is the function and acknowledge
         });
