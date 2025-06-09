@@ -80,14 +80,12 @@ dashboardSocket = async (socket) => {
   });
 
   socket.on("immediateCommand", (data, ackCallBack) => {
-    console.log(data);
     sendObject = {};
     const deviceId = devices.find((dev) => dev.name === data.device).id;
     const sourceArr = data.source.split(",");
     const source = sourceArr[0];
     const sourceType = sourceArr[1];
 
-    console.log(data);
     sendObject.device = data.device;
     sendObject.peripheral = source;
     sendObject.method = data.method;
@@ -95,9 +93,6 @@ dashboardSocket = async (socket) => {
     const methodInfo =
       peripherals_interface_info[sourceType].methods[data.method];
     const params = methodInfo.parameters;
-
-    if (params) console.log("this is params 0: ", params[0]);
-    console.log("this is send object param 1: ", sendObject.param);
 
     if (methodInfo.type === "write")
       sendObject.param = [autoParse(data.returnValue)];
@@ -107,8 +102,6 @@ dashboardSocket = async (socket) => {
         typeof params[0].default === "undefined" ||
         params[0].default === null
       ) {
-        console.log(typeof params[0].default);
-        console.log(sendObject.param);
         sendObject.param = [];
       } else sendObject.param = [autoParse(data.returnValue)];
     }
@@ -129,44 +122,48 @@ dashboardSocket = async (socket) => {
   });
 
   socket.on("addAutomationRule", (data) => {
-    data.automation = 1;
-    const sourceType = data.source.split(",")[1];
-    const returnType =
-      peripherals_interface_info[sourceType].methods[data.method].returns
-        ?.dataType;
+    try {
+      data.automation = 1;
+      const sourceType = data.source.split(",")[1];
+      const returnType =
+        peripherals_interface_info[sourceType].methods[data.method].returns
+          ?.dataType;
 
-    if (returnType) data.returnType = returnType;
+      if (returnType) data.returnType = returnType;
 
-    console.log("this is return type : ", returnType);
+      console.log(data);
 
-    data.source = data.source.split(",")[0];
-    data.condition = autoParse(data.condition);
+      data.source = data.source.split(",")[0];
+      data.condition = autoParse(data.condition);
 
-    data["source-output"] = data["source-output"].split(",")[0];
+      data["source-output"] = data["source-output"].split(",")[0];
 
-    const inputDevice = devices.find((dev) => dev.name === data.device);
+      const inputDevice = devices.find((dev) => dev.name === data.device);
 
-    const outputDevice = devices.find(
-      (dev) => dev.name === data["device-output"]
-    );
+      const outputDevice = devices.find(
+        (dev) => dev.name === data["device-output"]
+      );
 
-    console.log("this is output device : ", outputDevice);
+      console.log("this is output device : ", outputDevice);
 
-    data.outputDeviceId = Number(outputDevice.id);
-    data.outputParams = [];
-    data.inputParams = [];
+      data.outputDeviceId = Number(outputDevice.id);
+      data.outputParams = [];
+      data.inputParams = [];
 
-    if (data["automation-result-value"]) {
-      data.outputParams.push(autoParse(data["automation-result-value"]));
+      if (data["automation-result-value"]) {
+        data.outputParams.push(autoParse(data["automation-result-value"]));
+      }
+      if (data.threshold) {
+        data.threshold = autoParse(data.threshold);
+      }
+
+      console.log("send data to esp32 : ");
+      console.log(data);
+
+      client.publish(`esp32/${inputDevice.id}/receiver`, JSON.stringify(data));
+    } catch (err) {
+      console.log(err);
     }
-    if (data.threshold) {
-      data.threshold = autoParse(data.threshold);
-    }
-
-    console.log("send data to esp32 : ");
-    console.log(data);
-
-    client.publish(`esp32/${inputDevice.id}/receiver`, JSON.stringify(data));
   });
 };
 

@@ -689,6 +689,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     outputLine.appendChild(outputDeviceField);
 
     const deviceSelect = outputDeviceField.querySelector("select");
+    console.log("this is device select : ");
 
     const outputPeripheralField = createFieldSelect(
       "Source Output",
@@ -736,7 +737,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.log("here is the method select options ", methodSelect.options);
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
-      addOptions(methodSelect, filterOutputMethod(pSelect.value.split(",")[1]));
+      addOptionsMethods(
+        methodSelect,
+        filterOutputMethod(pSelect.value.split(",")[1])
+      );
     });
 
     pSelect.addEventListener("change", () => {
@@ -744,7 +748,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
       console.log("this is p select value : ", pSelect.value);
-      addOptions(methodSelect, filterOutputMethod(pSelect.value.split(",")[1]));
+      addOptionsMethods(
+        methodSelect,
+        filterOutputMethod(pSelect.value.split(",")[1])
+      );
     });
 
     configForm.appendChild(outputLine);
@@ -984,11 +991,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     return thresholdGroup;
   }
 
-  function addOptions(selectElement, listData) {
+  function addOptionsMethods(selectElement, listData) {
     listData.forEach((p) => {
       const option = document.createElement("option");
       option.text = p[0];
       option.value = p;
+      selectElement.add(option);
+    });
+  }
+
+  function addOptions(selectElement, listData) {
+    listData.forEach((p) => {
+      const option = document.createElement("option");
+      option.text = p[0];
+      option.value = p[1];
       selectElement.add(option);
     });
   }
@@ -1099,7 +1115,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         component.setAttribute(field.name, input.value);
       });
 
-      console.log(formData.source);
+      console.log("this is form data : ");
+      console.log(formData);
       formData.sourceArr = formData.source.split(",");
       console.log(formData.sourceArr);
       formData.source = formData.sourceArr[1];
