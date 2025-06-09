@@ -783,6 +783,13 @@
         },
         "purpose": "Turns the LED ON (sets the state to ON)"
       },
+      "switch": {
+        "type": "write",
+        "label": "Switch",
+        "returns": {
+          "dataType": "void"
+        }
+      },
       "off": {
         "type": "write",
         "label": "Turn OFF",
@@ -869,6 +876,13 @@
           "dataType": "void"
         },
         "purpose": "Turns the LED ON (sets the state to ON)"
+      },
+      "switch": {
+        "type": "write",
+        "label": "Switch",
+        "returns": {
+          "dataType": "void"
+        }
       },
       "off": {
         "type": "write",

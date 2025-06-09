@@ -584,6 +584,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.log(peripherals_interface_info[currentP[1]]);
       Object.entries(peripherals_interface_info[currentP[1]].methods).forEach(
         ([name, body]) => {
+          console.log(name);
           if (isAppropriateMethod(currentP[1], name, componentType)) {
             const option = document.createElement("option");
             option.text = body.label;
