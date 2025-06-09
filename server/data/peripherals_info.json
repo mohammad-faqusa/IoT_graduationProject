@@ -890,7 +890,11 @@
         "type": "read",
         "label": "Check if ON",
         "returns": {
-          "dataType": "Boolean"
+          "dataType": "Boolean",
+          "values_meaning": {
+            "true": "LED ON",
+            "false": "LED OFF"
+          }
         },
         "purpose": "Returns the current state of the LED (True if ON, False if OFF)"
       }
@@ -953,7 +957,7 @@
     },
     "methods": {
       "set_callback": {
-        "type": "write",
+        "type": "read",
         "label": "Register Motion Callback",
         "parameters": [
           {
@@ -1015,7 +1019,7 @@
     },
     "methods": {
       "set_callback": {
-        "type": "write",
+        "type": "read",
         "label": "Register Button Callback",
         "parameters": [
           {

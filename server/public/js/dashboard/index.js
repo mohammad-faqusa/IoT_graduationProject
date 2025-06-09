@@ -593,6 +593,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       );
 
+      console.log(configMethods.value);
       if (configMethods.value)
         methodAutoFill(currentP[1], configMethods.value, componentType);
     });
@@ -611,6 +612,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     componentType,
     configModal = document.querySelector("#configModal")
   ) {
+    console.log("clicked");
     const methodObject =
       peripherals_interface_info[selectedP].methods[selectedMethod];
 
@@ -641,7 +643,23 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Add the additional line to the form
       const configForm = configModal.querySelector("#configForm");
       const initialGroup = configModal.querySelector(".full-line");
-
+      if (
+        componentType === "automation-rule" &&
+        methodObject.returns.dataType === "Void"
+      ) {
+        const existingAdditionalLine = document.getElementById(
+          "automation-output-line"
+        );
+        console.log(
+          "this is old automation output line : ",
+          existingAdditionalLine
+        );
+        if (existingAdditionalLine) {
+          existingAdditionalLine.remove();
+        }
+        createAutomationOutputLine(configForm);
+        return;
+      }
       const considtionSelect = createConditionLine(
         configForm,
         initialGroup,
@@ -724,6 +742,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.log("here is the method select options ", methodSelect.options);
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
+      console.log("this is p select value : ", pSelect.value);
       addOptions(methodSelect, filterOutputMethod(pSelect.value.split(",")[1]));
     });
 
@@ -968,7 +987,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     listData.forEach((p) => {
       const option = document.createElement("option");
       option.text = p[0];
-      option.value = p[1];
+      option.value = p;
       selectElement.add(option);
     });
   }
