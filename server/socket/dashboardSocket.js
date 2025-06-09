@@ -92,20 +92,26 @@ dashboardSocket = async (socket) => {
     sendObject.peripheral = source;
     sendObject.method = data.method;
 
-    const params =
-      peripherals_interface_info[sourceType].methods[data.method].parameters;
+    const methodInfo =
+      peripherals_interface_info[sourceType].methods[data.method];
+    const params = methodInfo.parameters;
 
     if (params) console.log("this is params 0: ", params[0]);
     console.log("this is send object param 1: ", sendObject.param);
-    if (!params || !data.parameterLength) sendObject.param = [];
-    else if (
-      typeof params[0].default === "undefined" ||
-      params[0].default === null
-    ) {
-      console.log(typeof params[0].default);
-      console.log(sendObject.param);
-      sendObject.param = [];
-    } else sendObject.param = [autoParse(data.returnValue)];
+
+    if (methodInfo.type === "write")
+      sendObject.param = [autoParse(data.returnValue)];
+    else {
+      if (!params || !data.parameterLength) sendObject.param = [];
+      else if (
+        typeof params[0].default === "undefined" ||
+        params[0].default === null
+      ) {
+        console.log(typeof params[0].default);
+        console.log(sendObject.param);
+        sendObject.param = [];
+      } else sendObject.param = [autoParse(data.returnValue)];
+    }
 
     console.log("this is send object : ", sendObject);
     sendObject.commandId = generateCommandId();

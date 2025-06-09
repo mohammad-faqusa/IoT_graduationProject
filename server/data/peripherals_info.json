@@ -786,8 +786,21 @@
       "switch": {
         "type": "write",
         "label": "Switch",
+        "parameters": [
+          {
+            "dataType": "Boolean",
+            "values_meaning": {
+              "true": "ON",
+              "false": "OFF"
+            }
+          }
+        ],
         "returns": {
-          "dataType": "void"
+          "dataType": "Boolean",
+          "values_meaning": {
+            "true": "ON",
+            "false": "OFF"
+          }
         }
       },
       "off": {
@@ -880,8 +893,21 @@
       "switch": {
         "type": "write",
         "label": "Switch",
+        "parameters": [
+          {
+            "dataType": "Boolean",
+            "values_meaning": {
+              "true": "ON",
+              "false": "OFF"
+            }
+          }
+        ],
         "returns": {
-          "dataType": "void"
+          "dataType": "Boolean",
+          "values_meaning": {
+            "true": "ON",
+            "false": "OFF"
+          }
         }
       },
       "off": {

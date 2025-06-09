@@ -1016,6 +1016,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function isAppropriateMethod(pName, methodName, componentType) {
+    console.log(methodName);
     if (
       componentTemplates[componentType].allowed_method_types.includes(
         peripherals_interface_info[pName].methods[methodName].type
@@ -1035,6 +1036,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (
         peripherals_interface_info[pName].methods[methodName].type == "write"
       ) {
+        console.log("this is write method ", methodName);
         if (!peripherals_interface_info[pName].methods[methodName].parameters) {
           if (componentType === "push-button") return true;
           return false;
