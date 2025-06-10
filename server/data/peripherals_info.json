@@ -1380,7 +1380,7 @@
     "attributes": {
       "pin": {
         "dataType": "Number",
-        "purpose": "GPIO pin number connected to the Servo motor"
+        "purpose": "GPIO pin number connected to the servo signal wire"
       },
       "freq": {
         "dataType": "Number",
@@ -1390,43 +1390,31 @@
       },
       "min_us": {
         "dataType": "Number",
-        "default": 544,
+        "default": 500,
         "unit": "μs",
-        "purpose": "Minimum pulse width in microseconds (corresponds to min_deg)"
+        "purpose": "Minimum pulse width in microseconds"
       },
       "max_us": {
         "dataType": "Number",
-        "default": 2400,
+        "default": 2500,
         "unit": "μs",
-        "purpose": "Maximum pulse width in microseconds (corresponds to max_deg)"
+        "purpose": "Maximum pulse width in microseconds"
       },
-      "min_deg": {
-        "dataType": "Number",
-        "default": 0,
-        "unit": "°",
-        "purpose": "Minimum angle in degrees"
-      },
-      "max_deg": {
+      "angle_range": {
         "dataType": "Number",
         "default": 180,
         "unit": "°",
-        "purpose": "Maximum angle in degrees"
+        "purpose": "Total mechanical travel range of the servo horn"
       },
-      "_angle": {
+      "_current_deg": {
         "dataType": "Number",
         "unit": "°",
         "access": "read-only",
-        "purpose": "Current angle of the servo motor (in degrees)"
-      },
-      "_pulse_us": {
-        "dataType": "Number",
-        "unit": "μs",
-        "access": "read-only",
-        "purpose": "Current pulse width in microseconds"
+        "purpose": "Last commanded angle of the servo (in degrees)"
       }
     },
     "methods": {
-      "write": {
+      "angle": {
         "type": "write",
         "label": "Write Angle (Degrees)",
         "parameters": [
@@ -1444,47 +1432,7 @@
         "returns": {
           "dataType": "void"
         },
-        "purpose": "Sets the servo motor to the given angle in degrees"
-      },
-      "write_rad": {
-        "type": "write",
-        "label": "Write Angle (Radians)",
-        "parameters": [
-          {
-            "name": "rad",
-            "dataType": "Number",
-            "unit": "rad",
-            "purpose": "Angle in radians to move the servo to"
-          }
-        ],
-        "returns": {
-          "dataType": "void"
-        },
-        "purpose": "Sets the servo angle using radians"
-      },
-      "read": {
-        "type": "read",
-        "label": "Read Angle (Degrees)",
-        "returns": {
-          "dataType": "Number",
-          "unit": "°",
-          "range": {
-            "min": 0,
-            "max": 180
-          },
-          "purpose": "Returns the current angle of the servo"
-        },
-        "purpose": "Returns the current servo angle in degrees"
-      },
-      "read_rad": {
-        "type": "read",
-        "label": "Read Angle (Radians)",
-        "returns": {
-          "dataType": "Number",
-          "unit": "rad",
-          "purpose": "Returns the current servo angle in radians"
-        },
-        "purpose": "Returns the current servo angle in radians"
+        "purpose": "Moves the servo to the specified angle in degrees"
       },
       "write_us": {
         "type": "write",
@@ -1495,8 +1443,8 @@
             "dataType": "Number",
             "unit": "μs",
             "range": {
-              "min": 544,
-              "max": 2400
+              "min": 500,
+              "max": 2500
             },
             "purpose": "Directly sets the pulse width in microseconds"
           }
@@ -1506,31 +1454,31 @@
         },
         "purpose": "Sets the pulse width directly for advanced control"
       },
-      "read_us": {
+      "get_angle": {
         "type": "read",
-        "label": "Read Pulse Width",
+        "label": "Read Angle (Degrees)",
         "returns": {
           "dataType": "Number",
-          "unit": "μs",
+          "unit": "°",
           "range": {
-            "min": 544,
-            "max": 2400
+            "min": 0,
+            "max": 180
           },
-          "purpose": "Returns the current pulse width in microseconds"
+          "purpose": "Returns the last commanded angle of the servo"
         },
-        "purpose": "Returns the pulse width currently sent to the servo"
+        "purpose": "Returns the current servo angle in degrees"
       },
-      "off": {
+      "deinit": {
         "type": "write",
-        "label": "Turn Off",
+        "label": "Deinitialize",
         "returns": {
           "dataType": "void"
         },
-        "purpose": "Turns off the PWM signal to the servo"
+        "purpose": "Stops PWM and releases the hardware resources"
       }
     },
     "constructor": {
-      "purpose": "Initializes a Servo motor using PWM on a specified pin and angle-to-pulse mapping.",
+      "purpose": "Initializes a Servo motor using PWM on a specified pin with optional pulse and angle configuration.",
       "parameters": [
         {
           "name": "pin_id",
@@ -1538,39 +1486,32 @@
           "purpose": "GPIO pin number connected to the servo signal wire"
         },
         {
-          "name": "min_us",
-          "dataType": "Number",
-          "default": 544,
-          "unit": "μs",
-          "purpose": "Minimum pulse width in microseconds for min_deg"
-        },
-        {
-          "name": "max_us",
-          "dataType": "Number",
-          "default": 2400,
-          "unit": "μs",
-          "purpose": "Maximum pulse width in microseconds for max_deg"
-        },
-        {
-          "name": "min_deg",
-          "dataType": "Number",
-          "default": 0,
-          "unit": "°",
-          "purpose": "Minimum angle in degrees (default 0°)"
-        },
-        {
-          "name": "max_deg",
-          "dataType": "Number",
-          "default": 180,
-          "unit": "°",
-          "purpose": "Maximum angle in degrees (default 180°)"
-        },
-        {
           "name": "freq",
           "dataType": "Number",
           "default": 50,
           "unit": "Hz",
-          "purpose": "PWM frequency for controlling the servo (default 50Hz)"
+          "purpose": "PWM frequency for controlling the servo (default 50 Hz)"
+        },
+        {
+          "name": "min_us",
+          "dataType": "Number",
+          "default": 500,
+          "unit": "μs",
+          "purpose": "Minimum pulse width in microseconds"
+        },
+        {
+          "name": "max_us",
+          "dataType": "Number",
+          "default": 2500,
+          "unit": "μs",
+          "purpose": "Maximum pulse width in microseconds"
+        },
+        {
+          "name": "angle_range",
+          "dataType": "Number",
+          "default": 180,
+          "unit": "°",
+          "purpose": "Total mechanical travel range of the servo horn (default 180 °)"
         }
       ],
       "returns": {
@@ -1585,7 +1526,7 @@
         "required": true
       },
       "vcc": {
-        "purpose": "Voltage supply for the servo motor (typically 5V or 3.3V depending on the model)",
+        "purpose": "Voltage supply for the servo motor (typically 5 V or 3.3 V depending on the model)",
         "required": true
       },
       "signal": {
