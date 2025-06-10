@@ -724,7 +724,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     deviceSelect.addEventListener("change", () => {
       removeOptions(pSelect);
-
       devices
         .find((d) => d.name === deviceSelect.value)
         .pList.forEach((p) => {

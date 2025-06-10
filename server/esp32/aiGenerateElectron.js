@@ -155,8 +155,13 @@ def make_mqtt_cb(automation):
         outputMsg['param'] = []
     
     async def _job(level):
-        if(level == automation['condition']):
+        if(automation['source'] == 'encoder'):
+            print('message is sent with angle : ', level)
+            outputMsg['param'] = [level] 
             await publishMqttAutomation(output_device_id, outputMsg)
+        elif(level == automation['condition']):
+            await publishMqttAutomation(output_device_id, outputMsg)
+            
 
     # synchronous wrapper — **what you actually register**
     return lambda level: asyncio.create_task(_job(level))
