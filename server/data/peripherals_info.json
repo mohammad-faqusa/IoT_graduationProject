@@ -637,10 +637,19 @@
       },
 
       "set_callback": {
-        "type": "write",
-        "label": "Set Callback",
-        "returns": { "dataType": "void" },
-        "purpose": "Registers or replaces the value-change callback that runs outside the hard-IRQ context"
+        "interrupt": true,
+        "type": "read",
+        "label": "Register Encoder Callback",
+        "parameters": [
+          {
+            "name": "callback",
+            "dataType": "Function",
+            "signature": "fn(position: Integer)",
+            "purpose": "Invoked after debounce; true when pressed, false when released"
+          }
+        ],
+        "returns": { "dataType": "Void" },
+        "purpose": "Attach a user-supplied function to run on debounced state changes"
       }
     },
 
