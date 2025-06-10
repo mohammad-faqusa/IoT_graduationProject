@@ -596,128 +596,120 @@
     "title": "Encoder",
     "library_name": "encoder",
     "class_name": "Encoder",
+
     "attributes": {
       "pin_a": {
         "dataType": "Number",
-        "purpose": "GPIO pin A for encoder signal input"
+        "purpose": "GPIO pin number (or Pin object) connected to encoder channel A"
       },
       "pin_b": {
         "dataType": "Number",
-        "purpose": "GPIO pin B for encoder signal input"
+        "purpose": "GPIO pin number (or Pin object) connected to encoder channel B"
       },
-      "simulate": {
-        "dataType": "Boolean",
-        "default": true,
-        "values_meaning": {
-          "true": "Simulation mode enabled (position manually controlled via code)",
-          "false": "Reads real encoder signals from pins"
-        },
-        "purpose": "Determines whether encoder is in simulation or real hardware mode"
+      "min_pos": {
+        "dataType": "Number",
+        "default": 0,
+        "purpose": "Lower bound for the encoder’s position value"
+      },
+      "max_pos": {
+        "dataType": "Number",
+        "default": 180,
+        "purpose": "Upper bound for the encoder’s position value"
       },
       "_position": {
         "dataType": "Number",
         "access": "read-only",
-        "range": {
-          "min": null,
-          "max": null
-        },
+        "range": { "min": 0, "max": 180 },
         "default": 0,
-        "purpose": "Current position of the encoder (increments/decrements on rotation)"
+        "purpose": "Current encoder position (updated by interrupts, clamped to min_pos…max_pos)"
       }
     },
+
     "methods": {
       "get_position": {
         "type": "read",
         "label": "Get Position",
         "returns": {
           "dataType": "Number",
-          "range": {
-            "min": null,
-            "max": null
-          }
+          "range": { "min": 0, "max": 180 }
         },
-        "purpose": "Returns the current position of the encoder"
+        "purpose": "Returns the present, bounded position of the rotary encoder"
       },
-      "reset": {
+
+      "set_callback": {
         "type": "write",
-        "label": "Reset Position",
-        "returns": {
-          "dataType": "void"
-        },
-        "purpose": "Resets the encoder position back to zero"
-      },
-      "simulate_step": {
-        "type": "write",
-        "label": "Simulate Step",
-        "parameters": [
-          {
-            "name": "steps",
-            "dataType": "Number",
-            "range": {
-              "min": -1000,
-              "max": 1000
-            },
-            "purpose": "Number of steps to increment or decrement position (for simulate mode)"
-          }
-        ],
-        "returns": {
-          "dataType": "void"
-        },
-        "purpose": "Manually updates the encoder position during simulation mode",
-        "availability": "Only available when simulate=true"
+        "label": "Set Callback",
+        "returns": { "dataType": "void" },
+        "purpose": "Registers or replaces the value-change callback that runs outside the hard-IRQ context"
       }
     },
+
     "constructor": {
-      "purpose": "Initializes the rotary encoder with two pins. Supports simulation or real hardware interrupts for position tracking.",
+      "purpose": "Initialises a rotary encoder object that tracks position between fixed bounds, firing an optional callback on changes. Public methods are also available through the Method-Wrapper interface: obj[\"method_name\"](…) ",
       "parameters": [
         {
           "name": "pin_a",
-          "dataType": "Number",
-          "purpose": "GPIO pin connected to encoder channel A"
+          "dataType": "Number | Pin",
+          "purpose": "GPIO number or pre-built Pin for channel A"
         },
         {
           "name": "pin_b",
-          "dataType": "Number",
-          "purpose": "GPIO pin connected to encoder channel B"
+          "dataType": "Number | Pin",
+          "purpose": "GPIO number or pre-built Pin for channel B"
         },
         {
-          "name": "simulate",
-          "dataType": "Boolean",
-          "default": true,
-          "values_meaning": {
-            "true": "Enables simulation mode, position can be changed manually",
-            "false": "Enables real hardware mode using interrupts on GPIO pins"
-          },
-          "purpose": "Controls whether the encoder operates in simulation or real mode"
+          "name": "min_pos",
+          "dataType": "Number",
+          "default": 0,
+          "purpose": "Lower bound for position"
+        },
+        {
+          "name": "max_pos",
+          "dataType": "Number",
+          "default": 180,
+          "purpose": "Upper bound for position"
+        },
+        {
+          "name": "pull",
+          "dataType": "Enum<Pin.PULL_UP, Pin.PULL_DOWN>",
+          "default": "Pin.PULL_UP",
+          "purpose": "Configures internal pull resistors for the two GPIOs"
+        },
+        {
+          "name": "callback",
+          "dataType": "Function",
+          "default": null,
+          "purpose": "Optional initial callback for position changes"
         }
       ],
       "returns": {
         "dataType": "Object",
-        "class": "Encoder",
-        "purpose": "An instance of the Encoder class used to track rotary position"
+        "class": "BoundedRotaryEncoder",
+        "purpose": "An instance that maintains bounded position, exposes wrapped methods, and handles GPIO interrupts"
       }
     },
+
     "pin_properties": {
       "gnd": {
-        "purpose": "Ground connection for the encoder module",
+        "purpose": "Ground reference for the encoder",
         "required": true
       },
       "vcc": {
-        "purpose": "Voltage supply for the encoder module (typically 3.3V or 5V)",
+        "purpose": "Supply voltage for the encoder (3.3 V or 5 V depending on model)",
         "required": true
       },
       "s1": {
         "alias": "pin_a",
-        "purpose": "Encoder signal pin A (rotational signal channel A)",
+        "purpose": "Rotary encoder channel A",
         "required": true
       },
       "s2": {
         "alias": "pin_b",
-        "purpose": "Encoder signal pin B (rotational signal channel B)",
+        "purpose": "Rotary encoder channel B",
         "required": true
       },
       "key": {
-        "purpose": "Push-button switch pin (optional)",
+        "purpose": "Optional push-button switch pin (if the encoder includes a press switch)",
         "required": false
       }
     }
