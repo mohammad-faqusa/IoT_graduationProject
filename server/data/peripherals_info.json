@@ -1114,18 +1114,19 @@
     },
     "methods": {
       "set_callback": {
+        "interrupt": true,
         "type": "read",
         "label": "Register Motion Callback",
         "parameters": [
           {
             "name": "callback",
             "dataType": "Function",
-            "signature": "fn(level: Boolean)",
-            "purpose": "Called with true on rising edge (motion) and false on falling edge (idle)"
+            "signature": "fn(motion: Boolean)",
+            "purpose": "Invoked after debounce; true when motion, false when no motion"
           }
         ],
         "returns": { "dataType": "Void" },
-        "purpose": "Attach a user-supplied function to run on every edge transition"
+        "purpose": "Attach a user-supplied function to run on debounced state changes"
       },
       "deinit": {
         "type": "write",
@@ -1648,6 +1649,63 @@
       "signal": {
         "alias": "pin",
         "purpose": "GPIO pin number connected to the slide switch",
+        "required": true
+      }
+    }
+  },
+  {
+    "name": "ultrasonic_sensor",
+    "title": "Ultrasonic Sensor",
+    "library_name": "ultrasonic_sensor",
+    "class_name": "UltrasonicSensor",
+
+    "attributes": {
+      "trig_pin": {
+        "dataType": "Pin",
+        "purpose": "GPIO pin connected to the TRIG input of the ultrasonic sensor"
+      },
+      "echo_pin": {
+        "dataType": "Pin",
+        "purpose": "GPIO pin connected to the ECHO output of the ultrasonic sensor"
+      }
+    },
+
+    "methods": {
+      "get_distance": {
+        "type": "read",
+        "label": "Measure Distance",
+        "returns": {
+          "dataType": "Number",
+          "unit": "cm"
+        },
+        "purpose": "Measures and returns the distance to an object using ultrasonic pulses"
+      }
+    },
+
+    "constructor": {
+      "parameters": [
+        {
+          "name": "trig_pin",
+          "dataType": "Number",
+          "purpose": "GPIO number connected to TRIG"
+        },
+        {
+          "name": "echo_pin",
+          "dataType": "Number",
+          "purpose": "GPIO number connected to ECHO"
+        }
+      ]
+    },
+
+    "pin_properties": {
+      "vcc": { "purpose": "5V power supply", "required": true },
+      "gnd": { "purpose": "Ground", "required": true },
+      "trig": {
+        "purpose": "Trigger pin for sending ultrasonic pulse",
+        "required": true
+      },
+      "echo": {
+        "purpose": "Echo pin for receiving reflected pulse",
         "required": true
       }
     }
