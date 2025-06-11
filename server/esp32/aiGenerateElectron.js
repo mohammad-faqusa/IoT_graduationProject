@@ -135,7 +135,7 @@ async def runAutomation(automation):
    
     if(automation['sourceOutputType'] == 'oled_display'):
         print('this is : ', automation['source-output'])
-        outputMsg['param'] = ['{} : {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]
+        outputMsg['param'] = ['{} , {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]
         print(outputMsg['param'])
         await publishMqttAutomation(outputDeviceId, outputMsg)
 
@@ -173,7 +173,7 @@ def make_mqtt_cb(automation):
             
         elif(automation['sourceOutputType'] == 'oled_display'):
             print('this is : ', automation['source-output'])
-            outputMsg['param'] = ['{} : {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]
+            outputMsg['param'] = ['{} , {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]
             print(outputMsg['param'])
             await publishMqttAutomation(outputDeviceId, outputMsg)
     # synchronous wrapper — **what you actually register**
