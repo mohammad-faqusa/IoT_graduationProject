@@ -1,9 +1,9 @@
-You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"relay 3"**
+You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"ultra sonic"**
 
 Partial pin connections for the device:
 ```json
 {
-  "relay 3": {}
+  "ultra sonic": {}
 }
 ```
 
@@ -13,7 +13,7 @@ undefined
 ```
 
 🔧 Your task:
-Generate a complete list of step-by-step instructions for wiring the **"relay 3"** to an ESP32-WROOM-32 board.
+Generate a complete list of step-by-step instructions for wiring the **"ultra sonic"** to an ESP32-WROOM-32 board.
 
 📌 Rules & Tips:
 - **Preserve** all existing connections.

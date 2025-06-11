@@ -817,7 +817,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // removeOptions(fieldSelect);
 
-    addOptions(fieldSelect, dataArr);
+    if (name === "method-output") addOptionsMethods(fieldSelect, dataArr);
+    else addOptions(fieldSelect, dataArr);
 
     fieldGroup.appendChild(fieldLabel);
     fieldGroup.appendChild(fieldSelect);
