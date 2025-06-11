@@ -14,7 +14,10 @@ async function callClaude(prompt, shifted) {
     messages: [{ role: "user", content: prompt }],
   });
 
-  return await msg.content[0].text.replace(/^```python\s*|\s*```$/g, "");
+  return await msg.content[0].text.replace(
+    /^```(?:python|json)\s*|\s*```$/g,
+    ""
+  );
 }
 // callClaude();
 module.exports = callClaude;

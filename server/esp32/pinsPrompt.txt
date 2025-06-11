@@ -1,0 +1,47 @@
+
+You are an **ESP32 pin-extractor**.
+
+### Task
+Read the MicroPython initialisation code in the block below and build a JSON
+object that lists the GPIO pins used by each peripheral.
+
+### Output
+* Return **only** a JSON object under the top-level key `"connection_pins"`.
+* Example format (**illustrative only**):
+
+```json
+{
+  "connection_pins": {
+    "accelerometer": { "sda": 21, "scl": 22 },
+    "encoder":       { "pin_a": 12, "pin_b": 14 },
+    "relay 1":       { "pin": 26 }
+  }
+}
+```
+
+### Extraction rules
+1. Use the alias that appears inside `peripherals["..."]` as the object key.
+2. Take **all pin numbers exclusively from the inline comment** on the same line
+   (the text after `#`).
+   * If the comment contains pairs like `NAME=NUM`, use `NAME` (lower-case).
+   * If it lists bare `GPIO<num>` values, create keys `pin1`, `pin2`, … in
+     the order they appear.
+3. Ignore non-numeric constructor arguments (e.g. `True`, `False`, angles).
+4. Output *nothing except* the fenced JSON code block.
+
+### Code block
+```python
+# Initialise peripherals dictionary
+peripherals = {}
+
+# Instantiate each peripheral
+from oled import OLED
+from relay import Relay
+from dht_sensor import DHTSensor
+
+peripherals["Oled"] = OLED()  # SDA=21, SCL=22
+peripherals["relay 1"] = Relay(12)  # GPIO12
+peripherals["dht sensor"] = DHTSensor(14)  # GPIO14
+peripherals["relay 2"] = Relay(13)  # GPIO13
+
+```

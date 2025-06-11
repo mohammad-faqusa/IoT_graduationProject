@@ -43,109 +43,71 @@ const peripherals_info = JSON.parse(
 );
 
 /**
- * Build a prompt that makes the LLM output ONLY:
- *   1) import lines
- *   2) peripherals_pins dict
- *   3) peripherals dict with class instances
- *
- * Optional constructor parameters (optional === true OR a "default" key exists)
- * are deliberately **omitted**.
- *
- * @param {Object} dictVariables      // { instanceName : peripheralType, … }
- * @return {string} prompt
+ * Convert peripherals_info (array) → dict keyed by .name
+ * so we can do O(1) look-ups later.
+ */
+const peripheralsByName = Object.fromEntries(
+  peripherals_info.map((p) => [p.name, p])
+);
+
+/**
+ * Build the prompt that will make ChatGPT output
+ *    peripherals = {}
+ *    peripherals["foo"] = Foo(...)
+ * --nothing else, no generic GPIO/I²C scaffolding.
  */
 function initializePeripheralsPrompt(dictVariables) {
-  /* --------------------------------------------------------------------- */
-  /*  0.  Build a quick lookup map:   typeName → info                      */
-  /* --------------------------------------------------------------------- */
-  const infoOf = {};
-  peripherals_info.map((p) => (infoOf[p.name] = p));
+  // -------- 1. Resolve & validate the peripherals -------------
+  const sources_info = Object.fromEntries(
+    Object.entries(dictVariables)
+      .map(([alias, id]) => [alias, peripheralsByName[id]])
+      .filter(([, obj]) => obj) // drop unknown IDs
+  );
 
-  const instances = Object.entries(dictVariables); // [["acc", "accelerometer"], …]
-
-  /* --------------------------------------------------------------------- */
-  /*  1.  IMPORTS  (deduped per peripheral type)                           */
-  /* --------------------------------------------------------------------- */
-  const imports = [...new Set(instances.map(([, type]) => type))]
-    .map((type) => {
-      const meta = infoOf[type];
-      if (!meta) return `# ⚠ unknown peripheral "${type}"`;
-      return `from ${meta.library_name} import ${meta.class_name}`;
-    })
+  // -------- 2. Build instruction lines for each peripheral ----
+  const periphHints = Object.entries(sources_info)
+    .map(
+      ([alias, p]) => `
+• peripheral alias **"${alias}"**  
+  • class      : \`${p.class_name}\`  
+  • module     : \`${p.library_name}\`  
+  • REQUIRED constructor params (primitive only, NO optional params):  
+    ${JSON.stringify(p.constructor)}
+  • After the instantiation line add a **single** inline comment listing the GPIOs used.`
+    )
     .join("\n");
 
-  /* --------------------------------------------------------------------- */
-  /*  2.  peripherals_pins  skeleton                                       */
-  /*       – include ONLY *required* Pin-type ctor params                  */
-  /* --------------------------------------------------------------------- */
-  const pinDictLines = instances
-    .map(([inst, type]) => {
-      const meta = infoOf[type] || {};
-      const reqPins = (meta.constructor?.parameters || [])
-        .filter(
-          (p) =>
-            !p.optional && p.default === undefined && /pin/i.test(p.dataType)
-        )
-        .map((p) => `"${p.name}": …`)
-        .join(", ");
-
-      return reqPins ? `    "${inst}": { ${reqPins} },` : `    "${inst}": {},`;
-    })
-    .join("\n");
-
-  /* --------------------------------------------------------------------- */
-  /*  3.  peripherals  initialisation                                      */
-  /*       – use required params only; map Pin params to peripherals_pins  */
-  /* --------------------------------------------------------------------- */
-  const initLines = instances
-    .map(([inst, type]) => {
-      const meta = infoOf[type] || {};
-      const cls = meta.class_name || "UNKNOWN";
-
-      const reqParams = (meta.constructor?.parameters || []).filter(
-        (p) => !p.optional && p.default === undefined
-      );
-
-      const paramStr = reqParams
-        .map((p) =>
-          /pin/i.test(p.dataType)
-            ? `${p.name}=peripherals_pins["${inst}"]["${p.name}"]`
-            : `${p.name}=…`
-        )
-        .join(", ");
-
-      return reqParams.length
-        ? `peripherals["${inst}"] = ${cls}(${paramStr})`
-        : `peripherals["${inst}"] = ${cls}()`;
-    })
-    .join("\n");
-
-  /* --------------------------------------------------------------------- */
-  /*  4.  Assemble final prompt – ultra-strict                             */
-  /* --------------------------------------------------------------------- */
+  // -------- 3. Final prompt -----------------------------------
   return `
-You are a MicroPython ESP32 **code generator**.
+You are an **ESP32 MicroPython code generator**.
 
-OUTPUT **ONLY** the Python between the markers.
-• No Markdown fences
-• No Wi-Fi, MQTT, asyncio, timers, or extra imports
-• Keep comments EXACTLY as here (or omit them) – add nothing else.
+### Task
+Generate only the MicroPython code that:
+1. Creates an empty dictionary called \`peripherals\`.
+2. Instantiates each peripheral listed below **exactly once**, using its class from the indicated module, **only with the required primitive constructor arguments**.
+3. Stores every instance in \`peripherals["<alias>"]\`.
+4. Adds a brief inline GPIO-pin comment **on the same line** as each instantiation.
+5. Outputs nothing else—no extra GPIO/I²C/SPI setup, no Wi-Fi, no explanations.
 
-### BEGIN CODE
-${imports}
+### Peripherals to instantiate
+${periphHints}
 
-# Initialise pins dictionary
-peripherals_pins = {
-${pinDictLines}
-}
-
+### Output-format example  (NOT part of your final answer; for clarity only)
+\`\`\`python
 # Initialise peripherals dictionary
 peripherals = {}
 
 # Instantiate each peripheral
-${initLines}
-### END CODE
-`;
+peripherals["ultra sonic"]  = UltrasonicSensor(5, 18)   # TRIG=5, ECHO=18
+peripherals["internal led"] = InternalLED()             # GPIO2
+peripherals["oled display"] = OLED()                    # SDA=21, SCL=22
+\`\`\`
+
+**Remember**:  
+* Use primitive literals (e.g. \`13\`, not \`Pin(13)\`).  
+* Do **not** include peripherals that are not listed.  
+* Do **not** add boiler-plate (I²C, SPI, Wi-Fi, MQTT, etc.).  
+Return the code block only.`;
 }
 
 function generateDeviceWiringPrompt(deviceName, pinsConnection, pinProperties) {
@@ -187,19 +149,45 @@ Provide the steps in plain text format only.
   `.trim();
 }
 
-function seperatePinsPrompt(pythonCode) {
-  return `You are a code-analysis assistant.
+function seperatePinsPrompt(initCode) {
+  return `
+You are an **ESP32 pin-extractor**.
 
-**Task**
-1. Read the Python code block below.
-2. Find the dictionary assigned to the variable \`peripherals_pins\`.
-3. Reply **only** with that dictionary in valid JSON (double-quoted keys/values, no comments, no Python syntax, no markdown, no back-ticks, no surrounding text).
+### Task
+Read the MicroPython initialisation code in the block below and build a JSON
+object that lists the GPIO pins used by each peripheral.
 
-**Input code**
+### Output
+* Return **only** a JSON object under the top-level key \`"connection_pins"\`.
+* Example format (**illustrative only**):
+
+\`\`\`json
+{
+  "connection_pins": {
+    "accelerometer": { "sda": 21, "scl": 22 },
+    "encoder":       { "pin_a": 12, "pin_b": 14 },
+    "relay 1":       { "pin": 26 }
+  }
+}
+\`\`\`
+
+### Extraction rules
+1. Use the alias that appears inside \`peripherals["..."]\` as the object key.
+2. Take **all pin numbers exclusively from the inline comment** on the same line
+   (the text after \`#\`).
+   * If the comment contains pairs like \`NAME=NUM\`, use \`NAME\` (lower-case).
+   * If it lists bare \`GPIO<num>\` values, create keys \`pin1\`, \`pin2\`, … in
+     the order they appear.
+3. Ignore non-numeric constructor arguments (e.g. \`True\`, \`False\`, angles).
+4. Output *nothing except* the fenced JSON code block.
+
+### Code block
 \`\`\`python
-${pythonCode}
+${initCode}
+\`\`\`
 `;
 }
+
 // console.log(generateLoopRead());
 
 module.exports = {

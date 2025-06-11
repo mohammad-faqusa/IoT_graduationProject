@@ -1,0 +1,8 @@
+{
+  "connection_pins": {
+    "Oled": { "sda": 21, "scl": 22 },
+    "relay 1": { "pin1": 12 },
+    "dht sensor": { "pin1": 14 },
+    "relay 2": { "pin1": 13 }
+  }
+}

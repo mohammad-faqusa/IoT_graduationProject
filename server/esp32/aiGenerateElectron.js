@@ -14,13 +14,18 @@ async function initializeCode(peripherals_dict) {
   const prompt = initializePeripheralsPrompt(peripherals_dict);
   const finalCode = await callClaude(prompt);
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
+  fs.writeFileSync(path.join(__dirname, "prompt.txt"), finalCode);
   return finalCode;
 }
 
 async function seperatePins(pythonCode) {
   const prompt = seperatePinsPrompt(pythonCode);
+  fs.writeFileSync(path.join(__dirname, "pinsPrompt.txt"), prompt);
   const pinsObject = await callClaude(prompt);
-
+  fs.writeFileSync(
+    path.join(__dirname, "pinSeperationResult.txt"),
+    await pinsObject
+  );
   return await pinsObject;
 }
 
@@ -62,14 +67,6 @@ async def async_callback(topic, msg, retained):
                 
         automations.append(automation)
         return
-
-    if(msg.get('pins')):
-        result['pins'] = peripherals_pins
-        result['status'] = True
-        result['commandId'] = msg['commandId']
-        await client.publish('esp32/${id}/sender', '{}'.format(json.dumps(result)), qos = 1)
-        print("this is pins")
-        return  # ✅ Terminate early
      
     value = peripherals[msg['peripheral']][msg['method']][msg['param']]
     

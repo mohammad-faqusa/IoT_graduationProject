@@ -1,9 +1,21 @@
-You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"ultra sonic"**
+You are working with an **ESP32-WROOM-32** microcontroller and the following peripheral device: **"connection_pins"**
 
 Partial pin connections for the device:
 ```json
 {
-  "ultra sonic": {}
+  "connection_pins": {
+    "acceleromter": {
+      "sda": 21,
+      "scl": 22
+    },
+    "encoder": {
+      "a": 12,
+      "b": 14
+    },
+    "relay 1": {
+      "gpio": 26
+    }
+  }
 }
 ```
 
@@ -13,7 +25,7 @@ undefined
 ```
 
 🔧 Your task:
-Generate a complete list of step-by-step instructions for wiring the **"ultra sonic"** to an ESP32-WROOM-32 board.
+Generate a complete list of step-by-step instructions for wiring the **"connection_pins"** to an ESP32-WROOM-32 board.
 
 📌 Rules & Tips:
 - **Preserve** all existing connections.
