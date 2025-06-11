@@ -578,7 +578,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     configP.addEventListener("change", () => {
       removeOptions(configMethods);
 
-      currentP = configP.value.split(",");
+      currentP = configP.value.includes(",")
+        ? configP.value.split(",")
+        : configP.value;
 
       console.log(currentP[1]);
       console.log(peripherals_interface_info[currentP[1]]);
@@ -738,7 +740,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.log("this is method select : ", methodSelect);
       addOptionsMethods(
         methodSelect,
-        filterOutputMethod(pSelect.value.split(",")[1])
+        filterOutputMethod(
+          pSelect.value.includes(",")
+            ? pSelect.value.split(",")[1]
+            : pSelect.value
+        )
       );
     });
 
@@ -747,9 +753,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       removeOptions(methodSelect);
       console.log("this is method select : ", methodSelect);
       console.log("this is p select value : ", pSelect.value);
+      console.log();
       addOptionsMethods(
         methodSelect,
-        filterOutputMethod(pSelect.value.split(",")[1])
+        filterOutputMethod(
+          pSelect.value.includes(",")
+            ? pSelect.value.split(",")[1]
+            : pSelect.value
+        )
       );
     });
 
@@ -757,11 +768,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     methodSelect.addEventListener("change", () => {
       console.log(methodSelect.value);
-      createAutomationResultLine(pSelect.value[1], methodSelect.value);
+      createAutomationResultLine(pSelect.value, methodSelect.value);
     });
   }
 
   function createAutomationResultLine(pName, methodName) {
+    console.log("this is p name : ", pName);
+    console.log(
+      "this is method name is autoamtion output creation : ",
+      methodName
+    );
+    methodName = methodName.includes(",")
+      ? methodName.split(",")[1]
+      : methodName;
+
+    pName = pName.includes(",") ? pName.split(",")[1] : pName;
+    console.log(methodName);
     const configModal = document.querySelector("#configModal");
     const configForm = configModal.querySelector("#configForm");
 
@@ -772,7 +794,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     line.id = "automation-result-line";
     line.className = "full-line";
 
-    methodObject = peripherals_interface_info[pName].methods[methodName];
+    const methodObject = peripherals_interface_info[pName].methods[methodName];
     if (methodObject.parameters)
       switch (methodObject.parameters[0].dataType) {
         case "Boolean":
@@ -1134,7 +1156,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       console.log("this is form data : ");
       console.log(formData);
-      formData.sourceArr = formData.source.split(",");
+      formData.sourceArr = formData.source.includes(",")
+        ? formData.source.split(",")
+        : formData.source;
       console.log(formData.sourceArr);
       formData.source = formData.sourceArr[1];
 

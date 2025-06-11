@@ -138,8 +138,11 @@ dashboardSocket = async (socket) => {
       data["method-output"] = data["method-output"].split(",")[1];
       if (data.condition) data.condition = autoParse(data.condition);
 
-      data["source-output"] = data["source-output"].split(",")[0];
+      data["source-output"] = data["source-output"].split(",");
+      data.sourceOutputType = data["source-output"][1];
+      data["source-output"] = data["source-output"][0];
 
+      console.log("this is source output type ", data["source-output-type"]);
       const inputDevice = devices.find((dev) => dev.name === data.device);
 
       const outputDevice = devices.find(
