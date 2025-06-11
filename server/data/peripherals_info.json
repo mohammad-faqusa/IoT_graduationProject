@@ -1690,12 +1690,19 @@
 
     "methods": {
       "clear": {
-        "params": [],
-        "returns": "None",
+        "type": "write",
+        "label": "clear",
+
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Erase the entire display and refresh"
       },
       "write": {
-        "params": [
+        "type": "write",
+        "label": "Write Text",
+
+        "parameters": [
           {
             "name": "text",
             "dataType": "String",
@@ -1709,11 +1716,15 @@
             "purpose": "Target text row (0-based, each row = 8 px)"
           }
         ],
-        "returns": "None",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Clear the screen, then write the text on the specified row"
       },
       "write_line": {
-        "params": [
+        "type": "write",
+        "label": "write specific line",
+        "parameters": [
           {
             "name": "text",
             "dataType": "String",
@@ -1736,7 +1747,9 @@
             "purpose": "Whether to clear that row before writing"
           }
         ],
-        "returns": "None",
+        "returns": {
+          "dataType": "void"
+        },
         "purpose": "Write text on a single row without affecting other rows"
       }
     }
