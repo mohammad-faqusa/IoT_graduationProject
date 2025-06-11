@@ -120,6 +120,7 @@ async def automation_loop():
 async def publishMqttAutomation(outputDeviceId, outputMsg):
     await client.publish('esp32/{}/receiver'.format(outputDeviceId), json.dumps(outputMsg), qos = 1)
 async def runAutomation(automation):
+    global peripherals
     outputMsg = {}
     outputMsg['peripheral'] = automation['source-output']
     outputMsg['method'] = automation['method-output']
@@ -131,9 +132,14 @@ async def runAutomation(automation):
     selectedPeripheral = automation['source']
     selectedMethod = automation['method']
     inputParams = automation['inputParams']
+   
+    if(automation['sourceOutputType'] == 'oled_display'):
+        print('this is : ', automation['source-output'])
+        outputMsg['param'] = ['{} : {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]
+        print(outputMsg['param'])
+        await publishMqttAutomation(outputDeviceId, outputMsg)
 
-    if(automation['returnType'] == 'Number'):
-        
+    elif(automation['returnType'] == 'Number'):
         threshold = automation['threshold'] 
         if(cmp[automation['condition']][peripherals[selectedPeripheral][selectedMethod][inputParams], threshold]):
             await publishMqttAutomation(outputDeviceId, outputMsg)
@@ -151,10 +157,13 @@ def make_mqtt_cb(automation):
     outputMsg['commandId'] = 1
     output_device_id = automation['outputDeviceId']
     
+    
+    
     if outputMsg['param'] is None:
         outputMsg['param'] = []
     
     async def _job(level):
+        global peripherals
         if(automation['source'] == 'encoder'):
             print('message is sent with angle : ', level)
             outputMsg['param'] = [level] 
@@ -162,7 +171,11 @@ def make_mqtt_cb(automation):
         elif(level == automation['condition']):
             await publishMqttAutomation(output_device_id, outputMsg)
             
-
+        elif(automation['sourceOutputType'] == 'oled_display'):
+            print('this is : ', automation['source-output'])
+            outputMsg['param'] = ['{} : {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]
+            print(outputMsg['param'])
+            await publishMqttAutomation(outputDeviceId, outputMsg)
     # synchronous wrapper — **what you actually register**
     return lambda level: asyncio.create_task(_job(level))
 
