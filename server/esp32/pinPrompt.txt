@@ -4,16 +4,17 @@ Partial pin connections for the device:
 ```json
 {
   "connection_pins": {
-    "acceleromter": {
-      "sda": 21,
-      "scl": 22
+    "internal led": {
+      "pin": 2
     },
-    "encoder": {
-      "a": 12,
-      "b": 14
+    "push button": {
+      "pin": 14
     },
-    "relay 1": {
-      "gpio": 26
+    "servo motor": {
+      "pin": 13
+    },
+    "relay": {
+      "pin": 27
     }
   }
 }

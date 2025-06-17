@@ -670,34 +670,6 @@
           "name": "pin_b",
           "dataType": "Number | Pin",
           "purpose": "GPIO number or pre-built Pin for channel B"
-        },
-        {
-          "name": "min_pos",
-          "dataType": "Number",
-          "optional": true,
-          "default": 0,
-          "purpose": "Lower bound for position"
-        },
-        {
-          "name": "max_pos",
-          "dataType": "Number",
-          "optional": true,
-          "default": 180,
-          "purpose": "Upper bound for position"
-        },
-        {
-          "name": "pull",
-          "dataType": "Enum<Pin.PULL_UP, Pin.PULL_DOWN>",
-          "optional": true,
-          "default": "Pin.PULL_UP",
-          "purpose": "Configures internal pull resistors for the two GPIOs"
-        },
-        {
-          "name": "callback",
-          "dataType": "Function",
-          "optional": true,
-          "default": null,
-          "purpose": "Optional initial callback for position changes"
         }
       ],
       "returns": {

@@ -2,7 +2,7 @@
 peripherals = {}
 
 # Instantiate each peripheral
-peripherals["internal led"] = InternalLED(simulate=False)  # GPIO2
-peripherals["servo motor"] = Servo(13, 50, 500, 2500, 180)  # GPIO13
-peripherals["relay"] = Relay(27, True, False)  # GPIO27
-peripherals["push button"] = PushButton(5, 20)  # GPIO5
+peripherals["dht sensor"] = DHTSensor(12)                # GPIO12
+peripherals["encoder"] = Encoder(32, 33, 0, 180)         # GPIO32, GPIO33
+peripherals["internal led"] = InternalLED()              # GPIO2
+peripherals["relay"] = Relay(26)                         # GPIO26

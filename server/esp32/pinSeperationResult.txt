@@ -1,8 +1,8 @@
 {
   "connection_pins": {
-    "internal led": { "pin1": 2 },
-    "servo motor": { "pin1": 13 },
-    "relay": { "pin1": 27 },
-    "push button": { "pin1": 5 }
+    "internal led": { "pin": 2 },
+    "push button": { "pin": 14 },
+    "servo motor": { "pin": 13 },
+    "relay": { "pin": 27 }
   }
 }

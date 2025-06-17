@@ -8,18 +8,25 @@ const { initializePeripheralsPrompt, seperatePinsPrompt } = require(path.join(
   "generatePrompts"
 ));
 
+const peripherals_info = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "./../data/peripherals_info.json"))
+);
 const callClaude = require(path.join(__dirname, "claude_console/lib/index"));
 
 async function initializeCode(peripherals_dict) {
+  console.log("this is dict : ", peripherals_dict);
+
+  const plist = [...new Set(Object.values(peripherals_dict))];
+  const libraries = peripherals_info
+    .filter((p) => plist.includes(p.name))
+    .map((p) => `from ${p.library_name} import ${p.class_name}`)
+    .join("\n");
+  console.log("this is libraries : ", libraries);
   const prompt = initializePeripheralsPrompt(peripherals_dict);
   const finalCode = await callClaude(prompt);
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
-  fs.writeFileSync(path.join(__dirname, "prompt.txt"), finalCode);
-  const libraries = Object.entries(peripherals_dict)
-    .map(
-      ([key, value]) => `from ${value.library_name} import ${value.class_name}`
-    )
-    .join("\n");
+  fs.writeFileSync(path.join(__dirname, "initialize.py"), finalCode);
+
   return libraries + "\n" + finalCode;
 }
 
