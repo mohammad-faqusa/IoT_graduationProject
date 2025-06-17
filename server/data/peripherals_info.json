@@ -209,6 +209,7 @@
         {
           "name": "addr",
           "dataType": "Number",
+          "optional": true,
           "format": "hex",
           "default": 104,
           "purpose": "I²C address (0x68 or 0x69 when AD0 is high)"
@@ -336,13 +337,14 @@
         {
           "name": "i2c",
           "dataType": "Object",
-          "default": null,
           "optional": true,
+          "default": null,
           "purpose": "I2C bus instance used to communicate with the sensor"
         },
         {
           "name": "addr",
           "dataType": "Number",
+          "optional": true,
           "default": 104,
           "prefix": "hex",
           "range": {
@@ -354,6 +356,7 @@
         {
           "name": "simulate",
           "dataType": "Boolean",
+          "optional": true,
           "default": true,
           "values_meaning": {
             "true": "Simulated data (random values)",
@@ -478,6 +481,7 @@
         {
           "name": "sensor_type",
           "dataType": "String",
+          "optional": true,
           "default": "DHT22",
           "allowedValues": ["DHT11", "DHT22"],
           "purpose": "Specifies the type of DHT sensor being used"
@@ -485,6 +489,7 @@
         {
           "name": "simulate",
           "dataType": "Boolean",
+          "optional": true,
           "default": true,
           "values_meaning": {
             "true": "Sensor data will be simulated using random values",
@@ -669,24 +674,28 @@
         {
           "name": "min_pos",
           "dataType": "Number",
+          "optional": true,
           "default": 0,
           "purpose": "Lower bound for position"
         },
         {
           "name": "max_pos",
           "dataType": "Number",
+          "optional": true,
           "default": 180,
           "purpose": "Upper bound for position"
         },
         {
           "name": "pull",
           "dataType": "Enum<Pin.PULL_UP, Pin.PULL_DOWN>",
+          "optional": true,
           "default": "Pin.PULL_UP",
           "purpose": "Configures internal pull resistors for the two GPIOs"
         },
         {
           "name": "callback",
           "dataType": "Function",
+          "optional": true,
           "default": null,
           "purpose": "Optional initial callback for position changes"
         }
@@ -774,6 +783,7 @@
         {
           "name": "debounce_ms",
           "dataType": "Number",
+          "optional": true,
           "default": 20,
           "unit": "milliseconds",
           "purpose": "Debounce interval to ignore spurious transitions"
@@ -1010,6 +1020,7 @@
         {
           "name": "simulate",
           "dataType": "Boolean",
+          "optional": true,
           "default": false,
           "values_meaning": {
             "true": "LED behavior will be simulated with print statements instead of real hardware interaction",
@@ -1164,6 +1175,7 @@
         {
           "name": "debounce_ms",
           "dataType": "Number",
+          "optional": true,
           "default": 20,
           "unit": "milliseconds",
           "purpose": "Debounce interval to ignore spurious transitions"
@@ -1288,6 +1300,7 @@
         {
           "name": "active_high",
           "dataType": "Boolean",
+          "optional": true,
           "default": true,
           "values_meaning": {
             "true": "Relay is activated when the pin is set to HIGH",
@@ -1298,6 +1311,7 @@
         {
           "name": "simulate",
           "dataType": "Boolean",
+          "optional": true,
           "default": false,
           "values_meaning": {
             "true": "Relay behavior is simulated with console output",
@@ -1444,6 +1458,7 @@
         {
           "name": "freq",
           "dataType": "Number",
+          "optional": true,
           "default": 50,
           "unit": "Hz",
           "purpose": "PWM frequency for controlling the servo (default 50 Hz)"
@@ -1451,6 +1466,7 @@
         {
           "name": "min_us",
           "dataType": "Number",
+          "optional": true,
           "default": 500,
           "unit": "μs",
           "purpose": "Minimum pulse width in microseconds"
@@ -1458,6 +1474,7 @@
         {
           "name": "max_us",
           "dataType": "Number",
+          "optional": true,
           "default": 2500,
           "unit": "μs",
           "purpose": "Maximum pulse width in microseconds"
@@ -1465,6 +1482,7 @@
         {
           "name": "angle_range",
           "dataType": "Number",
+          "optional": true,
           "default": 180,
           "unit": "°",
           "purpose": "Total mechanical travel range of the servo horn (default 180 °)"
@@ -1578,6 +1596,7 @@
         {
           "name": "simulate",
           "dataType": "Boolean",
+          "optional": true,
           "default": true,
           "values_meaning": {
             "true": "Simulated mode enabled; state changes can be simulated programmatically",
