@@ -15,7 +15,12 @@ async function initializeCode(peripherals_dict) {
   const finalCode = await callClaude(prompt);
   // fs.writeFileSync(path.join(__dirname, "espFiles/main.py"), finalCode);
   fs.writeFileSync(path.join(__dirname, "prompt.txt"), finalCode);
-  return finalCode;
+  const libraries = Object.entries(peripherals_dict)
+    .map(
+      ([key, value]) => `from ${value.library_name} import ${value.class_name}`
+    )
+    .join("\n");
+  return libraries + "\n" + finalCode;
 }
 
 async function seperatePins(pythonCode) {
@@ -161,13 +166,14 @@ def make_mqtt_cb(automation):
     
     async def _job(level):
         global peripherals
-        if(automation['source'] == 'encoder'):
+        if(automation['source-type'] == 'encoder'):
             print('message is sent with angle : ', level)
             outputMsg['param'] = [level] 
             await publishMqttAutomation(output_device_id, outputMsg)
-        elif(level == automation['condition']):
-            await publishMqttAutomation(output_device_id, outputMsg)
-            
+        elif(automation['source-type'] == 'push_button'):
+            if(level == automation['condition']):
+                await publishMqttAutomation(output_device_id, outputMsg)
+        
         elif(automation['sourceOutputType'] == 'oled_display'):
             print('this is : ', automation['source-output'])
             outputMsg['param'] = ['{} , {}'.format(selectedPeripheral, peripherals[selectedPeripheral][selectedMethod][inputParams])]

@@ -35,13 +35,9 @@ object that lists the GPIO pins used by each peripheral.
 peripherals = {}
 
 # Instantiate each peripheral
-from oled import OLED
-from relay import Relay
-from dht_sensor import DHTSensor
-
-peripherals["Oled"] = OLED()  # SDA=21, SCL=22
-peripherals["relay 1"] = Relay(12)  # GPIO12
-peripherals["dht sensor"] = DHTSensor(14)  # GPIO14
-peripherals["relay 2"] = Relay(13)  # GPIO13
+peripherals["internal led"] = InternalLED(simulate=False)  # GPIO2
+peripherals["servo motor"] = Servo(13, 50, 500, 2500, 180)  # GPIO13
+peripherals["relay"] = Relay(27, True, False)  # GPIO27
+peripherals["push button"] = PushButton(5, 20)  # GPIO5
 
 ```

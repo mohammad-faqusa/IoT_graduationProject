@@ -127,6 +127,7 @@ dashboardSocket = async (socket) => {
       const sourceType = data.source.split(",")[1];
       const methodInfo =
         peripherals_interface_info[sourceType].methods[data.method];
+      data["source-type"] = sourceType;
       const returnType = methodInfo.returns?.dataType;
 
       if (methodInfo.interrupt) data.interrupt = true;
