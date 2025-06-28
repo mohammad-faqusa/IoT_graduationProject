@@ -15,34 +15,11 @@ const User = require("../models/User.js");
 
 const espSetup = require("../esp32/espSetupElectron");
 
-module.exports = async (socket) => {
+module.exports = async (
+  socket,
+  { getOnlineDevices, clientStatus, publishMessage, subscribeToTopic }
+) => {
   console.log("✅ Electron socket fully authenticated:", socket.user);
-  const onlineDevices = new Map();
-
-  const client = mqtt.connect("mqtt:localhost");
-  client.subscribe("esp32/online");
-  client.subscribe("esp32/status");
-  client.on("message", async (topic, message) => {
-    // console.log(JSON.parse(message));
-    if (topic === "esp32/online") {
-      // console.log(JSON.parse(message));
-      const deviceId = JSON.parse(message).id;
-      // console.log("this is device id : ", deviceId);
-      console.log("online esp32 : ", deviceId);
-
-      const now = Date.now();
-      onlineDevices.set(deviceId, now);
-    }
-  });
-
-  socket.on("ping", () => {
-    console.log("Received ping from Electron");
-    socket.emit("pong");
-  });
-
-  socket.on("disconnect", () => {
-    client.end();
-  });
 
   // ✅ Register event immediately, handle async data later
   socket.on("fetchDevices", async (data, ackCallback) => {
@@ -63,8 +40,8 @@ module.exports = async (socket) => {
     }
   });
 
-  socket.on("onlineDevices", (data, ackCallBack) => {
-    const mapAsObject = Object.fromEntries(onlineDevices);
+  socket.on("onlineDevices", async (data, ackCallBack) => {
+    const mapAsObject = await getOnlineDevices(socket.user.id);
     console.log("this is online devices : ", mapAsObject);
     ackCallBack(mapAsObject);
   });
@@ -105,10 +82,6 @@ module.exports = async (socket) => {
       ackCallBack(-1);
       console.error("Error in addDevice:", err);
     }
-  });
-
-  socket.on("hi", (data) => {
-    console.log("hi from electron");
   });
 
   socket.on("setupDevice", async (data) => {

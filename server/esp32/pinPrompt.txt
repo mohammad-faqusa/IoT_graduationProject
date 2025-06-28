@@ -4,17 +4,18 @@ Partial pin connections for the device:
 ```json
 {
   "connection_pins": {
-    "servo": {
-      "pin1": 12
+    "dht sensor": {
+      "pin": 15
     },
     "relay": {
-      "pin1": 14
+      "pin": 16
     },
     "internal led": {
-      "pin1": 2
+      "pin": 2
     },
-    "push button": {
-      "pin1": 27
+    "encoder": {
+      "pin1": 17,
+      "pin2": 18
     }
   }
 }

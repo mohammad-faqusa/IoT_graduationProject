@@ -1,5 +1,3 @@
-const deviceSocket = require("./deviceSocket");
-const devicesSocket = require("./devicesSocket");
 const dashboardSocket = require("./dashboardSocket");
 const electronSocket = require("./electronSocket");
 const cookie = require("cookie");
@@ -41,13 +39,6 @@ const socketMain = async (io, mqttFunctions) => {
     }
   });
 
-  // Default namespace
-  io.on("connection", (socket) => {
-    console.log("🟢 Socket connected to default namespace:", socket.id);
-    deviceSocket(socket);
-    devicesSocket(socket);
-  });
-
   // Dashboard namespace
   io.of("/dashboard").on("connection", (socket) => {
     console.log("📊 Socket connected to /dashboard:", socket.id);
@@ -57,7 +48,7 @@ const socketMain = async (io, mqttFunctions) => {
   // ✅ Electron namespace
   io.of("/electron").on("connection", (socket) => {
     console.log("🖥️ Socket connected to /electron:", socket.user.email);
-    electronSocket(socket); // <- Your Electron-specific logic
+    electronSocket(socket, mqttFunctions); // <- Your Electron-specific logic
   });
 };
 

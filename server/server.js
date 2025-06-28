@@ -21,14 +21,27 @@ const io = new Server(server, {
   },
 });
 
+const { getDevices } = require(path.join(__dirname, "./data/devices"));
+
 const pendingCommands = new Map(); // commandId -> ackCallBack
 const subscribedTopics = new Set();
+const onlineDevices = new Map();
 
 const client = mqtt.connect("mqtt:localhost");
-client.on("connect", () => console.log("connected to the broker"));
+
+client.on("connect", () => {
+  console.log("connected to the broker");
+  subscribeToTopic("esp32/online");
+});
 
 client.on("message", (topic, message) => {
   try {
+    if (topic === "esp32/online") {
+      const deviceId = JSON.parse(message).id;
+      const now = Date.now();
+      onlineDevices.set(deviceId, now);
+      return;
+    }
     console.log(message);
     const response = JSON.parse(message.toString());
     const commandId = response.commandId;
@@ -61,7 +74,25 @@ function clientStatus() {
   return client.connected;
 }
 
-socketMain(io, { clientStatus, publishMessage, subscribeToTopic });
+async function getOnlineDevices(userId) {
+  const userDevices = [...(await getDevices(userId))].map(
+    (device) => device.id
+  );
+  const userOnlineDevices = {};
+  for (const deviceId of userDevices) {
+    if (onlineDevices.has(deviceId)) {
+      userOnlineDevices[deviceId] = onlineDevices.get(deviceId);
+    }
+  }
+  return userOnlineDevices;
+}
+
+socketMain(io, {
+  getOnlineDevices,
+  clientStatus,
+  publishMessage,
+  subscribeToTopic,
+});
 
 server.listen(3000, () => console.log("Listening on 3000"));
 
