@@ -94,6 +94,20 @@ async def async_callback(topic, msg, retained):
 
 async def conn_han(client):
     await client.subscribe('esp32/${id}/receiver', 1)
+  
+def on_change(peripheral_name, change):
+    key, value = change
+    print(peripheral_name, f' changed {key} to {value}')
+    message = {} 
+    message['peripheral'] = peripheral_name
+    message['deviceId'] = ${id}
+    message['change'] = change
+    asyncio.create_task(publishMqtt('esp32/trigger', message))
+    
+async def publishMqtt(topic, objectMessage):
+    await client.publish(topic, json.dumps(objectMessage), qos = 1)
+    
+
     
 async def main(client):
     await client.connect()
@@ -104,6 +118,10 @@ async def main(client):
     n = 0
     esp_status = {}
     esp_status['id'] = ${id}
+
+    for x in peripherals:
+        peripherals[x].watch_state(on_change)
+
 
     while True:
         await asyncio.sleep(1)

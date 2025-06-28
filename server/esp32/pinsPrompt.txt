@@ -31,17 +31,15 @@ object that lists the GPIO pins used by each peripheral.
 
 ### Code block
 ```python
+from dht_sensor import DHTSensor
 from led import InternalLED
-from push_button import PushButton
 from relay import Relay
-from servo_motor import Servo
 # Initialise peripherals dictionary
 peripherals = {}
 
 # Instantiate each peripheral
-peripherals["servo"] = Servo(12)                # GPIO12
-peripherals["relay"] = Relay(14)                # GPIO14
-peripherals["internal led"] = InternalLED()     # GPIO2
-peripherals["push button"] = PushButton(27)     # GPIO27
+peripherals["dht sensor"] = DHTSensor(14)               # GPIO14
+peripherals["internal led"] = InternalLED()             # GPIO2
+peripherals["relay"] = Relay(27)                        # GPIO27
 
 ```

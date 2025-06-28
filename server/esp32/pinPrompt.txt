@@ -5,17 +5,10 @@ Partial pin connections for the device:
 {
   "connection_pins": {
     "dht sensor": {
-      "pin": 15
-    },
-    "relay": {
-      "pin": 16
+      "pin": 13
     },
     "internal led": {
       "pin": 2
-    },
-    "encoder": {
-      "pin1": 17,
-      "pin2": 18
     }
   }
 }

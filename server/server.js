@@ -6,6 +6,9 @@ const mqtt = require("mqtt");
 
 require("./database.js");
 
+const Device = require("./models/Device.js");
+const User = require("./models/User.js");
+
 const socketio = require("socket.io");
 const { Server } = require("socket.io");
 const socketMain = require("./socket/socketMain");
@@ -32,9 +35,10 @@ const client = mqtt.connect("mqtt:localhost");
 client.on("connect", () => {
   console.log("connected to the broker");
   subscribeToTopic("esp32/online");
+  subscribeToTopic("esp32/trigger");
 });
 
-client.on("message", (topic, message) => {
+client.on("message", async (topic, message) => {
   try {
     if (topic === "esp32/online") {
       const deviceId = JSON.parse(message).id;
@@ -42,8 +46,18 @@ client.on("message", (topic, message) => {
       onlineDevices.set(deviceId, now);
       return;
     }
-    console.log(message);
+
+    if (topic === "esp32/trigger") {
+      const trigMessage = JSON.parse(message);
+      const { deviceId } = trigMessage;
+      const sockets = (await io.of("/dashboard").fetchSockets()).filter(
+        (socket) => checkDeviceOwnership(socket, deviceId)
+      );
+      sockets.map((socket) => socket.emit("deviceTrigger", trigMessage));
+      return;
+    }
     const response = JSON.parse(message.toString());
+    console.log(response);
     const commandId = response.commandId;
 
     if (pendingCommands.has(commandId)) {
@@ -55,6 +69,23 @@ client.on("message", (topic, message) => {
     console.error("Invalid MQTT message:", err);
   }
 });
+
+const checkDeviceOwnership = async (socket, deviceId) => {
+  if (!socket.user || !socket.user.id) {
+    throw new Error("User not authenticated");
+  }
+
+  const device = await Device.findOne({ id: deviceId }).lean();
+  if (!device) {
+    throw new Error("Device not found");
+  }
+
+  if (device.user.toString() !== socket.user.id.toString()) {
+    return false;
+  }
+
+  return true;
+};
 
 function subscribeToTopic(topic) {
   if (!subscribedTopics.has(topic)) {

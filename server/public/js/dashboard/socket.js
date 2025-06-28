@@ -2,6 +2,7 @@ const socket = io("http://localhost:3000/dashboard", {
   transports: ["websocket"], // skip polling → go straight to WebSocket
   withCredentials: true, // send cookies along with the handshake
 });
+
 let devices = [];
 const peripherals = {};
 let peripherals_interface_info = {};
@@ -24,11 +25,7 @@ socket.on("connect", async () => {
 socket.on("sendImmediate", (data) => {
   console.log(data);
 });
-// socket.on('dashboardCardRes', data => {
-//     // console.log(data);
 
-// })
-
-// socket.on('onlineDevices', onlineDevices => {
-//     console.log(onlineDevices)
-// })
+socket.on("deviceTrigger", (data) => {
+  console.log(data);
+});

@@ -531,6 +531,22 @@
       }
     },
     "methods": {
+      "init_watch": {
+        "type": "write",
+        "label": "Start Watching for Changes",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Starts a background task that periodically checks for temperature and humidity changes and triggers the callback when values change."
+      },
+      "deinit_watch": {
+        "type": "write",
+        "label": "Stop Watching for Changes",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Stops the background task responsible for automatically detecting temperature and humidity changes."
+      },
       "measure": {
         "type": "write",
         "label": "Trigger Measurement",
