@@ -4,7 +4,6 @@ const { getDevices } = require("./../data/devices");
 
 const fs = require("fs");
 const path = require("path");
-const { truncate } = require("fs/promises");
 peripherals_interface_info = {};
 
 const peripherals_info = JSON.parse(
@@ -19,14 +18,15 @@ peripherals_info.forEach((peripheral) => {
   peripherals_interface_info[peripheral.name].methods = peripheral.methods;
 });
 
-dashboardSocket = async (
-  socket,
-  { clientStatus, publishMessage, subscribeToTopic }
-) => {
+const mqtt = require("mqtt");
+
+dashboardSocket = async (socket) => {
+  const subscribedTopics = new Set();
+
   let devices = await getDevices(socket.user.id);
 
   socket.on("brokerStatus", (data, ackCallBack) => {
-    ackCallBack(clientStatus());
+    ackCallBack(client.connected);
   });
 
   socket.on("deviceCardControl", (device) => {
@@ -41,8 +41,6 @@ dashboardSocket = async (
     device.param = [device.value];
 
     const deviceId = devices.find((dev) => dev.name === device.device).id;
-
-    publishMessage(`esp32/${deviceId}/receiver`, device);
   });
 
   socket.on("fetchDevices", (data, ackCallBack) => {
@@ -85,12 +83,10 @@ dashboardSocket = async (
       } else sendObject.param = [autoParse(data.returnValue)];
     }
 
-    const topic = `esp32/${deviceId}/sender`;
+    console.log("this is send object : ", sendObject);
+    sendObject.commandId = generateCommandId();
 
-    // Subscribe only once per topic
-    subscribeToTopic(topic);
-
-    publishMessage(`esp32/${deviceId}/receiver`, sendObject, ackCallBack);
+    client.publish(`esp32/${deviceId}/receiver`, JSON.stringify(sendObject));
   });
 
   socket.on("addAutomationRule", (data) => {
@@ -138,7 +134,7 @@ dashboardSocket = async (
       console.log("send data to esp32 : ");
       console.log(data);
 
-      publishMessage(`esp32/${inputDevice.id}/receiver`, data);
+      client.publish(`esp32/${inputDevice.id}/receiver`, JSON.stringify(data));
     } catch (err) {
       console.log(err);
     }
@@ -152,4 +148,7 @@ function autoParse(value) {
   return value;
 }
 
+function generateCommandId() {
+  return Date.now() + "-" + Math.random().toString(36).substring(2, 8);
+}
 module.exports = dashboardSocket;

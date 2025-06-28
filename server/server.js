@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 const path = require("path");
 dotenv.config({ path: path.join(__dirname, ".env") });
 const http = require("http");
+const mqtt = require("mqtt");
 
 require("./database.js");
 
@@ -20,6 +21,50 @@ const io = new Server(server, {
   },
 });
 
-socketMain(io);
+const pendingCommands = new Map(); // commandId -> ackCallBack
+const subscribedTopics = new Set();
+
+const client = mqtt.connect("mqtt:localhost");
+client.on("connect", () => console.log("connected to the broker"));
+
+client.on("message", (topic, message) => {
+  try {
+    console.log(message);
+    const response = JSON.parse(message.toString());
+    const commandId = response.commandId;
+
+    if (pendingCommands.has(commandId)) {
+      const ack = pendingCommands.get(commandId);
+      ack(response); // Send response to front-end via WebSocket
+      pendingCommands.delete(commandId); // Clean up
+    }
+  } catch (err) {
+    console.error("Invalid MQTT message:", err);
+  }
+});
+
+function subscribeToTopic(topic) {
+  if (!subscribedTopics.has(topic)) {
+    client.subscribe(topic);
+    subscribedTopics.add(topic);
+  }
+}
+
+function publishMessage(topic, message, ack = () => {}) {
+  // Subscribe only once per topic
+  const commandId = generateCommandId();
+  client.publish(topic, JSON.stringify({ commandId, ...message }));
+  pendingCommands.set(commandId, ack);
+}
+
+function clientStatus() {
+  return client.connected;
+}
+
+socketMain(io, { clientStatus, publishMessage, subscribeToTopic });
 
 server.listen(3000, () => console.log("Listening on 3000"));
+
+function generateCommandId() {
+  return Date.now() + "-" + Math.random().toString(36).substring(2, 8);
+}

@@ -39,9 +39,9 @@ from servo_motor import Servo
 peripherals = {}
 
 # Instantiate each peripheral
-peripherals["internal led"] = InternalLED()           # GPIO2
-peripherals["push button"] = PushButton(14)           # GPIO14
-peripherals["servo motor"] = Servo(13)                # GPIO13
-peripherals["relay"] = Relay(27)                      # GPIO27
+peripherals["servo"] = Servo(12)                # GPIO12
+peripherals["relay"] = Relay(14)                # GPIO14
+peripherals["internal led"] = InternalLED()     # GPIO2
+peripherals["push button"] = PushButton(27)     # GPIO27
 
 ```

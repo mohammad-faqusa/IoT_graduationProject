@@ -5,7 +5,7 @@ const electronSocket = require("./electronSocket");
 const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
 
-const socketMain = async (io) => {
+const socketMain = async (io, mqttFunctions) => {
   // For default namespace and /dashboard (cookie-based)
   const browserJWTMiddleware = (socket, next) => {
     let token;
@@ -51,7 +51,7 @@ const socketMain = async (io) => {
   // Dashboard namespace
   io.of("/dashboard").on("connection", (socket) => {
     console.log("📊 Socket connected to /dashboard:", socket.id);
-    dashboardSocket(socket);
+    dashboardSocket(socket, mqttFunctions);
   });
 
   // ✅ Electron namespace

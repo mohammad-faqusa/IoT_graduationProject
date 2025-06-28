@@ -1113,7 +1113,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!currentComponent) return;
 
     const component = currentComponent.element;
+    console.log("this is component : ", component);
+
     const componentType = currentComponent.type;
+
+    if (componentType !== "automation-rule")
+      component.querySelector(".card-header .card-title").textContent =
+        document.getElementById(`config-title`).value;
+
     const methodType =
       componentTemplates[componentType].allowed_method_types[0];
     component.setAttribute("method-type", methodType);
@@ -1132,6 +1139,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         "method-output",
         "automation-result-value",
       ];
+
       fieldsNames.forEach((fieldName) => {
         const input = document.getElementById(`config-${fieldName}`);
 
