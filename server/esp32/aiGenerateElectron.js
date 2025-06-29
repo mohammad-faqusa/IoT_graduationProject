@@ -96,8 +96,7 @@ async def conn_han(client):
     await client.subscribe('esp32/${id}/receiver', 1)
   
 def on_change(peripheral_name, change):
-    key, value = change
-    print(peripheral_name, f' changed {key} to {value}')
+    print(peripheral_name, 'changed ', str(change))
     message = {} 
     message['peripheral'] = peripheral_name
     message['deviceId'] = ${id}
