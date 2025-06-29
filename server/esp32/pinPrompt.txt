@@ -4,11 +4,15 @@ Partial pin connections for the device:
 ```json
 {
   "connection_pins": {
-    "dht sensor": {
-      "pin": 13
+    "encoder": {
+      "pin1": 13,
+      "pin2": 14
     },
     "internal led": {
-      "pin": 2
+      "pin1": 2
+    },
+    "relay": {
+      "pin1": 16
     }
   }
 }

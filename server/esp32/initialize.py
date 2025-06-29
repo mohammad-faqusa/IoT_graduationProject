@@ -2,6 +2,6 @@
 peripherals = {}
 
 # Instantiate each peripheral
-peripherals["dht sensor"] = DHTSensor(14)               # GPIO14
-peripherals["internal led"] = InternalLED()             # GPIO2
-peripherals["relay"] = Relay(27)                        # GPIO27
+peripherals["encoder"] = Encoder(13, 14)        # GPIO13, GPIO14
+peripherals["internal led"] = InternalLED()     # GPIO2
+peripherals["relay"] = Relay(16)                # GPIO16

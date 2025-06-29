@@ -656,21 +656,18 @@
         },
         "purpose": "Returns the present, bounded position of the rotary encoder"
       },
+      "init_watch": {
+        "type": "write",
+        "label": "Enable Watch Mode",
+        "returns": { "dataType": "void" },
+        "purpose": "Reactivates any previously disabled watch or change triggers for the encoder"
+      },
 
-      "set_callback": {
-        "interrupt": true,
-        "type": "read",
-        "label": "Register Encoder Callback",
-        "parameters": [
-          {
-            "name": "callback",
-            "dataType": "Function",
-            "signature": "fn(position: Integer)",
-            "purpose": "Invoked after debounce; true when pressed, false when released"
-          }
-        ],
-        "returns": { "dataType": "Void" },
-        "purpose": "Attach a user-supplied function to run on debounced state changes"
+      "deinit_watch": {
+        "type": "write",
+        "label": "Disable Watch Mode",
+        "returns": { "dataType": "void" },
+        "purpose": "Temporarily disables angle update callbacks (watch_state and change_on_trigger) while keeping the encoder active"
       }
     },
 

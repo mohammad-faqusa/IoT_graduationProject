@@ -1,7 +1,7 @@
 {
   "connection_pins": {
-    "dht sensor": { "pin": 14 },
-    "internal led": { "pin": 2 },
-    "relay": { "pin": 27 }
+    "encoder": { "pin1": 13, "pin2": 14 },
+    "internal led": { "pin1": 2 },
+    "relay": { "pin1": 16 }
   }
 }
