@@ -118,9 +118,9 @@ async def main(client):
     esp_status = {}
     esp_status['id'] = ${id}
 
-    for x in peripherals:
-        peripherals[x].watch_state(on_change)
-
+    for name, p in peripherals.items():
+        if hasattr(p, "watch_state"):
+            p.watch_state(on_change)
 
     while True:
         await asyncio.sleep(1)

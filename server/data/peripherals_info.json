@@ -647,6 +647,21 @@
     },
 
     "methods": {
+      "set_callback": {
+        "interrupt": true,
+        "type": "read",
+        "label": "On Encoder Trigger",
+        "parameters": [
+          {
+            "name": "callback",
+            "dataType": "Function",
+            "signature": "fn(level: Integer)",
+            "purpose": "Invoked when the level is chaned"
+          }
+        ],
+        "returns": { "dataType": "void" },
+        "purpose": "Automate other IoT devices when the endcoder position changes"
+      },
       "get_position": {
         "type": "read",
         "label": "Get Position",
@@ -747,13 +762,13 @@
             "purpose": "Invoked after debounce; true when gas, false when no gas"
           }
         ],
-        "returns": { "dataType": "Void" },
+        "returns": { "dataType": "void" },
         "purpose": "Attach a user-supplied function to run on debounced state changes"
       },
       "deinit": {
         "type": "write",
         "label": "Disable Gas Sensor",
-        "returns": { "dataType": "Void" },
+        "returns": { "dataType": "void" },
         "purpose": "Detach the IRQ handler and release the GPIO"
       }
     },
@@ -1076,13 +1091,13 @@
             "purpose": "Invoked after debounce; true when motion, false when no motion"
           }
         ],
-        "returns": { "dataType": "Void" },
+        "returns": { "dataType": "void" },
         "purpose": "Attach a user-supplied function to run on debounced state changes"
       },
       "deinit": {
         "type": "write",
         "label": "Disable Sensor",
-        "returns": { "dataType": "Void" },
+        "returns": { "dataType": "void" },
         "purpose": "Detach the IRQ handler and release the GPIO"
       }
     },
@@ -1139,13 +1154,13 @@
             "purpose": "Invoked after debounce; true when pressed, false when released"
           }
         ],
-        "returns": { "dataType": "Void" },
+        "returns": { "dataType": "void" },
         "purpose": "Attach a user-supplied function to run on debounced state changes"
       },
       "deinit": {
         "type": "write",
         "label": "Disable Button",
-        "returns": { "dataType": "Void" },
+        "returns": { "dataType": "void" },
         "purpose": "Detach the IRQ handler and release the GPIO"
       }
     },

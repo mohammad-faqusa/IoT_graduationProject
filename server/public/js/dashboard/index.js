@@ -663,6 +663,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       //   createAutomationOutputLine(configForm);
       //   return;
       // }
+
       const considtionSelect = createConditionLine(
         configForm,
         initialGroup,
@@ -870,6 +871,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     let options = [];
     if (methodObject.interrupt) {
+      console.log("this is interrupt method");
       options = [
         { value: true, label: "Rasing" },
         { value: false, label: "Failing" },

@@ -1,7 +1,7 @@
 {
   "connection_pins": {
-    "encoder": { "pin1": 13, "pin2": 14 },
+    "servo motor": { "pin1": 13 },
     "internal led": { "pin1": 2 },
-    "relay": { "pin1": 16 }
+    "oled": { "sda": 21, "scl": 22 }
   }
 }

@@ -31,15 +31,15 @@ object that lists the GPIO pins used by each peripheral.
 
 ### Code block
 ```python
-from encoder import Encoder
 from led import InternalLED
-from relay import Relay
+from servo_motor import Servo
+from oled import OLED
 # Initialise peripherals dictionary
 peripherals = {}
 
 # Instantiate each peripheral
-peripherals["encoder"] = Encoder(13, 14)        # GPIO13, GPIO14
-peripherals["internal led"] = InternalLED()     # GPIO2
-peripherals["relay"] = Relay(16)                # GPIO16
+peripherals["servo motor"] = Servo(13)                 # GPIO13
+peripherals["internal led"] = InternalLED()            # GPIO2
+peripherals["oled"] = OLED()                           # SDA=21, SCL=22
 
 ```

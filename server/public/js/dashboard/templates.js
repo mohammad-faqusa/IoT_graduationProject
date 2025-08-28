@@ -578,7 +578,7 @@ const componentTemplates = {
             </div>
         `,
     allowed_method_types: ["read"],
-    allowed_method_returns: ["Number", "Boolean", "Void"],
+    allowed_method_returns: ["Number", "Boolean", "void"],
     config: [
       {
         name: "device",
