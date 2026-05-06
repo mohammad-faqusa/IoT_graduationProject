@@ -1,5 +1,5 @@
 
-# 🏠 Simplified IoT Integration and Management Platform
+# 🏠 Smart Home Builder
 
 ## 📘 Overview
 This project simplifies IoT system deployment by enabling electricians and non-technical users to build, configure, and manage IoT devices easily.  
